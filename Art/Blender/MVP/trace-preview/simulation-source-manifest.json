@@ -1,0 +1,29 @@
+{
+  "schema": "dywx-mvp-trace-manifest-v1",
+  "trace": "playthrough-winning-trace.json",
+  "trace_sha256": "6c34c75aaf538c69977981a2b41a6c020e4830fa93bed66f7169dd2b0ea1b39d",
+  "seed": 12,
+  "hero": "Sword",
+  "policy": 0,
+  "command": "bash scripts/calibrate-mvp.sh --trace docs/mvp/playthrough-winning-trace.json 12 1 0",
+  "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+  "build_flags": [
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic"
+  ],
+  "source_sha256": {
+    "tests/mvp_playthrough.cpp": "aa17bf9fe793d5befc58ec35cc8730087c5ecb0d039046b50300be7f69e33428",
+    "Source/DywxUI/Private/MVP/ContentCatalog.cpp": "70930f017b13f330731927c140f58c6888196f6ece7d98ac5d3400726d8010d0",
+    "Source/DywxUI/Private/MVP/Progression.cpp": "68a32b37a43d6058ee9374f1da1a67a5bd9a720ce46f140228341a973e5185de",
+    "Source/DywxUI/Private/MVP/Simulation.cpp": "6ccdd2b9ac05b40bd4ad57030be584e7e6a5fe3985bd79d91125ec9d34fe5e97",
+    "Source/DywxUI/Public/MVP/Types.h": "27fa23953302215366c6f870d7a29ca76559309bb933f147350a462377cf6bf2",
+    "Source/DywxUI/Public/MVP/Simulation.h": "0f1c0c4c17a7735eabd5d3c60680d11f343fc844af6d52f5cbcf108550f4d044",
+    "Source/DywxUI/Public/MVP/Progression.h": "7c49c7dd90802a5ea9de953a57714618ac94c7a7744997e2a06587024b779c9e",
+    "Source/DywxUI/Public/MVP/ContentCatalog.h": "2d22e5a66860a6d79be61bf90db9a6374db7cbb20993486a2f624c7e876c2b3f"
+  },
+  "scope": "Actual pure C++ Simulation. No Unreal execution or GPU/render performance evidence.",
+  "discovery_metadata_validation": "All78 natural runs,72 DPS fixtures and winning trace byte-identical after discovery-only source additions."
+}

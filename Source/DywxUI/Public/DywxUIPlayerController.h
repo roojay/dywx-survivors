@@ -7,6 +7,8 @@
 #include "DywxUIPlayerController.generated.h"
 
 class SDywxRoot;
+class ADywxMVPWorld;
+namespace dywx::mvp { class Simulation; }
 class UGameViewportClient;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDywxRunRequested, int32, CharacterIndex, int32, MapIndex, int32, ModeIndex);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDywxUIAction);
@@ -17,6 +19,11 @@ class DYWXUI_API ADywxUIPlayerController : public APlayerController
 {
     GENERATED_BODY()
 public:
+    virtual void PlayerTick(float DeltaTime) override;
+    dywx::mvp::Simulation* Simulation();
+    void RefreshRunUI();
+    void RetryRun();
+    void ChooseUpgrade(int32 Index);
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -37,6 +44,13 @@ public:
     void ConfirmQuit();
 private:
     TSharedPtr<SDywxRoot> RootWidget;
+    UPROPERTY() TObjectPtr<ADywxMVPWorld> MVPWorld;
+    bool bDashQueued = false;
+    float HUDRefreshElapsed = 0.f;
+    int32 LastHero = 0;
+    void UpgradeOne();
+    void UpgradeTwo();
+    void UpgradeThree();
     // Preview owns these overrides only until live gameplay resumes or this controller exits.
     TWeakObjectPtr<UGameViewportClient> PreviewViewport;
     FTSTicker::FDelegateHandle PreviewTicker;

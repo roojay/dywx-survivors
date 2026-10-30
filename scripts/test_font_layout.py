@@ -32,6 +32,10 @@ FONT_DIR = ROOT / "Content/UI/Fonts"
 # id, text, point size, width, height, bold, total horizontal/vertical padding,
 # exact source slot anchor (width/height are pre-ScaleBox reference-canvas units).
 CASES = [
+    # Candidate title width is card 260 minus panel padding 12; height is the
+    # inner-card bound, not an assertion of Slate's AutoHeight title allocation.
+    ("upgrade-passive-title", "1  炼火心经", 24, 248, 208, True, 32, 9, "At(1080+I*270,290,260,220,Panel(Card,Ink,6))"),
+    ("fusion-action", "破境 · 雷火焚天掌", 30, 510, 80, True, 34, 10, "At(1360,130,510,80,"),
     ("main-title", "道衍万象", 82, 610, 155, True, 0, 0, "At(110,155,610,155,"),
     ("main-primary", "开始修行", 30, 490, 90, True, 32, 8, "At(120,455,490,90,"),
     ("codex-button", "道典", 24, 440, 70, True, 32, 9, "At(145,580,440,70,"),
@@ -40,10 +44,16 @@ CASES = [
     ("back-button", "Esc  返回", 24, 190, 60, True, 32, 9, "At(60,1005,190,60,"),
     ("map-mode", "传统", 30, 145, 95, True, 34, 10, "At(1395+Index*160,530,145,95,"),
     ("map-caption", "栖雷古坛", 30, 395, 70, True, 34, 10, "At(X,930,395,70,"),
-    ("dash-button", "遁术  空格", 24, 220, 60, True, 32, 9, "At(1195,985,220,60,"),
+    ("dash-button", "遁术  Space", 24, 400, 65, True, 32, 9, "At(1450,920,400,65,"),
     ("screen-heading", "选择修士", 65, 800, 130, True, 0, 0, "At(55,45,800,130,"),
     ("map-title", "栖雷古坛", 56, 460, 110, True, 0, 0, "At(1410,190,460,110,"),
-    ("hud-preview", "HUD 预览 · 静态示例数据 · 非实机战斗", 18, 650, 58, False, 16, 16, "At(660,145,650,58,"),
+    ("hud-resonance", "同道象达到 2 / 4 点共鸣 · 破境继承道象", 18, 800, 40, False, 0, 0, "At(35,185,800,40,"),
+    ("rest-refine", "炼化筛选结果 · 先预览", 24, 470, 60, True, 32, 9, "At(45,775,470,60,"),
+    ("rest-lock", "锁定 / 解锁", 24, 245, 60, True, 32, 9, "At(515,705,245,60,"),
+    ("rest-ready", "迎战 · 炼化修为入账", 30, 810, 70, True, 34, 10, "At(1080,750,810,70,"),
+    ("upgrade-reroll", "重悟 · 剩余 2 次", 24, 430, 60, True, 32, 9, "At(1460,520,430,60,"),
+    ("refine-confirm", "确认炼化", 24, 395, 60, True, 32, 9, "At(1080,740,395,60,"),
+    ("rest-title", "调息 · 战斗暂停   炼化待入账修为 9999", 26, 980, 55, True, 0, 0, "At(45,290,980,55,"),
 ]
 
 
@@ -83,7 +93,7 @@ def main() -> int:
     passed = all(result["passed"] for result in results)
     evidence = {
         "test": "offline Sarasa font advance/line metrics smoke test",
-        "scope": "12 representative fixed label/button slots at 100% and 110% text size",
+        "scope": "18 representative fixed label/button slots at 100% and 110% text size",
         "runtime_validation": "NOT_RUN: this is not UE/Slate layout or visual verification",
         "exclusions": ["Slate shaping/fallback/DPI", "shadows", "paragraph wrapping", "focus and disabled appearance", "brush/layout rendering", "actual 720p/1080p output"],
         "reference_canvas": [1920, 1080], "assumed_font_dpi": 96,

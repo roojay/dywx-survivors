@@ -1,5 +1,60 @@
 [
   {
+    "path": "Content/MVP/AudioSource/boss.wav",
+    "bytes": 44144,
+    "sha256": "4443592b336b512dbaf4c48944fd43318e65c05d98c6f5595a7ebf0e2977d17b"
+  },
+  {
+    "path": "Content/MVP/AudioSource/dash.wav",
+    "bytes": 9746,
+    "sha256": "7438183e42bd85f232f03c619133602174ae138817967279009b5d5ba9a63697"
+  },
+  {
+    "path": "Content/MVP/AudioSource/hit.wav",
+    "bytes": 5336,
+    "sha256": "3b807cfb94ede2f20fc4f3c125c11ac360d51bd9ab102c22cbe2ea34d081e191"
+  },
+  {
+    "path": "Content/MVP/AudioSource/loss.wav",
+    "bytes": 39734,
+    "sha256": "08354da0dc2da29d63e3cb07fb2b1a46a526ea93fb0502cae79e378c0f0d4f61"
+  },
+  {
+    "path": "Content/MVP/AudioSource/palm.wav",
+    "bytes": 10628,
+    "sha256": "0d5758df55fdbf0242a53769f6f0c642d9b128dec7ea7ccf5c2bbaf708d776d3"
+  },
+  {
+    "path": "Content/MVP/AudioSource/pickup.wav",
+    "bytes": 7540,
+    "sha256": "db02653a3d4deeb40b71c31bb8b6c56921824309ef37bd03d080a205e59a0016"
+  },
+  {
+    "path": "Content/MVP/AudioSource/sword.wav",
+    "bytes": 7982,
+    "sha256": "dd5761f978472fbf2ec799bd2c660a003a7dc4600c981a00e2dec9c97ce5e277"
+  },
+  {
+    "path": "Content/MVP/AudioSource/thunder.wav",
+    "bytes": 22094,
+    "sha256": "d395b965ce3fbf660478bb25dc56e23f195fd4b5d121bb5fb585b24e063a997f"
+  },
+  {
+    "path": "Content/MVP/AudioSource/upgrade.wav",
+    "bytes": 33118,
+    "sha256": "193ad95cbea5e604d41a8c482934fc786341ff6cc38666c6f8291e97408ce28b"
+  },
+  {
+    "path": "Content/MVP/AudioSource/win.wav",
+    "bytes": 57374,
+    "sha256": "d63e8ffeedb060936b06aef1754fabf7da6488ed490b2eb04551d31c8d048db4"
+  },
+  {
+    "path": "Content/MVP/Geometry/scene.json",
+    "bytes": 4857902,
+    "sha256": "4a2582433ee25bbff8783e6c57cbd9ca3bc21ec4a3434150fb704cd37277ba0c"
+  },
+  {
     "path": "Content/UI/Fonts/SARASA-OFL.txt",
     "bytes": 4703,
     "sha256": "41b97900effcb7fefb581f28090ba6dbcb53048f0b481188a2509a530640c46b"
@@ -31,8 +86,8 @@
   },
   {
     "path": "Content/UI/Images/character-portraits.png",
-    "bytes": 2899293,
-    "sha256": "513692fc76d476bfe453df02255e0607d3338cf7f20603ed66f30b05243c9d04"
+    "bytes": 2807709,
+    "sha256": "abf9f34707a52a05859f788d7067b4de92d45007517941d6f29ac6f19165c9ca"
   },
   {
     "path": "Content/UI/Images/icon-arrow.png",

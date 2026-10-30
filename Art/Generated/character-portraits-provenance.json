@@ -55,5 +55,6 @@
       ]
     }
   ],
-  "inspection": "Visually inspected; four equal-width portrait columns, no UI labels or frames. Mage holds a decorative talisman with non-authoritative calligraphic markings."
+  "inspection": "Visually inspected; four equal-width portrait columns, no UI labels or frames. Mage holds a decorative talisman with non-authoritative calligraphic markings.",
+  "superseded_by": "mvp-sword-portrait-provenance.json"
 }

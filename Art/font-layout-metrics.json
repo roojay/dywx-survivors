@@ -1,6 +1,6 @@
 {
   "test": "offline Sarasa font advance/line metrics smoke test",
-  "scope": "12 representative fixed label/button slots at 100% and 110% text size",
+  "scope": "18 representative fixed label/button slots at 100% and 110% text size",
   "runtime_validation": "NOT_RUN: this is not UE/Slate layout or visual verification",
   "exclusions": [
     "Slate shaping/fallback/DPI",
@@ -21,10 +21,56 @@
     "SarasaUiSC-Regular.ttf": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f",
     "SarasaUiSC-Bold.ttf": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad"
   },
-  "source_sha256": "8ead773193012d59b7e7d09a2addabb1af721be77dc5b87e40458a68b93006f9",
+  "source_sha256": "0b499677fd0167e2f66f64afb018184ae6d2c0b182e2504bffebe364e4fc9d48",
   "passed": true,
-  "case_count": 24,
+  "case_count": 40,
   "results": [
+    {
+      "id": "upgrade-passive-title",
+      "text": "1  炼火心经",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 248,
+        "height": 208,
+        "source_anchor": "At(1080+I*270,290,260,220,Panel(Card,Ink,6))"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 165.890625,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 50.1094,
+      "remaining_height": 160,
+      "passed": true
+    },
+    {
+      "id": "fusion-action",
+      "text": "破境 · 雷火焚天掌",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 510,
+        "height": 80,
+        "source_anchor": "At(1360,130,510,80,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 321.53125,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 154.4688,
+      "remaining_height": 21,
+      "passed": true
+    },
     {
       "id": "main-title",
       "text": "道衍万象",
@@ -211,25 +257,25 @@
     },
     {
       "id": "dash-button",
-      "text": "遁术  空格",
+      "text": "遁术  Space",
       "scale": 1.0,
       "font_style": "Bold",
       "points_after_rounding": 24,
       "metric_pixel_size": 32,
       "slot": {
-        "width": 220,
-        "height": 60,
-        "source_anchor": "At(1195,985,220,60,"
+        "width": 400,
+        "height": 65,
+        "source_anchor": "At(1450,920,400,65,"
       },
       "total_padding": {
         "x": 32,
         "y": 9
       },
-      "advance": 145.21875,
+      "advance": 179.125,
       "ascent": 31,
       "descent": 8,
-      "remaining_width": 42.7812,
-      "remaining_height": 12,
+      "remaining_width": 188.875,
+      "remaining_height": 17,
       "passed": true
     },
     {
@@ -279,26 +325,210 @@
       "passed": true
     },
     {
-      "id": "hud-preview",
-      "text": "HUD 预览 · 静态示例数据 · 非实机战斗",
+      "id": "hud-resonance",
+      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象",
       "scale": 1.0,
       "font_style": "Regular",
       "points_after_rounding": 18,
       "metric_pixel_size": 24,
       "slot": {
-        "width": 650,
-        "height": 58,
-        "source_anchor": "At(660,145,650,58,"
+        "width": 800,
+        "height": 40,
+        "source_anchor": "At(35,185,800,40,"
       },
       "total_padding": {
-        "x": 16,
-        "y": 16
+        "x": 0,
+        "y": 0
       },
-      "advance": 421.28125,
+      "advance": 426.453125,
       "ascent": 24,
       "descent": 6,
-      "remaining_width": 212.7188,
+      "remaining_width": 373.5469,
+      "remaining_height": 10,
+      "passed": true
+    },
+    {
+      "id": "rest-refine",
+      "text": "炼化筛选结果 · 先预览",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 470,
+        "height": 60,
+        "source_anchor": "At(45,775,470,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 321.21875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 116.7812,
       "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "rest-lock",
+      "text": "锁定 / 解锁",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 245,
+        "height": 60,
+        "source_anchor": "At(515,705,245,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 157.640625,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 55.3594,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "rest-ready",
+      "text": "迎战 · 炼化修为入账",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 810,
+        "height": 70,
+        "source_anchor": "At(1080,750,810,70,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 361.53125,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 414.4688,
+      "remaining_height": 11,
+      "passed": true
+    },
+    {
+      "id": "upgrade-reroll",
+      "text": "重悟 · 剩余 2 次",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 430,
+        "height": 60,
+        "source_anchor": "At(1460,520,430,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 231.109375,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 166.8906,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "refine-confirm",
+      "text": "确认炼化",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 395,
+        "height": 60,
+        "source_anchor": "At(1080,740,395,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 128.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 235.0,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "rest-title",
+      "text": "调息 · 战斗暂停   炼化待入账修为 9999",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 980,
+        "height": 55,
+        "source_anchor": "At(45,290,980,55,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 619.46875,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 360.5312,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "upgrade-passive-title",
+      "text": "1  炼火心经",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 248,
+        "height": 208,
+        "source_anchor": "At(1080+I*270,290,260,220,Panel(Card,Ink,6))"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 181.453125,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 34.5469,
+      "remaining_height": 156,
+      "passed": true
+    },
+    {
+      "id": "fusion-action",
+      "text": "破境 · 雷火焚天掌",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 510,
+        "height": 80,
+        "source_anchor": "At(1360,130,510,80,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 353.6875,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 122.3125,
+      "remaining_height": 16,
       "passed": true
     },
     {
@@ -487,25 +717,25 @@
     },
     {
       "id": "dash-button",
-      "text": "遁术  空格",
+      "text": "遁术  Space",
       "scale": 1.1,
       "font_style": "Bold",
       "points_after_rounding": 26,
       "metric_pixel_size": 35,
       "slot": {
-        "width": 220,
-        "height": 60,
-        "source_anchor": "At(1195,985,220,60,"
+        "width": 400,
+        "height": 65,
+        "source_anchor": "At(1450,920,400,65,"
       },
       "total_padding": {
         "x": 32,
         "y": 9
       },
-      "advance": 158.84375,
+      "advance": 195.921875,
       "ascent": 34,
       "descent": 9,
-      "remaining_width": 29.1562,
-      "remaining_height": 8,
+      "remaining_width": 172.0781,
+      "remaining_height": 13,
       "passed": true
     },
     {
@@ -555,26 +785,164 @@
       "passed": true
     },
     {
-      "id": "hud-preview",
-      "text": "HUD 预览 · 静态示例数据 · 非实机战斗",
+      "id": "hud-resonance",
+      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象",
       "scale": 1.1,
       "font_style": "Regular",
       "points_after_rounding": 20,
       "metric_pixel_size": 27,
       "slot": {
-        "width": 650,
-        "height": 58,
-        "source_anchor": "At(660,145,650,58,"
+        "width": 800,
+        "height": 40,
+        "source_anchor": "At(35,185,800,40,"
       },
       "total_padding": {
-        "x": 16,
-        "y": 16
+        "x": 0,
+        "y": 0
       },
-      "advance": 473.984375,
+      "advance": 479.8125,
       "ascent": 27,
       "descent": 7,
-      "remaining_width": 160.0156,
+      "remaining_width": 320.1875,
+      "remaining_height": 6,
+      "passed": true
+    },
+    {
+      "id": "rest-refine",
+      "text": "炼化筛选结果 · 先预览",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 470,
+        "height": 60,
+        "source_anchor": "At(45,775,470,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 351.34375,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 86.6562,
       "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "rest-lock",
+      "text": "锁定 / 解锁",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 245,
+        "height": 60,
+        "source_anchor": "At(515,705,245,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 172.421875,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 40.5781,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "rest-ready",
+      "text": "迎战 · 炼化修为入账",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 810,
+        "height": 70,
+        "source_anchor": "At(1080,750,810,70,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 397.6875,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 378.3125,
+      "remaining_height": 6,
+      "passed": true
+    },
+    {
+      "id": "upgrade-reroll",
+      "text": "重悟 · 剩余 2 次",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 430,
+        "height": 60,
+        "source_anchor": "At(1460,520,430,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 252.796875,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 145.2031,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "refine-confirm",
+      "text": "确认炼化",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 395,
+        "height": 60,
+        "source_anchor": "At(1080,740,395,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 140.0,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 223.0,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "rest-title",
+      "text": "调息 · 战斗暂停   炼化待入账修为 9999",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 29,
+      "metric_pixel_size": 39,
+      "slot": {
+        "width": 980,
+        "height": 55,
+        "source_anchor": "At(45,290,980,55,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 690.15625,
+      "ascent": 38,
+      "descent": 10,
+      "remaining_width": 289.8438,
+      "remaining_height": 7,
       "passed": true
     }
   ]

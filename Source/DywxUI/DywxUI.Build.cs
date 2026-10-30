@@ -5,7 +5,7 @@ public class DywxUI : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore" });
-        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore", "ApplicationCore", "ImageWrapper", "RenderCore" });
+        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore", "ApplicationCore", "ImageWrapper", "RenderCore", "MeshDescription", "StaticMeshDescription", "Json" });
         CppStandard = CppStandardVersion.Cpp20;
     }
 }

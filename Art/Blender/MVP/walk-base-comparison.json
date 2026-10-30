@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "base_meshes": [
+    "hero_body",
+    "hero_sword",
+    "enemy_swarm",
+    "enemy_exploder",
+    "enemy_charger",
+    "enemy_rangedbird",
+    "enemy_supporttotem",
+    "enemy_summoner",
+    "enemy_boss",
+    "enemy_spirit",
+    "rock",
+    "pillar",
+    "tile",
+    "shrine_banner",
+    "shrine_arch"
+  ],
+  "check": "exact coordinate/polygon geometry multiset against pre-animation mvp-meshes.blend; vertex indices may reorder"
+}

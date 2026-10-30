@@ -7,6 +7,7 @@
 #include "Engine/Texture2D.h"
 #include "DywxHUDState.h"
 #include "DywxUIState.h"
+#include "MVP/Types.h"
 
 class ADywxUIPlayerController;
 class SConstraintCanvas;
@@ -17,9 +18,13 @@ public:
     SLATE_BEGIN_ARGS(SDywxRoot) {} SLATE_ARGUMENT(TWeakObjectPtr<ADywxUIPlayerController>, Owner) SLATE_END_ARGS()
     void Construct(const FArguments& Args);
     void HandleEscape() { Back(); }
+    // Idempotent: never toggle/close an existing modal on focus loss.
+    void HandleFocusLoss() { if (Nav.liveBattle) Pause(); }
     void HandleDash() { Dash(); }
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual FReply OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;
+    void SetSnapshot(const dywx::mvp::Snapshot& State);
+    void RefreshRunUI();
     void SetHUDState(const FDywxHUDState& State);
     void BeginLiveHUD(const FDywxHUDState& State);
     void ReturnToMenu();
@@ -28,6 +33,20 @@ private:
     TWeakObjectPtr<ADywxUIPlayerController> Owner;
     dywx::Navigation Nav;
     FDywxHUDState HUD;
+    dywx::mvp::Snapshot Run;
+    float BossHP = 0, BossMaxHP = 1;
+    uint64 UIEpoch = 0;
+    uint64 SelectedBag = 0;
+    int32 SelectedSlot = 0;
+    int32 AspectFilter = -1, AffixFilter = -1;
+    int32 RarityFilter = -1;
+    bool bRefinePreview = false;
+    FString RunNotice;
+    TSharedRef<SWidget> LiveText(TFunction<FString()> Value, int32 Size = 22, FLinearColor Color = FLinearColor::White);
+    void UpgradePanel();
+    void RestPanel();
+    void ResultPanel();
+    FReply RunCommand(TFunction<void()> Command);
     TMap<FString, TUniquePtr<FSlateBrush>> Brushes;
     TArray<TStrongObjectPtr<UTexture2D>> Textures;
     FButtonStyle NormalButton, PrimaryButton, FramedButton;

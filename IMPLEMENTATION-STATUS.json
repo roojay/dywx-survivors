@@ -1,42 +1,80 @@
 {
-  "artifact": "repaired native UE UI source, awaiting engine revalidation",
-  "baseline_commit": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
-  "user_reported_failures": [
-    "truncated menu labels and mismatched button layout",
-    "GPU utilization reported as 99%"
+  "artifact": "UE5 survivors MVP source and original resources",
+  "status": "offline_verified; Unreal build and playable binary delivery pending",
+  "source_baseline": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
+  "gameplay_reference": [
+    "docs/gameplay-design-v0.1.md",
+    "docs/mvp-prototype-config-v0.1.md"
   ],
-  "repairs": [
-    "Sarasa UI SC official TTF Regular/Bold",
-    "single-line labels and bounded paragraph wrapping",
-    "button geometry and style correction",
-    "preview-only foreground/background/minimized frame budget",
-    "occluded preview world rendering disabled and live state restored"
-  ],
-  "verification_note": "Current tests are offline only; see repair review. GPU root cause and improvement are not yet measured.",
-  "not_run": [
-    "UE compilation of repaired source",
-    "new Windows package",
-    "actual layout/focus/DPI acceptance",
-    "foreground/background/minimized FPS and GPU measurement"
-  ],
-  "reason": "win-dev switched off; authorized dot environment has no UE or usable GPU device",
-  "previous_windows_build": {
-    "engine": "5.8.4-58902052+++UE5+Release-5.8",
-    "configuration": "Win64 Development",
-    "compiler_reported": "Visual Studio 14.50.35725",
-    "windows_sdk": "10.0.26100.0",
-    "uat_exit_code": 0,
-    "runtime_file_count": 58,
-    "runtime_bytes": 669210292,
-    "pdb_files_in_package": 0,
-    "report": "docs/WINDOWS-DEMO.md"
+  "implemented": {
+    "heroes": 2,
+    "base_spells": 10,
+    "passives": 5,
+    "fusion_recipes": 2,
+    "relics": 15,
+    "default_wave_durations": [
+      100,
+      120,
+      140,
+      160
+    ],
+    "boss_phase_hp": [
+      14000,
+      16000
+    ],
+    "mode": "quick",
+    "inventory_slots": 6,
+    "max_live_wave_population": 130,
+    "source_mesh_count": 31
   },
-  "previous_build_commit": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
   "passed_offline": [
-    "C++20 navigation policy",
-    "C++20 preview budget policy including external cap ownership",
-    "17 resource/font/license checks",
-    "24 representative Sarasa text metrics at100/110% with minimum4px vertical margin",
-    "independent source/API review"
-  ]
+    "C++20 core and progression test suites",
+    "ASan/UBSan with leak detection disabled due host ptrace",
+    "independent acceptance and safety/stress tests",
+    "natural 8-direction playthrough victories for both heroes without state/damage/XP injection",
+    "source contracts, font metrics, geometry and media validation",
+    "same-binary and sanitizer winning replay consistency"
+  ],
+  "natural_run_examples": [
+    {
+      "hero": "Sword",
+      "seed": 12,
+      "elapsed_seconds": 636.272,
+      "boss_seconds": 116.338
+    },
+    {
+      "hero": "Body",
+      "seed": 73,
+      "elapsed_seconds": 663.815,
+      "boss_seconds": 143.881
+    }
+  ],
+  "not_run": [
+    "UE UHT/UBT for current MVP",
+    "UE bootstrap/import/cook/package",
+    "packaged launch and actual Slate input/layout",
+    "actual GPU/frame pacing/VRAM",
+    "human-play fun/balance acceptance",
+    "LeakSanitizer"
+  ],
+  "known_limits": [
+    "fixed six-obstacle arena rather than full procedural tile assembly",
+    "prototype art, not concept-level final fidelity",
+    "mesh-pose walking rather than skeletal animation",
+    "Body boss pacing can exceed parameter target",
+    "local profile replacement crash durability unverified"
+  ],
+  "proofs": [
+    "docs/mvp/COVERAGE.md",
+    "docs/mvp/PLAYTHROUGH-CALIBRATION.md",
+    "docs/mvp/UE-INTEGRATION-REVIEW.md",
+    "docs/mvp/MVP-HANDOFF.md"
+  ],
+  "delivery": {
+    "new_exe": false,
+    "remote_mvp_push_verified": false,
+    "reason": "Windows offline, dot lacks UE/GPU; GitHub write confirmation did not complete"
+  },
+  "offline_video": "Art/Blender/MVP/trace-preview/simulation-trace-offline-not-ue.mp4",
+  "offline_video_warning": "Blender rendering of actual core snapshots; not Unreal runtime or performance evidence"
 }

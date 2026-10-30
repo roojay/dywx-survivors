@@ -15,17 +15,17 @@ struct Navigation
     bool endlessUnlocked = false;
     bool liveBattle = false;
     bool Start() { if (screen != Screen::Main || modal != Modal::None) return false; screen = Screen::Character; return true; }
-    bool SelectCharacter(int value) { if (screen != Screen::Character || modal != Modal::None || value < 0 || value > 3) return false; character = value; return true; }
-    bool ChooseMap() { if (screen != Screen::Character || modal != Modal::None || character != 0) return false; screen = Screen::Map; return true; }
+    bool SelectCharacter(int value) { if (screen != Screen::Character || modal != Modal::None || value < 0 || value > 1) return false; character = value; return true; }
+    bool ChooseMap() { if (screen != Screen::Character || modal != Modal::None || character < 0 || character > 1) return false; screen = Screen::Map; return true; }
     bool SelectMap(int value) { if (screen != Screen::Map || modal != Modal::None || value != 0) return false; map = value; return true; }
     bool SelectMode(Mode value)
     {
         if (screen != Screen::Map || modal != Modal::None) return false;
         if (value != Mode::Quick && value != Mode::Traditional && value != Mode::Endless) return false;
-        if (value == Mode::Endless && !endlessUnlocked) return false;
+        if (value != Mode::Quick) return false;
         mode = value; return true;
     }
-    bool Enter() { if (screen != Screen::Map || modal != Modal::None || character != 0 || map != 0 || (mode == Mode::Endless && !endlessUnlocked)) return false; screen = Screen::Battle; liveBattle = false; return true; }
+    bool Enter() { if (screen != Screen::Map || modal != Modal::None || character < 0 || character > 1 || map != 0 || mode != Mode::Quick) return false; screen = Screen::Battle; liveBattle = false; return true; }
     bool Back()
     {
         if (modal != Modal::None) { modal = Modal::None; return true; }

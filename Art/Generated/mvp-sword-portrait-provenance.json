@@ -1,0 +1,10 @@
+{
+  "purpose": "MVP second hero uses flying swords per paired gameplay/config, not old bow concept",
+  "source_reference": "previous four-character atlas generated in UI concept batch",
+  "method": "built-in imagegen edit; no paid external API",
+  "invariants": "four equal UV columns, first/third/fourth character identities preserved visually",
+  "change": "second column bow replaced with levitating Chinese swords and casting gesture",
+  "current_file": "Content/UI/Images/character-portraits.png",
+  "sha256": "abf9f34707a52a05859f788d7067b4de92d45007517941d6f29ac6f19165c9ca",
+  "inspection": "parent inspected generated actual pixels; does not certify final UE asset appearance"
+}

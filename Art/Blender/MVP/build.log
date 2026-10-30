@@ -1,0 +1,15 @@
+Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
+socket(): Operation not permitted
+/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/build_scene.py:13: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m=bpy.data.materials.new(k); m.diffuse_color=c; m.use_nodes=True
+00:02.174  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_7_6fa56323a1c6b55d214df87175d1d6d8.png.png"
+00:16.238  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/contact-sheet.png'
+00:16.323  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_7_153a28712b4d6868d6f82645a9c01b01.png.png"
+00:39.013  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/arena-preview.png'
+Warning: No mesh data to join
+Info: Saved as "mvp-meshes.blend"
+Info: Saved as "mvp-arena-preview.blend"
+EXPORTED [('hero_body', 1656, 2116), ('hero_sword', 142, 164), ('enemy_swarm', 1066, 1664), ('enemy_exploder', 481, 874), ('enemy_charger', 1398, 2432), ('enemy_boss', 1910, 3024), ('enemy_rangedbird', 905, 624), ('enemy_supporttotem', 185, 330), ('enemy_summoner', 542, 744), ('enemy_spirit', 271, 486), ('rock', 234, 80), ('pillar', 1080, 756), ('tile', 186, 74), ('shrine_banner', 1058, 680), ('shrine_arch', 1960, 1392)]
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
+
+Blender quit
