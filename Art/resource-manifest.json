@@ -1,18 +1,18 @@
 [
   {
-    "path": "Content/UI/Fonts/NOTO-LICENSE.txt",
-    "bytes": 14712,
-    "sha256": "849f4ea9c214fa4ac3593b770c699f387534b11ce671264c1b10d85bdcb5997b"
+    "path": "Content/UI/Fonts/SARASA-OFL.txt",
+    "bytes": 4703,
+    "sha256": "41b97900effcb7fefb581f28090ba6dbcb53048f0b481188a2509a530640c46b"
   },
   {
-    "path": "Content/UI/Fonts/NotoSansSC-Regular.otf",
-    "bytes": 16437340,
-    "sha256": "8a2053ea6e57c0b4255df2ad428529fe2503433506505835e1f1a0fca66def40"
+    "path": "Content/UI/Fonts/SarasaUiSC-Bold.ttf",
+    "bytes": 23896256,
+    "sha256": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad"
   },
   {
-    "path": "Content/UI/Fonts/NotoSerifSC-Regular.otf",
-    "bytes": 24543056,
-    "sha256": "c532c85bab70897f70f04a0c9a90e49526f046cc4ef233cfb79e737c90a9fc92"
+    "path": "Content/UI/Fonts/SarasaUiSC-Regular.ttf",
+    "bytes": 24049996,
+    "sha256": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f"
   },
   {
     "path": "Content/UI/Images/battle-background.png",

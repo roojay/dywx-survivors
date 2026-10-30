@@ -1,0 +1,23 @@
+{
+  "release": "v1.0.43",
+  "official_archive": "https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.43/SarasaUiSC-TTF-1.0.43.7z",
+  "archive_sha256": "3dc0f534b2cfa5f98b58a574948d3e3f9eb140600bd738f259c3d077acb2de66",
+  "github_release_digest_verified": true,
+  "fonts": [
+    {
+      "path": "Content/UI/Fonts/SARASA-OFL.txt",
+      "sha256": "41b97900effcb7fefb581f28090ba6dbcb53048f0b481188a2509a530640c46b",
+      "bytes": 4703
+    },
+    {
+      "path": "Content/UI/Fonts/SarasaUiSC-Bold.ttf",
+      "sha256": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad",
+      "bytes": 23896256
+    },
+    {
+      "path": "Content/UI/Fonts/SarasaUiSC-Regular.ttf",
+      "sha256": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f",
+      "bytes": 24049996
+    }
+  ]
+}

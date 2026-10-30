@@ -30,7 +30,7 @@ private:
     FDywxHUDState HUD;
     TMap<FString, TUniquePtr<FSlateBrush>> Brushes;
     TArray<TStrongObjectPtr<UTexture2D>> Textures;
-    FButtonStyle NormalButton, PrimaryButton;
+    FButtonStyle NormalButton, PrimaryButton, FramedButton;
     FProgressBarStyle ProgressStyle;
     TSharedPtr<SConstraintCanvas> Canvas;
     float UIScale = 1.0f;
@@ -38,7 +38,8 @@ private:
     const FSlateBrush* Art(const FString& Filename);
     const FSlateBrush* Portrait(int32 Index);
     TSharedRef<SWidget> Label(const FString& Text, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
-    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""));
+    TSharedRef<SWidget> Paragraph(const FString& Text, float Width, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
+    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""), bool bFramed = false);
     TSharedRef<SWidget> Panel(TSharedRef<SWidget> Content, FLinearColor Tint, float Padding = 24.0f) const;
     void At(float X, float Y, float W, float H, TSharedRef<SWidget> Widget);
     void Rebuild();

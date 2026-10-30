@@ -89,7 +89,7 @@ def validate() -> dict:
     text = "\n".join(path.read_text(encoding="utf-8") for path in (ROOT / "Source").rglob("*")
                      if path.suffix in (".h", ".cpp"))
     han = {ord(char) for char in text if 0x3400 <= ord(char) <= 0x9FFF}
-    for name in ("NotoSansSC-Regular.otf", "NotoSerifSC-Regular.otf"):
+    for name in ("SarasaUiSC-Regular.ttf", "SarasaUiSC-Bold.ttf"):
         path = ROOT / "Content/UI/Fonts" / name
         try:
             with TTFont(path) as font:
@@ -99,8 +99,8 @@ def validate() -> dict:
                       {"han_glyphs_checked": len(han), "missing": "".join(map(chr, missing))})
         except Exception as error:
             check(name, False, str(error))
-    license_path = ROOT / "Content/UI/Fonts/NOTO-LICENSE.txt"
-    check("font license present", license_path.is_file() and "OPEN FONT LICENSE" in license_path.read_text())
+    license_path = ROOT / "Content/UI/Fonts/SARASA-OFL.txt"
+    check("font license present", license_path.is_file() and "OPEN FONT LICENSE" in license_path.read_text().upper())
 
     packaging = (ROOT / "Config/DefaultGame.ini").read_text()
     check("loose UI files included in packaging", 'DirectoriesToAlwaysStageAsNonUFS=(Path="UI")' in packaging)

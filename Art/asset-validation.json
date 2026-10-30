@@ -222,18 +222,18 @@
       }
     },
     {
-      "name": "NotoSansSC-Regular.otf",
+      "name": "SarasaUiSC-Regular.ttf",
       "passed": true,
       "detail": {
-        "han_glyphs_checked": 237,
+        "han_glyphs_checked": 238,
         "missing": ""
       }
     },
     {
-      "name": "NotoSerifSC-Regular.otf",
+      "name": "SarasaUiSC-Bold.ttf",
       "passed": true,
       "detail": {
-        "han_glyphs_checked": 237,
+        "han_glyphs_checked": 238,
         "missing": ""
       }
     },

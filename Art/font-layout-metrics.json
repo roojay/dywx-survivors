@@ -1,0 +1,581 @@
+{
+  "test": "offline Sarasa font advance/line metrics smoke test",
+  "scope": "12 representative fixed label/button slots at 100% and 110% text size",
+  "runtime_validation": "NOT_RUN: this is not UE/Slate layout or visual verification",
+  "exclusions": [
+    "Slate shaping/fallback/DPI",
+    "shadows",
+    "paragraph wrapping",
+    "focus and disabled appearance",
+    "brush/layout rendering",
+    "actual 720p/1080p output"
+  ],
+  "reference_canvas": [
+    1920,
+    1080
+  ],
+  "assumed_font_dpi": 96,
+  "minimum_vertical_slack": 4,
+  "pillow_version": "13.0.0",
+  "font_sha256": {
+    "SarasaUiSC-Regular.ttf": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f",
+    "SarasaUiSC-Bold.ttf": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad"
+  },
+  "source_sha256": "8ead773193012d59b7e7d09a2addabb1af721be77dc5b87e40458a68b93006f9",
+  "passed": true,
+  "case_count": 24,
+  "results": [
+    {
+      "id": "main-title",
+      "text": "道衍万象",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 82,
+      "metric_pixel_size": 110,
+      "slot": {
+        "width": 610,
+        "height": 155,
+        "source_anchor": "At(110,155,610,155,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 440.0,
+      "ascent": 107,
+      "descent": 27,
+      "remaining_width": 170.0,
+      "remaining_height": 21,
+      "passed": true
+    },
+    {
+      "id": "main-primary",
+      "text": "开始修行",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 490,
+        "height": 90,
+        "source_anchor": "At(120,455,490,90,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 8
+      },
+      "advance": 160.0,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 298.0,
+      "remaining_height": 33,
+      "passed": true
+    },
+    {
+      "id": "codex-button",
+      "text": "道典",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,580,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 64.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 344.0,
+      "remaining_height": 22,
+      "passed": true
+    },
+    {
+      "id": "settings-button",
+      "text": "设置",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,685,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 64.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 344.0,
+      "remaining_height": 22,
+      "passed": true
+    },
+    {
+      "id": "quit-button",
+      "text": "退出游戏",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,790,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 128.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 280.0,
+      "remaining_height": 22,
+      "passed": true
+    },
+    {
+      "id": "back-button",
+      "text": "Esc  返回",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 190,
+        "height": 60,
+        "source_anchor": "At(60,1005,190,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 137.375,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 20.625,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "map-mode",
+      "text": "传统",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 145,
+        "height": 95,
+        "source_anchor": "At(1395+Index*160,530,145,95,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 80.0,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 31.0,
+      "remaining_height": 36,
+      "passed": true
+    },
+    {
+      "id": "map-caption",
+      "text": "栖雷古坛",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 395,
+        "height": 70,
+        "source_anchor": "At(X,930,395,70,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 160.0,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 201.0,
+      "remaining_height": 11,
+      "passed": true
+    },
+    {
+      "id": "dash-button",
+      "text": "遁术  空格",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 220,
+        "height": 60,
+        "source_anchor": "At(1195,985,220,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 145.21875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 42.7812,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "screen-heading",
+      "text": "选择修士",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 65,
+      "metric_pixel_size": 87,
+      "slot": {
+        "width": 800,
+        "height": 130,
+        "source_anchor": "At(55,45,800,130,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 348.0,
+      "ascent": 85,
+      "descent": 21,
+      "remaining_width": 452.0,
+      "remaining_height": 24,
+      "passed": true
+    },
+    {
+      "id": "map-title",
+      "text": "栖雷古坛",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 56,
+      "metric_pixel_size": 75,
+      "slot": {
+        "width": 460,
+        "height": 110,
+        "source_anchor": "At(1410,190,460,110,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 300.0,
+      "ascent": 73,
+      "descent": 19,
+      "remaining_width": 160.0,
+      "remaining_height": 18,
+      "passed": true
+    },
+    {
+      "id": "hud-preview",
+      "text": "HUD 预览 · 静态示例数据 · 非实机战斗",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 18,
+      "metric_pixel_size": 24,
+      "slot": {
+        "width": 650,
+        "height": 58,
+        "source_anchor": "At(660,145,650,58,"
+      },
+      "total_padding": {
+        "x": 16,
+        "y": 16
+      },
+      "advance": 421.28125,
+      "ascent": 24,
+      "descent": 6,
+      "remaining_width": 212.7188,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "main-title",
+      "text": "道衍万象",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 90,
+      "metric_pixel_size": 120,
+      "slot": {
+        "width": 610,
+        "height": 155,
+        "source_anchor": "At(110,155,610,155,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 480.0,
+      "ascent": 117,
+      "descent": 29,
+      "remaining_width": 130.0,
+      "remaining_height": 9,
+      "passed": true
+    },
+    {
+      "id": "main-primary",
+      "text": "开始修行",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 490,
+        "height": 90,
+        "source_anchor": "At(120,455,490,90,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 8
+      },
+      "advance": 176.0,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 282.0,
+      "remaining_height": 28,
+      "passed": true
+    },
+    {
+      "id": "codex-button",
+      "text": "道典",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,580,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 70.0,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 338.0,
+      "remaining_height": 18,
+      "passed": true
+    },
+    {
+      "id": "settings-button",
+      "text": "设置",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,685,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 70.0,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 338.0,
+      "remaining_height": 18,
+      "passed": true
+    },
+    {
+      "id": "quit-button",
+      "text": "退出游戏",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 440,
+        "height": 70,
+        "source_anchor": "At(145,790,440,70,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 140.0,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 268.0,
+      "remaining_height": 18,
+      "passed": true
+    },
+    {
+      "id": "back-button",
+      "text": "Esc  返回",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 190,
+        "height": 60,
+        "source_anchor": "At(60,1005,190,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 150.265625,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 7.7344,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "map-mode",
+      "text": "传统",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 145,
+        "height": 95,
+        "source_anchor": "At(1395+Index*160,530,145,95,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 88.0,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 23.0,
+      "remaining_height": 31,
+      "passed": true
+    },
+    {
+      "id": "map-caption",
+      "text": "栖雷古坛",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 395,
+        "height": 70,
+        "source_anchor": "At(X,930,395,70,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 176.0,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 185.0,
+      "remaining_height": 6,
+      "passed": true
+    },
+    {
+      "id": "dash-button",
+      "text": "遁术  空格",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 220,
+        "height": 60,
+        "source_anchor": "At(1195,985,220,60,"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 158.84375,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 29.1562,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "screen-heading",
+      "text": "选择修士",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 72,
+      "metric_pixel_size": 96,
+      "slot": {
+        "width": 800,
+        "height": 130,
+        "source_anchor": "At(55,45,800,130,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 384.0,
+      "ascent": 93,
+      "descent": 24,
+      "remaining_width": 416.0,
+      "remaining_height": 13,
+      "passed": true
+    },
+    {
+      "id": "map-title",
+      "text": "栖雷古坛",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 62,
+      "metric_pixel_size": 83,
+      "slot": {
+        "width": 460,
+        "height": 110,
+        "source_anchor": "At(1410,190,460,110,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 332.0,
+      "ascent": 81,
+      "descent": 20,
+      "remaining_width": 128.0,
+      "remaining_height": 9,
+      "passed": true
+    },
+    {
+      "id": "hud-preview",
+      "text": "HUD 预览 · 静态示例数据 · 非实机战斗",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 650,
+        "height": 58,
+        "source_anchor": "At(660,145,650,58,"
+      },
+      "total_padding": {
+        "x": 16,
+        "y": 16
+      },
+      "advance": 473.984375,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 160.0156,
+      "remaining_height": 8,
+      "passed": true
+    }
+  ]
+}

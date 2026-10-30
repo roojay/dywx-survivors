@@ -1,10 +1,13 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Containers/Ticker.h"
+#include "Engine/EngineBaseTypes.h"
 #include "GameFramework/PlayerController.h"
 #include "DywxHUDState.h"
 #include "DywxUIPlayerController.generated.h"
 
 class SDywxRoot;
+class UGameViewportClient;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDywxRunRequested, int32, CharacterIndex, int32, MapIndex, int32, ModeIndex);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDywxUIAction);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDywxPauseChanged, bool, bPaused);
@@ -34,6 +37,24 @@ public:
     void ConfirmQuit();
 private:
     TSharedPtr<SDywxRoot> RootWidget;
+    // Preview owns these overrides only until live gameplay resumes or this controller exits.
+    TWeakObjectPtr<UGameViewportClient> PreviewViewport;
+    FTSTicker::FDelegateHandle PreviewTicker;
+    FDelegateHandle ActivationHandle;
+    bool bPreviewBudgetActive = false;
+    bool bSavedWorldRenderingDisabled = false;
+    bool bSavedMouseCursor = false;
+    bool bSavedIgnoreInput = false;
+    bool bSavedHideCursorDuringCapture = false;
+    EMouseCaptureMode SavedMouseCaptureMode = EMouseCaptureMode::NoCapture;
+    EMouseLockMode SavedMouseLockMode = EMouseLockMode::DoNotLock;
+    float SavedMaxFPS = 0.f;
+    float AppliedMaxFPS = -1.f;
+    void StartPreviewBudget();
+    void StopPreviewBudget();
+    void RefreshPreviewBudget();
+    bool TickPreviewBudget(float DeltaSeconds);
+    void HandleApplicationActivation(bool bActive);
     void HandleEscape();
     void HandleDash();
 };
