@@ -1,6 +1,6 @@
 {
   "test": "offline Sarasa font advance/line metrics smoke test",
-  "scope": "18 representative fixed label/button slots at 100% and 110% text size",
+  "scope": "35 representative label/button/scroll-content lines at 100% and 110% text size",
   "runtime_validation": "NOT_RUN: this is not UE/Slate layout or visual verification",
   "exclusions": [
     "Slate shaping/fallback/DPI",
@@ -21,9 +21,9 @@
     "SarasaUiSC-Regular.ttf": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f",
     "SarasaUiSC-Bold.ttf": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad"
   },
-  "source_sha256": "0b499677fd0167e2f66f64afb018184ae6d2c0b182e2504bffebe364e4fc9d48",
+  "source_sha256": "2f2bf47ae92df50aceee81741f4af5a289c0bfc321286f1015de9f713472f5a9",
   "passed": true,
-  "case_count": 40,
+  "case_count": 70,
   "results": [
     {
       "id": "upgrade-passive-title",
@@ -58,7 +58,7 @@
       "slot": {
         "width": 510,
         "height": 80,
-        "source_anchor": "At(1360,130,510,80,"
+        "source_anchor": "At(1360,120,510,100,Fusions)"
       },
       "total_padding": {
         "x": 34,
@@ -141,8 +141,8 @@
       "passed": true
     },
     {
-      "id": "settings-button",
-      "text": "设置",
+      "id": "legacy-button",
+      "text": "传承",
       "scale": 1.0,
       "font_style": "Bold",
       "points_after_rounding": 24,
@@ -211,48 +211,48 @@
     },
     {
       "id": "map-mode",
-      "text": "传统",
+      "text": "无尽 · 每五波洞主",
       "scale": 1.0,
       "font_style": "Bold",
       "points_after_rounding": 30,
       "metric_pixel_size": 40,
       "slot": {
-        "width": 145,
-        "height": 95,
-        "source_anchor": "At(1395+Index*160,530,145,95,"
+        "width": 580,
+        "height": 85,
+        "source_anchor": "At(60+I*620,475,580,85,"
       },
       "total_padding": {
         "x": 34,
         "y": 10
       },
-      "advance": 80.0,
+      "advance": 321.53125,
       "ascent": 39,
       "descent": 10,
-      "remaining_width": 31.0,
-      "remaining_height": 36,
+      "remaining_width": 224.4688,
+      "remaining_height": 26,
       "passed": true
     },
     {
       "id": "map-caption",
-      "text": "栖雷古坛",
+      "text": "雷泽洞天 · 未解锁",
       "scale": 1.0,
       "font_style": "Bold",
-      "points_after_rounding": 30,
-      "metric_pixel_size": 40,
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
       "slot": {
-        "width": 395,
-        "height": 70,
-        "source_anchor": "At(X,930,395,70,"
+        "width": 580,
+        "height": 80,
+        "source_anchor": "At(60+I*620,190,580,80,"
       },
       "total_padding": {
         "x": 34,
         "y": 10
       },
-      "advance": 160.0,
-      "ascent": 39,
-      "descent": 10,
-      "remaining_width": 201.0,
-      "remaining_height": 11,
+      "advance": 257.21875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 288.7812,
+      "remaining_height": 31,
       "passed": true
     },
     {
@@ -283,50 +283,50 @@
       "text": "选择修士",
       "scale": 1.0,
       "font_style": "Bold",
-      "points_after_rounding": 65,
-      "metric_pixel_size": 87,
+      "points_after_rounding": 50,
+      "metric_pixel_size": 67,
       "slot": {
         "width": 800,
-        "height": 130,
-        "source_anchor": "At(55,45,800,130,"
+        "height": 100,
+        "source_anchor": "At(55,45,800,100,"
       },
       "total_padding": {
         "x": 0,
         "y": 0
       },
-      "advance": 348.0,
-      "ascent": 85,
-      "descent": 21,
-      "remaining_width": 452.0,
-      "remaining_height": 24,
+      "advance": 268.0,
+      "ascent": 65,
+      "descent": 17,
+      "remaining_width": 532.0,
+      "remaining_height": 18,
       "passed": true
     },
     {
       "id": "map-title",
-      "text": "栖雷古坛",
+      "text": "选择洞天与劫数",
       "scale": 1.0,
       "font_style": "Bold",
-      "points_after_rounding": 56,
-      "metric_pixel_size": 75,
+      "points_after_rounding": 50,
+      "metric_pixel_size": 67,
       "slot": {
-        "width": 460,
-        "height": 110,
-        "source_anchor": "At(1410,190,460,110,"
+        "width": 800,
+        "height": 100,
+        "source_anchor": "At(55,55,800,100,"
       },
       "total_padding": {
         "x": 0,
         "y": 0
       },
-      "advance": 300.0,
-      "ascent": 73,
-      "descent": 19,
-      "remaining_width": 160.0,
+      "advance": 469.0,
+      "ascent": 65,
+      "descent": 17,
+      "remaining_width": 331.0,
       "remaining_height": 18,
       "passed": true
     },
     {
       "id": "hud-resonance",
-      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象",
+      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象 · C 打开道典",
       "scale": 1.0,
       "font_style": "Regular",
       "points_after_rounding": 18,
@@ -340,10 +340,10 @@
         "x": 0,
         "y": 0
       },
-      "advance": 426.453125,
+      "advance": 571.328125,
       "ascent": 24,
       "descent": 6,
-      "remaining_width": 373.5469,
+      "remaining_width": 228.6719,
       "remaining_height": 10,
       "passed": true
     },
@@ -463,6 +463,351 @@
       "passed": true
     },
     {
+      "id": "save-exit",
+      "text": "保存并离开",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "Add(Button(TEXT(\"保存并离开\")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 160.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 404.0,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "saved-hero",
+      "text": "存档待续 · 请先续接",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 30,
+      "metric_pixel_size": 40,
+      "slot": {
+        "width": 500,
+        "height": 75,
+        "source_anchor": "At(600,920,500,75,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 361.53125,
+      "ascent": 39,
+      "descent": 10,
+      "remaining_width": 104.4688,
+      "remaining_height": 16,
+      "passed": true
+    },
+    {
+      "id": "economy-refresh",
+      "text": "刷新洞府 · 免费传承或15灵石",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "Button(TEXT(\"刷新洞府 · 免费传承或15灵石\")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 426.5625,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 137.4375,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "economy-reforge",
+      "text": "重铸 · 999灵石 · 道象共鸣",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "TEXT(\"重铸 · %d灵石 · \")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 384.453125,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 179.5469,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "economy-relic-heading",
+      "text": "玄霜镇海印·藏真",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 21,
+      "metric_pixel_size": 28,
+      "slot": {
+        "width": 596,
+        "height": 55,
+        "source_anchor": "Label(CN(RelicCatalog()[R.catalogId].name),21,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 210.0,
+      "ascent": 28,
+      "descent": 7,
+      "remaining_width": 386.0,
+      "remaining_height": 20,
+      "passed": true
+    },
+    {
+      "id": "codex-numeric-line",
+      "text": "第五重：伤害999 · 冷却12.0秒",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 21,
+      "metric_pixel_size": 28,
+      "slot": {
+        "width": 570,
+        "height": 55,
+        "source_anchor": "570,21,Seen ? Paper : Muted"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 397.4375,
+      "ascent": 28,
+      "descent": 7,
+      "remaining_width": 172.5625,
+      "remaining_height": 20,
+      "passed": true
+    },
+    {
+      "id": "opportunity-title",
+      "text": "雷泽洞天 · 遗留洞府",
+      "scale": 1.0,
+      "font_style": "Bold",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 810,
+        "height": 65,
+        "source_anchor": "Button(CN(Details.title)"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 289.21875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 488.7812,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "opportunity-reward-line",
+      "text": "所得修为 +15，灵石 +20（初版数值）。",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 780,
+        "height": 55,
+        "source_anchor": "Paragraph(CN(Details.description),780,20,Paper)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 497.53125,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 282.4688,
+      "remaining_height": 21,
+      "passed": true
+    },
+    {
+      "id": "anomaly-benefit-line",
+      "text": "【当前雷象有利：可吸纳引雷】",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 21,
+      "metric_pixel_size": 28,
+      "slot": {
+        "width": 570,
+        "height": 55,
+        "source_anchor": "TEXT(\"【当前雷象有利：可吸纳引雷】 \")"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 392.0,
+      "ascent": 28,
+      "descent": 7,
+      "remaining_width": 178.0,
+      "remaining_height": 20,
+      "passed": true
+    },
+    {
+      "id": "boss-realm-title",
+      "text": "洞主破相！ 流波夔君 · 第 2 相   99999 / 99999",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 22,
+      "metric_pixel_size": 30,
+      "slot": {
+        "width": 750,
+        "height": 45,
+        "source_anchor": "At(580,700,750,45,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 650.234375,
+      "ascent": 30,
+      "descent": 8,
+      "remaining_width": 99.7656,
+      "remaining_height": 7,
+      "passed": true
+    },
+    {
+      "id": "local-ranking-heading",
+      "text": "无尽波数排行 · 本地，不联网",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 596,
+        "height": 55,
+        "source_anchor": "Label(TEXT(\"无尽波数排行 · 本地，不联网\"),24,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 417.21875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 178.7812,
+      "remaining_height": 16,
+      "passed": true
+    },
+    {
+      "id": "local-ranking-line",
+      "text": "20 · 灵契山人 · 第 99999 波",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 560,
+        "height": 55,
+        "source_anchor": "560,20,Paper)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 355.09375,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 204.9062,
+      "remaining_height": 21,
+      "passed": true
+    },
+    {
+      "id": "anomaly-hud-header",
+      "text": "【雷】引雷 · 剩余16秒 · 悬停查看完整规律",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 18,
+      "metric_pixel_size": 24,
+      "slot": {
+        "width": 974,
+        "height": 42,
+        "source_anchor": "At(35,285,990,100,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 464.90625,
+      "ascent": 24,
+      "descent": 6,
+      "remaining_width": 509.0938,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "anomaly-hud-numbers",
+      "text": "预警1.2秒 · 伤害22 · 半径2.2格 · 雷象可吸纳，威力×1.30",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 18,
+      "metric_pixel_size": 24,
+      "slot": {
+        "width": 974,
+        "height": 42,
+        "source_anchor": "WrapTextAt(970)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 633.546875,
+      "ascent": 24,
+      "descent": 6,
+      "remaining_width": 340.4531,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "hover-comparison-heading",
+      "text": "有效属性       当前装备    候选换装    差值",
+      "scale": 1.0,
+      "font_style": "Regular",
+      "points_after_rounding": 18,
+      "metric_pixel_size": 24,
+      "slot": {
+        "width": 570,
+        "height": 42,
+        "source_anchor": "Label(TEXT(\"有效属性       当前装备    候选换装    差值\"),18,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 432.796875,
+      "ascent": 24,
+      "descent": 6,
+      "remaining_width": 137.2031,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
       "id": "rest-title",
       "text": "调息 · 战斗暂停   炼化待入账修为 9999",
       "scale": 1.0,
@@ -518,7 +863,7 @@
       "slot": {
         "width": 510,
         "height": 80,
-        "source_anchor": "At(1360,130,510,80,"
+        "source_anchor": "At(1360,120,510,100,Fusions)"
       },
       "total_padding": {
         "x": 34,
@@ -601,8 +946,8 @@
       "passed": true
     },
     {
-      "id": "settings-button",
-      "text": "设置",
+      "id": "legacy-button",
+      "text": "传承",
       "scale": 1.1,
       "font_style": "Bold",
       "points_after_rounding": 26,
@@ -671,48 +1016,48 @@
     },
     {
       "id": "map-mode",
-      "text": "传统",
+      "text": "无尽 · 每五波洞主",
       "scale": 1.1,
       "font_style": "Bold",
       "points_after_rounding": 33,
       "metric_pixel_size": 44,
       "slot": {
-        "width": 145,
-        "height": 95,
-        "source_anchor": "At(1395+Index*160,530,145,95,"
+        "width": 580,
+        "height": 85,
+        "source_anchor": "At(60+I*620,475,580,85,"
       },
       "total_padding": {
         "x": 34,
         "y": 10
       },
-      "advance": 88.0,
+      "advance": 353.6875,
       "ascent": 43,
       "descent": 11,
-      "remaining_width": 23.0,
-      "remaining_height": 31,
+      "remaining_width": 192.3125,
+      "remaining_height": 21,
       "passed": true
     },
     {
       "id": "map-caption",
-      "text": "栖雷古坛",
+      "text": "雷泽洞天 · 未解锁",
       "scale": 1.1,
       "font_style": "Bold",
-      "points_after_rounding": 33,
-      "metric_pixel_size": 44,
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
       "slot": {
-        "width": 395,
-        "height": 70,
-        "source_anchor": "At(X,930,395,70,"
+        "width": 580,
+        "height": 80,
+        "source_anchor": "At(60+I*620,190,580,80,"
       },
       "total_padding": {
         "x": 34,
         "y": 10
       },
-      "advance": 176.0,
-      "ascent": 43,
-      "descent": 11,
-      "remaining_width": 185.0,
-      "remaining_height": 6,
+      "advance": 281.34375,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 264.6562,
+      "remaining_height": 27,
       "passed": true
     },
     {
@@ -743,50 +1088,50 @@
       "text": "选择修士",
       "scale": 1.1,
       "font_style": "Bold",
-      "points_after_rounding": 72,
-      "metric_pixel_size": 96,
+      "points_after_rounding": 55,
+      "metric_pixel_size": 74,
       "slot": {
         "width": 800,
-        "height": 130,
-        "source_anchor": "At(55,45,800,130,"
+        "height": 100,
+        "source_anchor": "At(55,45,800,100,"
       },
       "total_padding": {
         "x": 0,
         "y": 0
       },
-      "advance": 384.0,
-      "ascent": 93,
-      "descent": 24,
-      "remaining_width": 416.0,
-      "remaining_height": 13,
+      "advance": 296.0,
+      "ascent": 72,
+      "descent": 18,
+      "remaining_width": 504.0,
+      "remaining_height": 10,
       "passed": true
     },
     {
       "id": "map-title",
-      "text": "栖雷古坛",
+      "text": "选择洞天与劫数",
       "scale": 1.1,
       "font_style": "Bold",
-      "points_after_rounding": 62,
-      "metric_pixel_size": 83,
+      "points_after_rounding": 55,
+      "metric_pixel_size": 74,
       "slot": {
-        "width": 460,
-        "height": 110,
-        "source_anchor": "At(1410,190,460,110,"
+        "width": 800,
+        "height": 100,
+        "source_anchor": "At(55,55,800,100,"
       },
       "total_padding": {
         "x": 0,
         "y": 0
       },
-      "advance": 332.0,
-      "ascent": 81,
-      "descent": 20,
-      "remaining_width": 128.0,
-      "remaining_height": 9,
+      "advance": 518.0,
+      "ascent": 72,
+      "descent": 18,
+      "remaining_width": 282.0,
+      "remaining_height": 10,
       "passed": true
     },
     {
       "id": "hud-resonance",
-      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象",
+      "text": "同道象达到 2 / 4 点共鸣 · 破境继承道象 · C 打开道典",
       "scale": 1.1,
       "font_style": "Regular",
       "points_after_rounding": 20,
@@ -800,10 +1145,10 @@
         "x": 0,
         "y": 0
       },
-      "advance": 479.8125,
+      "advance": 642.8125,
       "ascent": 27,
       "descent": 7,
-      "remaining_width": 320.1875,
+      "remaining_width": 157.1875,
       "remaining_height": 6,
       "passed": true
     },
@@ -919,6 +1264,351 @@
       "ascent": 34,
       "descent": 9,
       "remaining_width": 223.0,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "save-exit",
+      "text": "保存并离开",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "Add(Button(TEXT(\"保存并离开\")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 175.0,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 389.0,
+      "remaining_height": 13,
+      "passed": true
+    },
+    {
+      "id": "saved-hero",
+      "text": "存档待续 · 请先续接",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 33,
+      "metric_pixel_size": 44,
+      "slot": {
+        "width": 500,
+        "height": 75,
+        "source_anchor": "At(600,920,500,75,"
+      },
+      "total_padding": {
+        "x": 34,
+        "y": 10
+      },
+      "advance": 397.6875,
+      "ascent": 43,
+      "descent": 11,
+      "remaining_width": 68.3125,
+      "remaining_height": 11,
+      "passed": true
+    },
+    {
+      "id": "economy-refresh",
+      "text": "刷新洞府 · 免费传承或15灵石",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "Button(TEXT(\"刷新洞府 · 免费传承或15灵石\")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 466.5625,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 97.4375,
+      "remaining_height": 13,
+      "passed": true
+    },
+    {
+      "id": "economy-reforge",
+      "text": "重铸 · 999灵石 · 道象共鸣",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 596,
+        "height": 65,
+        "source_anchor": "TEXT(\"重铸 · %d灵石 · \")"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 420.515625,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 143.4844,
+      "remaining_height": 13,
+      "passed": true
+    },
+    {
+      "id": "economy-relic-heading",
+      "text": "玄霜镇海印·藏真",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 23,
+      "metric_pixel_size": 31,
+      "slot": {
+        "width": 596,
+        "height": 55,
+        "source_anchor": "Label(CN(RelicCatalog()[R.catalogId].name),21,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 232.5,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 363.5,
+      "remaining_height": 16,
+      "passed": true
+    },
+    {
+      "id": "codex-numeric-line",
+      "text": "第五重：伤害999 · 冷却12.0秒",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 23,
+      "metric_pixel_size": 31,
+      "slot": {
+        "width": 570,
+        "height": 55,
+        "source_anchor": "570,21,Seen ? Paper : Muted"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 440.09375,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 129.9062,
+      "remaining_height": 16,
+      "passed": true
+    },
+    {
+      "id": "opportunity-title",
+      "text": "雷泽洞天 · 遗留洞府",
+      "scale": 1.1,
+      "font_style": "Bold",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 810,
+        "height": 65,
+        "source_anchor": "Button(CN(Details.title)"
+      },
+      "total_padding": {
+        "x": 32,
+        "y": 9
+      },
+      "advance": 316.34375,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 461.6562,
+      "remaining_height": 13,
+      "passed": true
+    },
+    {
+      "id": "opportunity-reward-line",
+      "text": "所得修为 +15，灵石 +20（初版数值）。",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 22,
+      "metric_pixel_size": 30,
+      "slot": {
+        "width": 780,
+        "height": 55,
+        "source_anchor": "Paragraph(CN(Details.description),780,20,Paper)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 552.75,
+      "ascent": 30,
+      "descent": 8,
+      "remaining_width": 227.25,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "anomaly-benefit-line",
+      "text": "【当前雷象有利：可吸纳引雷】",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 23,
+      "metric_pixel_size": 31,
+      "slot": {
+        "width": 570,
+        "height": 55,
+        "source_anchor": "TEXT(\"【当前雷象有利：可吸纳引雷】 \")"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 434.0,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 136.0,
+      "remaining_height": 16,
+      "passed": true
+    },
+    {
+      "id": "boss-realm-title",
+      "text": "洞主破相！ 流波夔君 · 第 2 相   99999 / 99999",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 24,
+      "metric_pixel_size": 32,
+      "slot": {
+        "width": 750,
+        "height": 45,
+        "source_anchor": "At(580,700,750,45,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 693.6875,
+      "ascent": 31,
+      "descent": 8,
+      "remaining_width": 56.3125,
+      "remaining_height": 6,
+      "passed": true
+    },
+    {
+      "id": "local-ranking-heading",
+      "text": "无尽波数排行 · 本地，不联网",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 26,
+      "metric_pixel_size": 35,
+      "slot": {
+        "width": 596,
+        "height": 55,
+        "source_anchor": "Label(TEXT(\"无尽波数排行 · 本地，不联网\"),24,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 456.34375,
+      "ascent": 34,
+      "descent": 9,
+      "remaining_width": 139.6562,
+      "remaining_height": 12,
+      "passed": true
+    },
+    {
+      "id": "local-ranking-line",
+      "text": "20 · 灵契山人 · 第 99999 波",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 22,
+      "metric_pixel_size": 30,
+      "slot": {
+        "width": 560,
+        "height": 55,
+        "source_anchor": "560,20,Paper)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 394.4375,
+      "ascent": 30,
+      "descent": 8,
+      "remaining_width": 165.5625,
+      "remaining_height": 17,
+      "passed": true
+    },
+    {
+      "id": "anomaly-hud-header",
+      "text": "【雷】引雷 · 剩余16秒 · 悬停查看完整规律",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 974,
+        "height": 42,
+        "source_anchor": "At(35,285,990,100,"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 523.0625,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 450.9375,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "anomaly-hud-numbers",
+      "text": "预警1.2秒 · 伤害22 · 半径2.2格 · 雷象可吸纳，威力×1.30",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 974,
+        "height": 42,
+        "source_anchor": "WrapTextAt(970)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 712.890625,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 261.1094,
+      "remaining_height": 8,
+      "passed": true
+    },
+    {
+      "id": "hover-comparison-heading",
+      "text": "有效属性       当前装备    候选换装    差值",
+      "scale": 1.1,
+      "font_style": "Regular",
+      "points_after_rounding": 20,
+      "metric_pixel_size": 27,
+      "slot": {
+        "width": 570,
+        "height": 42,
+        "source_anchor": "Label(TEXT(\"有效属性       当前装备    候选换装    差值\"),18,Gold)"
+      },
+      "total_padding": {
+        "x": 0,
+        "y": 0
+      },
+      "advance": 486.984375,
+      "ascent": 27,
+      "descent": 7,
+      "remaining_width": 83.0156,
       "remaining_height": 8,
       "passed": true
     },

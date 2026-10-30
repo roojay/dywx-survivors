@@ -15,6 +15,13 @@ struct RelicFilter {
 };
 class Progression {
 public:
+  void ConfigureFullGame(int layer, const Stats& permanentBonuses = Stats{}, int extraRerolls = 0);
+  void SetSystemLayer(int layer);
+  void SetContentUnlocks(bool spellPool, bool relicPool);
+  bool SealOffer(std::size_t index);
+  bool SkipUpgrade();
+  int TakeSkipStones();
+  bool FullGameEnabled() const { return fullGame_; }
   void Reset(std::uint32_t seed, HeroId hero, bool formResonance = true);
   const ProgressionState &GetState() const { return state_; }
   // Imports discovery flags only; never run power, inventory, XP or pity.
@@ -36,6 +43,11 @@ public:
   std::vector<Relic> BossRewards(); // Three distinct catalog items,
                                     // Immortal/Dao only, no pity impact.
   void GenerateBossRewards();
+  void GenerateBossRewards(std::uint64_t bossOrdinal);
+  void SetDropRiskWeight(float weight);
+  std::array<float,4> DropRarityProbabilities(bool guaranteedSpirit = false) const;
+  std::string DescribeDropOdds(bool guaranteedSpirit = false) const;
+  void SetRelicPool(const std::vector<int>& preferredCatalogIds);
   bool ChooseBossReward(std::size_t index);
   bool RollSpiritBeast();
   void OnWaveEnded();
@@ -61,18 +73,26 @@ public:
   static Stats ClampStats(Stats s);
 
 private:
+  friend class SaveCodec;
+  bool fullGame_ = false, spellPoolUnlocked_ = true, relicPoolUnlocked_ = true;
+  Stats permanentBase_{};
+  float dropRiskWeight_ = 1;
+  std::vector<int> preferredRelics_;
+  std::uint64_t lastBossOrdinal_ = 0;
+  friend class Economy; // Atomic inventory transactions and stat recomputation.
   ProgressionState state_;
   std::mt19937 rng_{1};
   EntityId nextRelic_ = 1;
   bool formResonance_ = true, resting_ = false, immortalThisWave_ = false,
        bossRewardsGenerated_ = false;
   int pityWaves_ = 0, pendingRefineXp_ = 0;
-  std::array<bool, 12> consumed_{};
+  std::array<bool, kSpellCount> consumed_{};
   struct Undo {
     std::vector<Relic> relics;
     int xp = 0;
   };
   std::vector<Undo> undo_;
+  bool LegalRelic(int catalogId) const;
   float Unit();
   int Index(int size);
   void AddRawXp(float xp);

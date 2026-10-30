@@ -21,6 +21,8 @@ void ADywxUIPlayerController::BeginPlay()
     Super::BeginPlay();
     if (IsLocalController() && GetWorld() && GetWorld()->GetGameViewport())
     {
+        MVPWorld = GetWorld()->SpawnActor<ADywxMVPWorld>();
+        if (MVPWorld) MVPWorld->InitializeProfile();
         RootWidget = SNew(SDywxRoot).Owner(this);
         GetWorld()->GetGameViewport()->AddViewportWidgetContent(RootWidget.ToSharedRef(), 10);
         ApplyUIInput(false, false);
@@ -71,16 +73,34 @@ void ADywxUIPlayerController::SetEndlessUnlocked(bool bUnlocked)
 {
     if (RootWidget.IsValid()) RootWidget->SetEndlessUnlocked(bUnlocked);
 }
-void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, int32 ModeIndex)
+const dywx::mvp::CampaignProfile& ADywxUIPlayerController::CampaignProfile() const
 {
-    if (MapIndex != 0 || ModeIndex != 0 || CharacterIndex < 0 || CharacterIndex > 1 || !GetWorld()) return;
-    LastHero = CharacterIndex;
+    static const dywx::mvp::CampaignProfile Empty;
+    return MVPWorld ? MVPWorld->GetCampaignProfile() : Empty;
+}
+bool ADywxUIPlayerController::PurchaseLegacy(dywx::mvp::LegacyUnlock U) { return MVPWorld && MVPWorld->PurchaseLegacy(U); }
+bool ADywxUIPlayerController::PurchasePermanent(dywx::mvp::PermanentStat S) { return MVPWorld && MVPWorld->PurchasePermanent(S); }
+bool ADywxUIPlayerController::SaveRun() { return MVPWorld && MVPWorld->SaveRun(); }
+bool ADywxUIPlayerController::HasSavedRun(int32 H) const { return MVPWorld && MVPWorld->HasSavedRun(H); }
+bool ADywxUIPlayerController::ResumeRun(int32 H)
+{
+    if (!MVPWorld) return false;
     StopPreviewBudget();
-    if (!MVPWorld) MVPWorld = GetWorld()->SpawnActor<ADywxMVPWorld>();
-    if (!MVPWorld) { StartPreviewBudget(); return; }
-    MVPWorld->StartRun(CharacterIndex == 0 ? dywx::mvp::HeroId::Body : dywx::mvp::HeroId::Sword, uint64(FDateTime::UtcNow().GetTicks()));
-    BeginLiveHUD(FDywxHUDState());
-    RefreshRunUI();
+    if (!MVPWorld->ResumeRun(H)) { StartPreviewBudget(); return false; }
+    const auto& C=MVPWorld->GetSimulation().GetCampaign().GetState();
+    LastHero=H; LastMap=int32(MVPWorld->GetSimulation().GetArena().cave); LastMode=int32(C.mode); LastRisk=C.riskMask;
+    StopPreviewBudget(); BeginLiveHUD(FDywxHUDState()); RefreshRunUI(); return true;
+}
+void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, int32 ModeIndex, uint32 RiskMask)
+{
+    if (!GetWorld()) return;
+    if (!MVPWorld) { MVPWorld = GetWorld()->SpawnActor<ADywxMVPWorld>(); if (MVPWorld) MVPWorld->InitializeProfile(); }
+    if (MVPWorld && MVPWorld->HasSavedRun(CharacterIndex)) { if(RootWidget.IsValid())RootWidget->ShowNotice(TEXT("此修士已有进行中存档，请先续接；未覆盖任何存档。")); return; }
+    StopPreviewBudget();
+    if (!MVPWorld || !MVPWorld->StartFullRun(CharacterIndex,MapIndex,ModeIndex,RiskMask))
+    { if (RootWidget.IsValid()) { RootWidget->ReturnToMenu(); RootWidget->ShowNotice(TEXT("无法开始：检查修士、洞天、模式、劫数解锁或存档状态。")); } StartPreviewBudget(); return; }
+    LastHero=CharacterIndex; LastMap=MapIndex; LastMode=ModeIndex; LastRisk=RiskMask;
+    StopPreviewBudget(); BeginLiveHUD(FDywxHUDState()); RefreshRunUI();
     OnRunRequested.Broadcast(CharacterIndex, MapIndex, ModeIndex);
 }
 void ADywxUIPlayerController::RequestDash() { bDashQueued = true; OnDashRequested.Broadcast(); }
@@ -225,7 +245,7 @@ void ADywxUIPlayerController::RefreshPreviewBudget()
 
 dywx::mvp::Simulation* ADywxUIPlayerController::Simulation() { return MVPWorld ? &MVPWorld->GetSimulation() : nullptr; }
 void ADywxUIPlayerController::RefreshRunUI() { if (MVPWorld && RootWidget.IsValid()) RootWidget->SetSnapshot(MVPWorld->GetSnapshot()); }
-void ADywxUIPlayerController::RetryRun() { RequestRun(LastHero,0,0); }
+void ADywxUIPlayerController::RetryRun() { RequestRun(LastHero,LastMap,LastMode,LastRisk); }
 void ADywxUIPlayerController::ChooseUpgrade(int32 Index) { if (Simulation() && !Simulation()->GetSnapshot().paused) { Simulation()->ChooseUpgrade(Index); RefreshRunUI(); } }
 void ADywxUIPlayerController::UpgradeOne() { ChooseUpgrade(0); }
 void ADywxUIPlayerController::UpgradeTwo() { ChooseUpgrade(1); }

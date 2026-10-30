@@ -11,7 +11,7 @@ struct Vec2 {
   Vec2 operator-(Vec2 b) const { return {x - b.x, y - b.y}; }
   Vec2 operator*(float s) const { return {x * s, y * s}; }
 };
-enum class HeroId { Body, Sword };
+enum class HeroId { Body, Sword, Beast, Count };
 enum class SpellId {
   FlamePalm,
   ThunderFist,
@@ -25,6 +25,13 @@ enum class SpellId {
   HeavenlyThunder,
   FusionPalm,
   FusionSwords,
+  MetalPalm, WoodPalm, WaterPalm, EarthPalm,
+  MetalSword, WoodSword, WaterSword, EarthSword,
+  MetalArray, WoodArray, WaterArray, EarthArray,
+  FireBeast, ThunderBeast, WoodBeast, WaterBeast,
+  FireTalisman, ThunderTalisman, MetalTalisman, EarthTalisman,
+  FusionBeast,
+  AscendantPalm, AscendantSword, AscendantBeast,
   Count
 };
 enum class PassiveId {
@@ -33,10 +40,14 @@ enum class PassiveId {
   FireScripture,
   ThunderScripture,
   ClearMind,
+  BeastScripture, MetalScripture, WoodScripture, WaterScripture, EarthScripture, TalismanScripture,
   Count
 };
-enum class Element { Fire, Thunder, None };
-enum class Form { Body, Sword, Array, None };
+enum class Element { Fire, Thunder, None, Metal, Wood, Water, Earth, Count };
+enum class Form { Body, Sword, Array, None, Beast, Talisman, Count };
+inline constexpr std::size_t kSpellCount = static_cast<std::size_t>(SpellId::Count);
+inline constexpr std::size_t kPassiveCount = static_cast<std::size_t>(PassiveId::Count);
+inline constexpr std::size_t kRelicCount = 80, kFusionCount = 6, kResonanceCount = 11;
 enum class Rarity { Common, Spirit, Immortal, Dao };
 enum class EnemyRole {
   Swarm,
@@ -69,8 +80,8 @@ struct Stats {
   std::array<bool, 7> triggers{};
   std::array<bool, 6> mysteries{};
   std::array<bool, 2> uniques{};
-  std::array<float, 2> elementBonus{};
-  std::array<float, 3> formBonus{};
+  std::array<float, static_cast<std::size_t>(Element::Count)> elementBonus{};
+  std::array<float, static_cast<std::size_t>(Form::Count)> formBonus{};
 };
 struct SpellState {
   SpellId id = SpellId::FlamePalm;
@@ -78,6 +89,7 @@ struct SpellState {
 };
 struct Resonance {
   int fire = 0, thunder = 0, body = 0, sword = 0, array = 0;
+  int metal = 0, wood = 0, water = 0, earth = 0, beast = 0, talisman = 0;
 };
 struct BuildState {
   HeroId hero = HeroId::Body;
@@ -106,7 +118,8 @@ enum class AffixKind {
   Resonance,
   Trigger,
   Mystery,
-  Unique
+  Unique,
+  Metal, Wood, Water, Earth, Beast, Talisman, Count
 };
 struct Affix {
   AffixKind kind = AffixKind::Power;
@@ -135,14 +148,17 @@ struct ProgressionState {
   std::vector<UpgradeOffer> offers;
   std::vector<Relic> equipped, bag;
   int pendingRefineXp = 0, pityWaves = 0;
+  int systemLayer = 1, sealsRemaining = 3, skippedUpgrades = 0, skipSpiritStones = 0;
+  std::array<bool, kSpellCount> sealedSpells{};
+  std::array<bool, kPassiveCount> sealedPassives{};
   std::vector<Relic> bossRewards;
-  std::array<bool, 12> seenSpells{};
-  std::array<bool, 15> seenRelics{};
-  std::array<bool, 2> seenFusions{};
-  std::array<bool, 5> seenPassives{};
+  std::array<bool, kSpellCount> seenSpells{};
+  std::array<bool, kRelicCount> seenRelics{};
+  std::array<bool, kFusionCount> seenFusions{};
+  std::array<bool, kPassiveCount> seenPassives{};
   std::array<bool, 8> seenEnemies{};
   std::array<bool, 4> seenMutations{};
-  std::array<bool, 5> seenResonances{};
+  std::array<bool, kResonanceCount> seenResonances{};
 };
 struct PlayerState {
   Vec2 position{}, facing{1, 0};
@@ -157,6 +173,7 @@ struct EnemyState {
   float hp = 18, maxHp = 18, shield = 0, armor = 0, radius = .45f, speed = 3.2f,
         damage = 6, cooldown = 0, windup = 0, chargeRemaining = 0, stun = 0,
         burnRemaining = 0, burnDps = 0;
+  float slowRemaining = 0, slowFraction = 0;
   int burnStacks = 0, mutations = 0, bossPhase = 0;
   EntityId owner = 0;
 };
@@ -193,6 +210,7 @@ struct PickupState {
   float xp = 0;
   bool hasRelic = false;
   Relic relic;
+  int spiritStones = 0;
 };
 struct RunStatistics {
   std::uint64_t kills = 0, shots = 0, hits = 0, dodges = 0;
@@ -227,7 +245,7 @@ struct Snapshot {
   int wave = 0, waveCount = 4, bossPhase = 0;
   float waveElapsed = 0, waveDuration = 100;
   PlayerState player;
-  std::array<float, 12> spellCooldowns{};
+  std::array<float, kSpellCount> spellCooldowns{};
   ProgressionState progression;
   std::vector<EnemyState> enemies;
   std::vector<ProjectileState> projectiles;

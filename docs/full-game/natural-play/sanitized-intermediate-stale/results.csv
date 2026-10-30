@@ -1,0 +1,10 @@
+seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,build
+11,0,0,0,veteran_unlocks_zero_stats,0,1200,dead,403.879,4,0,831,13,100,0,3,0,0,0,0,0,1,4,"0:5;4:2;9:4;P0;2;8;"
+29,0,1,1,veteran_unlocks_zero_stats,0,1200,dead,607.829,4,0,1794,22,130,0,4,0,0,6,2,0,1,4,"3:5;2:5;13:3;5:5;12:1;P1;2;3;7;"
+73,0,2,2,veteran_unlocks_zero_stats,0,1200,dead,1006.38,4,0,2423,27,130,0,4,0,0,3,1,0,1,4,"2:5;7:5;32:1;4:4;P5;2;4;8;"
+11,1,0,1,veteran_unlocks_zero_stats,0,2400,dead,752.127,4,0,618,13,50,3,0,0,0,0,0,0,1,8,"4:2;10:1;P0;2;"
+29,1,1,2,veteran_unlocks_zero_stats,0,2400,dead,1280.05,7,0,1819,25,130,6,2,1,0,7,4,2,1,14,"2:5;11:1;4:4;6:3;9:1;P1;2;4;"
+73,1,2,0,veteran_unlocks_zero_stats,0,2400,dead,1296.29,6,0,1082,16,130,5,1,0,0,0,0,1,1,12,"4:3;32:1;2:2;P5;2;"
+11,2,0,2,veteran_unlocks_zero_stats,0,1200,sample_bound,1200.39,5,175.15,1590,21,110,5,0,0,0,1,2,0,0,0,"7:4;2:5;10:1;P0;2;3;"
+29,2,1,0,veteran_unlocks_zero_stats,0,1200,dead,713.953,4,0,845,15,72,3,1,1,0,2,1,1,1,8,"3:5;7:2;4:1;6:2;2:2;9:1;P1;2;3;"
+73,2,2,1,veteran_unlocks_zero_stats,0,1200,dead,950.229,5,0,519,11,110,4,1,0,0,0,0,1,1,10,"32:1;P5;2;"

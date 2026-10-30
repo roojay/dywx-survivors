@@ -19,7 +19,7 @@ public:
     void Construct(const FArguments& Args);
     void HandleEscape() { Back(); }
     // Idempotent: never toggle/close an existing modal on focus loss.
-    void HandleFocusLoss() { if (Nav.liveBattle) Pause(); }
+    void HandleFocusLoss();
     void HandleDash() { Dash(); }
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual FReply OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event) override;
@@ -28,12 +28,16 @@ public:
     void SetHUDState(const FDywxHUDState& State);
     void BeginLiveHUD(const FDywxHUDState& State);
     void ReturnToMenu();
+    void ShowNotice(const FString& Text) { RunNotice=Text;Rebuild(); }
     void SetEndlessUnlocked(bool bUnlocked);
 private:
     TWeakObjectPtr<ADywxUIPlayerController> Owner;
     dywx::Navigation Nav;
     FDywxHUDState HUD;
     dywx::mvp::Snapshot Run;
+    bool bBeastVisible = false;
+    dywx::mvp::Vec2 BeastOffset;
+    float BossChangeUntil = 0;
     float BossHP = 0, BossMaxHP = 1;
     uint64 UIEpoch = 0;
     uint64 SelectedBag = 0;
@@ -41,6 +45,8 @@ private:
     int32 AspectFilter = -1, AffixFilter = -1;
     int32 RarityFilter = -1;
     bool bRefinePreview = false;
+    bool bRefineStones = false;
+    bool bModalPausedRun = false;
     FString RunNotice;
     TSharedRef<SWidget> LiveText(TFunction<FString()> Value, int32 Size = 22, FLinearColor Color = FLinearColor::White);
     void UpgradePanel();
@@ -58,7 +64,8 @@ private:
     const FSlateBrush* Portrait(int32 Index);
     TSharedRef<SWidget> Label(const FString& Text, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
     TSharedRef<SWidget> Paragraph(const FString& Text, float Width, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
-    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""), bool bFramed = false);
+    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""), bool bFramed = false, TSharedPtr<SWidget> TooltipContent = nullptr);
+    TSharedRef<SWidget> Comparison(const dywx::mvp::Stats& Before,const dywx::mvp::Stats& After,const FString& Description=TEXT("")) const;
     TSharedRef<SWidget> Panel(TSharedRef<SWidget> Content, FLinearColor Tint, float Padding = 24.0f) const;
     void At(float X, float Y, float W, float H, TSharedRef<SWidget> Widget);
     void Rebuild();

@@ -48,3 +48,53 @@ assert 'Radius*.75f' not in vfx
 assert 'Simulation.' not in vfx and 'rand(' not in vfx
 assert 'Build-MVPAssets.ps1' in (ROOT/'scripts/package-windows.ps1').read_text()
 print(json.dumps({'status':'passed','mesh_count':len(scene['meshes']),'triangles':triangles,'scope':'JSON + staging + source contracts only','ue_compile':'not_run','ue_render':'not_run'},indent=2))
+
+# Full-game runtime wiring. Source contracts are not UE compilation/render evidence.
+header = (ROOT/'Source/DywxUI/Public/MVP/DywxMVPWorld.h').read_text()
+def function(name):
+    start = cpp.index(name)
+    brace = cpp.index('{', start)
+    depth = 1
+    end = brace + 1
+    while depth:
+        depth += (cpp[end] == '{') - (cpp[end] == '}')
+        end += 1
+    return cpp[brace:end]
+for api in ('InitializeProfile', 'StartFullRun', 'GetCampaignProfile', 'PurchaseLegacy',
+            'PurchasePermanent', 'SaveRun', 'ResumeRun', 'HasSavedRun'):
+    assert api in header
+arena = function('void ADywxMVPWorld::RebuildArena')
+assert 'Simulation.GetArena()' in arena and 'Arena.obstacles' in arena
+assert 'ClearInstances()' in arena and 'Allocated=0' in arena
+assert 'Arena.veins' in arena and 'Arena.hazards' in arena
+assert 'cornerCut' in arena and 'Corners[(I+1)%8]' in arena
+assert 'LoadGeometry' not in arena and 'BuildMesh' not in arena
+render = function('void ADywxMVPWorld::Render(float')
+assert 'RebuildArena' not in render and 'BuildMesh' not in render and 'MakeBatch' not in render
+start = function('bool ADywxMVPWorld::StartFullRun')
+assert start.index('AllocateRunId()') < start.index('Simulation=MoveTemp(Candidate)')
+assert 'if(!RunId) return false;' in start
+settle = function('bool ADywxMVPWorld::SaveProfile')
+assert 'seenAnomalies[I]=true' in settle
+assert settle.index('CandidateProfile.Save()') < settle.index('Simulation=MoveTemp(CandidateSimulation)')
+resume = function('bool ADywxMVPWorld::ResumeRun')
+assert resume.index('RestoreCheckpoint') < resume.index('ConsumeCheckpoint') < resume.index('Simulation=MoveTemp(Candidate)')
+for element in ('Metal', 'Wood', 'Water', 'Earth', 'Fire', 'Thunder'):
+    assert f'Element::{element}' in cpp + vfx
+assert 'E.form==Form::Beast' in vfx and 'HeroId::Beast' in render
+assert 'RelicGrade%d' in render and 'CollectedGrade' in render
+assert 'Vision' in render and 'AnomalyId::Array' in render
+print('PASS: full-game world, persistence ordering, seeded arena and bounded six-element/companion presentation source contracts')
+
+# Anomaly halo eligibility follows current gameplay modifiers, not a blanket ring.
+affected = function('bool AnomalyAffectsEnemy')
+for condition in ('Mods.currency>1.f', 'Mods.spawn>1.f', 'Mods.chargers>1.f',
+                  'Role==EnemyRole::Charger', 'Mods.ranged>1.f', 'Role==EnemyRole::Ranged',
+                  'Mods.beasts>1.f', 'Role==EnemyRole::SpiritBeast', 'Mods.xp>1.f'):
+    assert condition in affected
+assert 'if(!State.active) return false' in affected
+assert 'case AnomalyId::Lightning: case AnomalyId::Array: case AnomalyId::Count: return false' in affected
+assert 'AnomalyAffectsEnemy(Anomaly.State(),Anomaly.Modifiers(S.player.position),E.role)' in render
+assert 'AnomalyColors' in vfx and 'AnomalyHalo%d' in vfx and 'unit_faint_boundary' in vfx
+assert 'Mods.playerPower>1.f' in render and 'Mods.thunderPower>1.f' in render
+print('PASS: six-color low-priority anomaly halos gated by actual modifiers/roles; no fictitious lightning/array enemy buffs')

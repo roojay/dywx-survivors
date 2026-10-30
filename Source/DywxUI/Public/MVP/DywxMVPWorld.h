@@ -23,6 +23,15 @@ public:
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     void StartRun(dywx::mvp::HeroId Hero, uint64 Seed);
     void StopRun();
+    void InitializeProfile();
+    bool StartFullRun(int32 Hero,int32 Map,int32 Mode,uint32 RiskMask=0);
+    const dywx::mvp::CampaignProfile& GetCampaignProfile() const { return Profile.GetCampaign(); }
+    bool PurchaseLegacy(dywx::mvp::LegacyUnlock Unlock);
+    bool PurchasePermanent(dywx::mvp::PermanentStat Stat);
+    bool SaveRun();
+    bool ResumeRun(int32 Hero);
+    bool HasSavedRun(int32 Hero) const;
+
     bool IsRunActive() const { return bActive; }
     bool IsWindowForeground() const { return bWindowForeground; }
     bool ConsumeFocusPauseRequest() { const bool Requested=bFocusPauseRequested; bFocusPauseRequested=false; return Requested; }
@@ -38,7 +47,7 @@ private:
     float ProfileElapsed=0;
     int32 ProfileWave=-1;
     dywx::mvp::RunPhase ProfilePhase=dywx::mvp::RunPhase::Title;
-    void SaveProfile();
+    bool SaveProfile();
     dywx::mvp::InputState Input;
     UPROPERTY() TObjectPtr<UCameraComponent> Camera;
     UPROPERTY() TArray<TObjectPtr<UStaticMesh>> OwnedMeshes;
@@ -50,6 +59,7 @@ private:
     TMap<FName,FBatch> Batches;
     TMap<uint64,FVector> PreviousEnemies, PreviousPickups;
     TMap<uint64,float> SwarmWalkPhases;
+    TMap<uint64,int32> PreviousPickupGrades;
     float HeroWalkPhase=0;
     FVector PreviousPlayer=FVector::ZeroVector;
     bool bHavePreviousPlayer=false;
@@ -64,6 +74,9 @@ private:
     int32 LastLevel=1;
     dywx::mvp::RunPhase LastPhase=dywx::mvp::RunPhase::Title;
     void BuildScene();
+    void RebuildArena();
+    void ActivateRun();
+    static FName ElementBatch(dywx::mvp::Element Element, const TCHAR* Suffix);
     void LoadGeometry();
     void SetupVFX();
     void RenderVFX(const dywx::mvp::Snapshot& Snapshot,bool& NewPalm,bool& NewThunder,uint64& MaxEffect);

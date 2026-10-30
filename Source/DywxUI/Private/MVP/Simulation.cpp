@@ -1,11 +1,16 @@
 #include "MVP/Simulation.h"
 #include "MVP/ContentCatalog.h"
+#include "MVP/SaveCodec.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <sstream>
 namespace dywx::mvp {
 namespace {
 constexpr float Pi = 3.14159265359f;
+constexpr std::array<float,8> EnemyHp{18,14,90,70,120,160,14000,80};
+constexpr std::array<float,8> EnemySpeed{3.2f,2.6f,2.8f,2,1.6f,1.2f,1.5f,6};
+constexpr std::array<float,8> EnemyDamage{6,25,30,14,0,0,35,0};
 float Len2(Vec2 a) { return a.x * a.x + a.y * a.y; }
 float Len(Vec2 a) { return std::sqrt(Len2(a)); }
 Vec2 Unit(Vec2 a) {
@@ -42,6 +47,11 @@ float Simulation::Random() {
 }
 void Simulation::Start(std::uint64_t seed, HeroId hero,
                        const RunConfig &config) {
+  fullGame_ = false;
+  opportunityEnemy_ = 0;
+  restSerial_ = 0;
+  terrainTimer_ = 0;
+  anomalyWarningShown_ = false;
   const auto gen = state_.generation + 1;
   state_ = Snapshot{};
   state_.generation = gen;
@@ -84,7 +94,272 @@ void Simulation::Start(std::uint64_t seed, HeroId hero,
   Sync();
   state_.player.hp = state_.progression.build.stats.maxHp;
 }
-void Simulation::Restart() { Start(seed_, hero_, config_); }
+bool Simulation::StartCampaign(const CampaignProfile &profile, GameMode mode, HeroId hero,
+    std::uint64_t seed, std::uint64_t runId, CaveId cave, unsigned riskMask,
+    const RunConfig &config, const CampaignConfig &campaignConfig) {
+  seed=seed?seed:1;
+  CampaignConfig cc=campaignConfig;cc.quickSixWaves=mode==GameMode::Quick && config.sixWaves;
+  Campaign next(cc);
+  if (!IsRealmUnlocked(profile, int(cave)) ||
+      !next.Start(profile, mode, int(hero), seed, runId, riskMask)) return false;
+  RunConfig c = config;
+  c.sixWaves = mode==GameMode::Quick && config.sixWaves;
+  c.formResonance = HasFeature(profile, Feature::FormResonance);
+  Start(seed, hero, c);
+  fullGame_ = true;
+  campaign_ = next;
+  campaignProfile_ = profile;
+  Stats baseline; ApplyPermanentBonuses(profile, baseline);
+  progression_.ConfigureFullGame(int(FeatureTier(profile)), baseline,
+      profile.unlocks[unsigned(LegacyUnlock::ExtraReroll)] ? 1 : 0);
+  progression_.SetContentUnlocks(profile.unlocks[unsigned(LegacyUnlock::SpellPool)], profile.unlocks[unsigned(LegacyUnlock::RelicPool)]);
+  arena_ = GenerateArena(seed, cave);
+  progression_.SetDropRiskWeight(GetTrialEffects(riskMask, campaignConfig).highRarityWeight);
+  progression_.SetRelicPool(RealmRelicPool(int(cave)));
+  AnomalyConfig ac;
+  const auto trial = GetTrialEffects(riskMask, campaignConfig);
+  ac.lightningDamage *= trial.hazard; ac.fissureDamage *= trial.hazard;
+  anomalies_.Reset(seed, arena_, HasFeature(profile, Feature::Anomalies), ac);
+  EconomyConfig ec;ec.rarityWeight=trial.highRarityWeight;
+  economy_.Reset(unsigned(seed), mode == GameMode::Quick,
+      HasFeature(profile, Feature::Economy), HasFeature(profile, Feature::Reforge), ec);
+  state_.waveCount = mode == GameMode::Quick ? (c.sixWaves?6:4) : mode == GameMode::Traditional ? 10 : 0;
+  state_.waveDuration = ScheduleWave(mode, 1, cc).seconds;
+  if (mode == GameMode::Quick) state_.waveDuration = config_.waveDurations[0];
+  Sync(); state_.player.hp = state_.progression.build.stats.maxHp;
+  return true;
+}
+void Simulation::Restart() {
+  if (fullGame_) {
+    // A new run needs a new durable id supplied by the caller, not a replayed settlement id.
+    return;
+  }
+  Start(seed_, hero_, config_);
+}
+Vec2 Simulation::Constrain(Vec2 p, float radius) const {
+  return fullGame_ ? arena_.Constrain(p, radius) : Clamp(p, radius);
+}
+Vec2 Simulation::Steer(Vec2 position, Vec2 direction, float distance, float radius) const {
+  if (!fullGame_) return Clamp(position + direction * distance, radius);
+  Vec2 next = position + direction * distance;
+  if (arena_.Walkable(next, radius)) return next;
+  // Deterministic wall sliding, testing both tangents against the same layout.
+  for (float angle : {.5f, -.5f, 1.f, -1.f, 1.57f, -1.57f}) {
+    Vec2 rotated{direction.x*std::cos(angle)-direction.y*std::sin(angle),
+                 direction.x*std::sin(angle)+direction.y*std::cos(angle)};
+    next = position + rotated * distance;
+    if (arena_.Walkable(next, radius)) return next;
+  }
+  return arena_.Constrain(position, radius);
+}
+void Simulation::ReceiveRelic(Relic relic) {
+  if (fullGame_) economy_.ReceiveRelic(progression_, std::move(relic));
+  else progression_.GrantRelic(std::move(relic));
+}
+std::string Simulation::DescribeEnemy(EnemyRole role) {
+  unsigned index=unsigned(role);if(index>=EnemyHp.size())return {};
+  static const char* rules[]={
+    "群行追击，近身每0.8秒攻击一次。",
+    "接近2.5格后预警0.8秒，自爆半径2.5格；雷象可提前引爆并伤及周围妖魔。",
+    "12格内预警1秒后沿直线冲锋，速度9格/秒、持续1.4秒，冷却4秒。",
+    "保持5至8格距离；预警0.6秒后发射灵火，速度7格/秒、冷却2秒。",
+    "每5秒蓄势0.6秒，为8格内最多3只同伴各施40点护盾；完整模式火象可破除。",
+    "每4秒蓄势0.6秒召3只群行妖魔，自身随从上限12只。",
+    "分两变；具体洞天机制、每次预警与数值见各洞主条目。",
+    "沿本洞天外围安全路线逃跑；击败必得灵品及以上法宝。"
+  };
+  std::ostringstream text;text<<"基础气血 "<<EnemyHp[index]<<"，身法 "<<EnemySpeed[index]<<"格/秒，基础伤害 "<<EnemyDamage[index]<<"。"<<rules[index]
+      <<" 数值再乘当前波数与劫数系数；大妖气血×8、伤害×1.5，并有1至2条异变。";
+  return text.str();
+}
+std::string Simulation::DescribeElementInteractions() {
+  return "雷击磷火：提前引爆，2.5格范围内对周围妖魔造成25点基础伤害。火击灵盾：完整模式直接破除护盾，不能破除灵甲。水击灼烧妖魔：本次伤害提高25%；水象术法触及地面火域时可熄灭火域。任一道象均可伤害所有妖魔，同元素不免疫。";
+}
+std::string Simulation::DescribeMutation(unsigned index) {
+  static const char* rules[]={
+    "狂暴：身法提高20%；冲锋冷却4→2.8秒，远程攻击冷却2→1.4秒。",
+    "灵甲：200点灵甲；灵甲存在时伤害先降低30%，再由灵甲吸收，耗尽后失效。",
+    "分裂：陨落时分出2只同职责异种，各有本体最大气血的40%；分身不继承异变。",
+    "环绕雷：3枚雷珠沿1.7格轨道环绕，接触0.65格内造成6伤害，共享0.8秒命中冷却。"
+  };
+  return index<4?rules[index]:"";
+}
+std::string Simulation::DescribeBossMechanics(CaveId cave) {
+  std::ostringstream text;
+  const auto r=BossRules();
+  if(cave==CaveId::ThunderMarsh)
+    return "流波夔君：一变每6秒三道引雷（预警1秒，35伤害），每5秒召20凡妖；二变每8秒火墙（预警1.5秒，每0.25秒5伤害），每10秒蓄力冲撞（预警1.2秒，45伤害），每8秒召4远程与6冲锋妖魔。";
+  if(cave==CaveId::EmberMountain) {
+    text<<"赤山离火君（初版数值）：一/二变每"<<r.flamePeriod[0]<<"/"<<r.flamePeriod[1]
+        <<"秒在面前铺三道火浪，预警"<<r.flameWarning<<"秒，半径"<<r.flameRadius
+        <<"，伤害"<<r.flameDamage[0]<<"/"<<r.flameDamage[1]<<"；二变每"<<r.ringPeriod
+        <<"秒铺八处环火。火域可被水象熄灭。每"<<r.flameSummon[0]<<"/"<<r.flameSummon[1]
+        <<"秒召2自爆妖魔/2远程与2冲锋妖魔。";
+  } else {
+    text<<"青岚蜃君（初版数值）：一/二变每"<<r.rootPeriod[0]<<"/"<<r.rootPeriod[1]
+        <<"秒布1/2处根缚区域，预警"<<r.rootWarning<<"秒，半径"<<r.rootRadius<<"，持续"
+        <<r.rootDuration<<"秒，每"<<r.rootTick<<"秒伤害"<<r.rootDamage[0]<<"/"<<r.rootDamage[1]
+        <<"；踏入后身法暂降"<<r.rootSlow*100<<"%，离开即恢复，遁术距离不变。每"
+        <<r.mistSummon[0]<<"/"<<r.mistSummon[1]<<"秒召2群行与1护持/1护持与1召唤妖魔。";
+  }
+  return text.str();
+}
+OpportunityDetails Simulation::DescribeOpportunity(unsigned index) const {
+  OpportunityDetails result;
+  if(!fullGame_ || index>=campaign_.GetState().offerCount)return result;
+  const auto &cave=CaveCatalog()[int(arena_.cave)];
+  const auto kind=campaign_.GetState().offers[index];
+  if(kind==OpportunityKind::Event) {
+    // No RNG is consumed by rendering or re-opening the choice panel.
+    std::uint64_t key=seed_ ^ (std::uint64_t(state_.wave)*0x9e3779b97f4a7c15ULL) ^ index;
+    key^=key>>30;key*=0xbf58476d1ce4e5b9ULL;key^=key>>27;
+    unsigned fragment=unsigned(key%3);
+    static const char* fragments[3][3]={
+      {"石上雷纹每逢潮落便依次亮起。残句曰：‘雷非无常，循脉而行。’你沿旧刻静观，悟得一缕周天。",
+       "旋龟绕过雷池，始终踏在相隔等距的旧石上。它回望一瞬，留下一枚温热的灵脉结晶。",
+       "池中玉片随雷声共振，池外却寂然无声。守池残铭曰：‘同声者应，同道者鸣。’"},
+      {"赤羽落处，灰烬排成细密同心纹。石缝旧句曰：‘离火聚则生焰，散则成暖。’",
+       "泉边一缕残念问：‘山火为何不越此线？’你循冷暖交界而行，见旧阵仍在缓缓吐纳。",
+       "匣面朱纹明灭如息，温热只沿刻线流转。残铭曰：‘守其脉，火自归途。’"},
+      {"古木年轮藏着反复出现的符号，月明时微亮。残篇曰：‘万木异形，生机同源。’",
+       "白鹿在浓雾中只循一线清风前行。旧碑记着：‘不逐幻影，但辨来路。’",
+       "雾里数座山峰同时倒影于露珠。远处传来残音：‘所见非尽虚，所知亦未全。’"}
+    };
+    result.title=std::string(cave.opportunities[fragment]);
+    result.description=fragments[int(arena_.cave)][fragment];
+    result.experience=campaign_.GetConfig().eventXp;
+    result.spiritStones=HasFeature(campaign_.GetState().tier,Feature::Economy)?campaign_.GetConfig().eventStones:0;
+    result.description+="\n所得修为 +"+std::to_string(result.experience);
+    if(result.spiritStones)result.description+="，灵石 +"+std::to_string(result.spiritStones);
+    result.description+="（初版数值）。";
+  } else if(kind==OpportunityKind::Elite) {
+    result.title=std::string(cave.enemies[1])+" · 大妖";
+    result.description="迎战此地异变大妖；击败本体与分裂余妖后，必得灵品及以上法宝。迎战前可先整理法宝。";
+  } else if(kind==OpportunityKind::Cave) {
+    result.title=std::string(cave.name)+" · 遗留洞府";
+    result.description="旧摊位循灵脉明灭。可祭炼仙品以上的未知灵纹；已开放坊市时可买卖整理，已开放重铸时可重铸普通灵纹。";
+  } else {
+    result.title=std::string(cave.name)+" · 封灵宝匣";
+    result.description="此机缘免费开启一次宝匣，亲手揭示所得法宝。仙品有保底，道品无保底；额外开匣仍须支付灵石。";
+  }
+  return result;
+}
+bool Simulation::ChooseOpportunity(unsigned index) {
+  if (!fullGame_ || state_.paused || state_.phase != RunPhase::Rest) return false;
+  const auto result = campaign_.ChooseOpportunity(index);
+  if (!result.accepted) return false;
+  progression_.AddXp(float(result.xp)); economy_.CreditStones(int(result.spiritStones));
+  if (result.openCave) economy_.EnterCave(progression_,
+      campaignProfile_.unlocks[unsigned(LegacyUnlock::FreeCaveRefresh)]);
+  if (result.openChest) economy_.OpenTreasure(progression_, false, true);
+  if (result.eliteEncounter) {
+    economy_.EndRest(progression_); progression_.EndRest();
+    state_.phase = RunPhase::Wave;
+    opportunityEnemy_ = Spawn(EnemyRole::Charger, Edge(), EnemyTier::Elite);
+  }
+  Sync(); return true;
+}
+bool Simulation::ChooseBossReward(std::size_t index) {
+  if (state_.paused || (state_.phase != RunPhase::Won && state_.phase != RunPhase::Rest)) return false;
+  bool ok = fullGame_ ? economy_.ChooseBossReward(progression_, index) : progression_.ChooseBossReward(index); Sync(); return ok;
+}
+bool Simulation::SettleCampaign(CampaignProfile &profile) {
+  return fullGame_ && campaign_.Settle(profile);
+}
+bool Simulation::FinalizeRestExperience() {
+  if(!fullGame_ || state_.phase!=RunPhase::Rest) return false;
+  bool ok=economy_.CommitRestExperience(progression_);Sync();return ok;
+}
+bool Simulation::PrepareCheckpoint(RunCheckpoint &out) const {
+  if(!fullGame_ || state_.phase!=RunPhase::Rest ||
+      campaign_.GetState().mode==GameMode::Quick || !state_.progression.bossRewards.empty() ||
+      economy_.HasTreasureToReveal() || economy_.PendingReforge()) return false;
+  Campaign next=campaign_;
+  if(!next.BeginNextWave())return false;
+  RunCheckpoint checkpoint;
+  checkpoint.progression=progression_;checkpoint.economy=economy_;
+  checkpoint.economy.EndRest(checkpoint.progression);checkpoint.progression.EndRest();
+  checkpoint.campaign=next.GetState();checkpoint.campaignConfig=campaign_.GetConfig();
+  checkpoint.runConfig=config_;checkpoint.seed=seed_;checkpoint.simulationRng=rng_;
+  checkpoint.nextEntityId=nextId_;checkpoint.restSerial=restSerial_;checkpoint.realm=int(arena_.cave);
+  checkpoint.player=state_.player;checkpoint.statistics=state_.statistics;
+  checkpoint.arena=arena_;checkpoint.anomalies=anomalies_;
+  checkpoint.spellCooldowns=spellCooldowns_;checkpoint.casts=casts_;
+  checkpoint.combat.procCooldowns=procCooldowns_;
+  checkpoint.combat.speedBuff=speedBuff_;checkpoint.combat.powerBuff=powerBuff_;
+  checkpoint.combat.shieldTime=shieldTime_;checkpoint.combat.bodyProcCooldown=bodyProcCooldown_;
+  checkpoint.combat.critCooldown=critCooldown_;checkpoint.combat.resetTimer=resetTimer_;
+  checkpoint.combat.terrainTimer=terrainTimer_;
+  checkpoint.combat.lowHpUsed=checkpoint.combat.lowHpActive=false;
+  if(!SaveCodec::ValidateCheckpoint(checkpoint))return false;
+  out=std::move(checkpoint);return true;
+}
+bool Simulation::RestoreCheckpoint(const RunCheckpoint &checkpoint, const CampaignProfile &profile) {
+  if(!SaveCodec::ValidateCheckpoint(checkpoint))return false;
+  const auto &run=checkpoint.campaign;
+  if(run.hero<0 || run.hero>=3 || run.runId<=profile.settledThrough[unsigned(run.hero)] ||
+      !IsHeroUnlocked(profile,run.hero) || !IsRealmUnlocked(profile,checkpoint.realm) ||
+      run.tier>FeatureTier(profile))return false;
+  Campaign restored(checkpoint.campaignConfig);
+  if(!restored.Restore(run))return false;
+  Start(checkpoint.seed,HeroId(run.hero),checkpoint.runConfig);
+  fullGame_=true;campaign_=restored;campaignProfile_=profile;
+  progression_=checkpoint.progression;economy_=checkpoint.economy;
+  seed_=checkpoint.seed;rng_=checkpoint.simulationRng;nextId_=checkpoint.nextEntityId;
+  restSerial_=checkpoint.restSerial;arena_=checkpoint.arena;anomalies_=checkpoint.anomalies;
+  state_.player=checkpoint.player;state_.statistics=checkpoint.statistics;
+  spellCooldowns_=checkpoint.spellCooldowns;casts_=checkpoint.casts;
+  procCooldowns_=checkpoint.combat.procCooldowns;
+  speedBuff_=checkpoint.combat.speedBuff;powerBuff_=checkpoint.combat.powerBuff;
+  shieldTime_=checkpoint.combat.shieldTime;bodyProcCooldown_=checkpoint.combat.bodyProcCooldown;
+  critCooldown_=checkpoint.combat.critCooldown;resetTimer_=checkpoint.combat.resetTimer;
+  terrainTimer_=checkpoint.combat.terrainTimer;
+  lowHpUsed_=checkpoint.combat.lowHpUsed;lowHpActive_=checkpoint.combat.lowHpActive;
+  state_.wave=run.wave;state_.waveCount=run.mode==GameMode::Traditional?10:0;
+  state_.waveDuration=ScheduleWave(run.mode,run.wave,checkpoint.campaignConfig).seconds;
+  state_.waveElapsed=0;state_.phase=RunPhase::Wave;
+  Sync();
+  if(run.phase==CampaignPhase::Boss)StartBoss();
+  return true;
+}
+bool Simulation::SealUpgrade(std::size_t index) {
+  if(!fullGame_ || state_.paused || (state_.phase!=RunPhase::Wave && state_.phase!=RunPhase::Boss && state_.phase!=RunPhase::Rest))return false;
+  bool ok=progression_.SealOffer(index);Sync();return ok;
+}
+bool Simulation::SkipUpgrade() {
+  if(!fullGame_ || state_.paused || (state_.phase!=RunPhase::Wave && state_.phase!=RunPhase::Boss && state_.phase!=RunPhase::Rest))return false;
+  bool ok=progression_.SkipUpgrade();if(ok)economy_.CreditStones(progression_.TakeSkipStones());Sync();return ok;
+}
+bool Simulation::BuyGood(std::uint64_t token) {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.Buy(progression_,token); Sync(); return ok;
+}
+bool Simulation::RefreshShop() {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.Refresh(progression_); Sync(); return ok;
+}
+bool Simulation::BeginReforge(EntityId id, std::size_t affix) {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.BeginReforge(progression_,id,affix); Sync(); return ok;
+}
+bool Simulation::ResolveReforge(bool keepNew) {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.ResolveReforge(progression_,keepNew); Sync(); return ok;
+}
+bool Simulation::OpenTreasure(bool paid) {
+  // Free encounter openings are issued only by ChooseOpportunity, never by UI boolean.
+  bool ok=fullGame_ && paid && !state_.paused && state_.phase==RunPhase::Rest && economy_.OpenTreasure(progression_,true); Sync(); return ok;
+}
+bool Simulation::RevealTreasure() {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.RevealTreasure(progression_).has_value(); Sync(); return ok;
+}
+bool Simulation::IdentifyRelic(EntityId id) {
+  bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.Identify(progression_,id); Sync(); return ok;
+}
+bool Simulation::Refine(const std::vector<EntityId> &ids, RefineReward reward) {
+  if (state_.paused || state_.phase!=RunPhase::Rest) return false;
+  bool ok=fullGame_ ? economy_.Refine(progression_,ids,reward) : reward==RefineReward::Experience && progression_.Refine(ids); Sync(); return ok;
+}
+bool Simulation::UndoRefine() {
+  if (state_.paused || state_.phase!=RunPhase::Rest) return false;
+  bool ok=fullGame_ ? economy_.UndoRefine(progression_) : progression_.UndoRefine(); Sync(); return ok;
+}
 void Simulation::Pause(bool p) {
   state_.paused = p;
   accumulator_ = 0;
@@ -115,8 +390,13 @@ bool Simulation::Reroll() {
   return ok;
 }
 bool Simulation::BeginNextWave() {
-  if (state_.phase != RunPhase::Rest)
+  if (state_.paused || state_.phase != RunPhase::Rest)
     return false;
+  if (fullGame_) {
+    if (!state_.progression.bossRewards.empty() || economy_.HasTreasureToReveal() ||
+        economy_.PendingReforge() || !campaign_.BeginNextWave()) return false;
+    economy_.EndRest(progression_);
+  }
   progression_.EndRest();
   Sync();
   lowHpUsed_ = lowHpActive_ = false;
@@ -125,6 +405,13 @@ bool Simulation::BeginNextWave() {
   spawnAccumulator_ = 0;
   state_.waveElapsed = 0;
   accumulator_ = 0;
+  if (fullGame_) {
+    if (campaign_.GetState().phase == CampaignPhase::Boss) { StartBoss(); return true; }
+    state_.wave = campaign_.GetState().wave;
+    state_.waveDuration = ScheduleWave(campaign_.GetState().mode, state_.wave, campaign_.GetConfig()).seconds;
+    if (campaign_.GetState().mode == GameMode::Quick) state_.waveDuration = config_.waveDurations[state_.wave-1];
+    state_.phase = RunPhase::Wave; beastRolled_ = false; return true;
+  }
   if (state_.wave >= state_.waveCount) {
     StartBoss();
     return true;
@@ -211,17 +498,22 @@ void Simulation::Tick(float dt, const InputState &input) {
       AddEffect(e);
     }
   }
+  float terrainMove=1;
+  if(fullGame_)for(const auto &effect:state_.effects)
+    if(effect.hostile && effect.element==Element::Wood && effect.form==Form::Array && effect.warning<=0 && effect.life>0 &&
+       Len2(p.position-effect.position)<=effect.radius*effect.radius)
+      terrainMove=1-BossRules().rootSlow;
   bool wasDash = p.dashRemaining > 0;
   if (wasDash) {
     float travel = std::min(dt, p.dashRemaining);
-    p.position = Clamp(p.position + p.facing * (4.f / .3f * travel));
+    p.position = Constrain(p.position + p.facing * (4.f / .3f * travel));
     Down(p.dashRemaining, dt);
     if (p.dashRemaining == 0 && progression_.HasMystery(2))
       Area(p.position, 2, 40, Element::Thunder, Form::None, false);
   } else
     p.position =
-        Clamp(p.position +
-              movement * (stats.moveSpeed * (speedBuff_ > 0 ? 1.15f : 1) * dt));
+        Constrain(p.position +
+              movement * (stats.moveSpeed * terrainMove * (speedBuff_ > 0 ? 1.15f : 1) * dt));
   p.hp = std::min(stats.maxHp, p.hp + stats.regen * dt);
   if (progression_.HasTrigger(7) && !lowHpUsed_ && p.hp < stats.maxHp * .3f) {
     lowHpActive_ = lowHpUsed_ = true;
@@ -235,7 +527,31 @@ void Simulation::Tick(float dt, const InputState &input) {
       spellCooldowns_.fill(0);
     }
   }
-  if (state_.phase == RunPhase::Wave) {
+  if (fullGame_) {
+    terrainTimer_ += dt;
+    if (terrainTimer_ >= 12 && !arena_.hazards.empty()) {
+      terrainTimer_ -= 12;
+      EffectState trap;trap.hostile=true;trap.warning=1.2f;trap.life=1.5f;
+      trap.position=arena_.hazards[std::min(arena_.hazards.size()-1,std::size_t(Random()*arena_.hazards.size()))];
+      trap.radius=2;trap.damage=12*GetTrialEffects(campaign_.GetState().riskMask, campaign_.GetConfig()).hazard;
+      trap.kind=arena_.cave==CaveId::EmberMountain ? EffectKind::Burn : arena_.cave==CaveId::ThunderMarsh ? EffectKind::Lightning : EffectKind::Explosion;
+      trap.element=arena_.cave==CaveId::EmberMountain ? Element::Fire : Element::None;
+      AddEffect(trap);
+    }
+    for (const auto &event : anomalies_.Step(dt, p.position, state_.progression.build.resonance.thunder > 0)) {
+      if (event.warning) {
+        EffectState fx; fx.position=event.position; fx.radius=event.radius;
+        fx.kind=EffectKind::Lightning; fx.warning=anomalies_.Config().warning; fx.life=.2f;fx.hostile=true;
+        anomalyWarningShown_=AddEffect(fx);
+      } else {
+        if (anomalyWarningShown_ && !event.absorbed && Len2(p.position-event.position) <= event.radius*event.radius) Hurt(event.damage);
+        if (event.anomaly == AnomalyId::Fissure)
+          Area(event.position,event.radius,event.damage,Element::None,Form::None,false);
+      }
+    }
+    if (state_.phase == RunPhase::Dead) return;
+  }
+  if (state_.phase == RunPhase::Wave && !opportunityEnemy_) {
     SpawnWave(dt);
   }
   UpdateEnemies(dt);
@@ -243,14 +559,17 @@ void Simulation::Tick(float dt, const InputState &input) {
     return;
   UpdateSpells(dt);
   UpdateProjectiles(dt);
+  if(state_.phase==RunPhase::Dead)return;
   UpdateEffects(dt);
+  if(state_.phase==RunPhase::Dead)return;
   ResolveDeaths();
   CollectPickups();
-  if (state_.phase == RunPhase::Wave &&
+  if (state_.phase == RunPhase::Wave && !opportunityEnemy_ &&
       state_.waveElapsed >= state_.waveDuration)
     EndWave();
 }
 Vec2 Simulation::Edge() {
+  if (fullGame_ && !arena_.edgeSpawns.empty()) return arena_.edgeSpawns[std::min(arena_.edgeSpawns.size()-1, std::size_t(Random()*arena_.edgeSpawns.size()))];
   float t = Random();
   if (Random() < .5f)
     return {Random() < .5f ? -47.f : 47.f, -26.f + t * 52};
@@ -302,6 +621,8 @@ EntityId Simulation::Spawn(EnemyRole role, Vec2 pos, EnemyTier tier,
                          : config_.sixWaves
                              ? capsB[std::clamp(state_.wave - 1, 0, 5)]
                              : capsA[std::clamp(state_.wave - 1, 0, 3)];
+  if (fullGame_ && state_.phase != RunPhase::Boss)
+    phaseCap = std::size_t(ScheduleWave(campaign_.GetState().mode, state_.wave, campaign_.GetConfig()).enemyCap * GetTrialEffects(campaign_.GetState().riskMask, campaign_.GetConfig()).population);
   std::size_t cap = ignorePhaseCap ? config_.maxEnemies
                                    : std::min(config_.maxEnemies, phaseCap);
   if (state_.enemies.size() >= cap) {
@@ -312,11 +633,8 @@ EntityId Simulation::Spawn(EnemyRole role, Vec2 pos, EnemyTier tier,
   e.id = Id();
   e.role = role;
   e.tier = tier;
-  e.position = Clamp(pos);
+  e.position = Constrain(pos);
   e.owner = owner;
-  const float hp[] = {18, 14, 90, 70, 120, 160, 14000, 80};
-  const float speeds[] = {3.2f, 2.6f, 2.8f, 2, 1.6f, 1.2f, 1.5f, 6};
-  const float damage[] = {6, 25, 30, 14, 0, 0, 35, 0};
   int i = int(role);
   int w = std::clamp(state_.wave - 1, 0, 5);
   const float hp4[] = {1, 1.5f, 2.2f, 3.2f};
@@ -324,9 +642,16 @@ EntityId Simulation::Spawn(EnemyRole role, Vec2 pos, EnemyTier tier,
   float h = config_.sixWaves ? hp6[w] : hp4[std::min(w, 3)];
   const float damage4[] = {1, 1.15f, 1.3f, 1.5f};
   float d = config_.sixWaves ? 1 + .5f * float(w) / 5 : damage4[std::min(w, 3)];
-  e.hp = e.maxHp = hp[i] * h;
-  e.speed = speeds[i];
-  e.damage = damage[i] * d;
+  if (fullGame_) {
+    auto schedule = ScheduleWave(campaign_.GetState().mode, state_.wave, campaign_.GetConfig());
+    h = schedule.healthScale; d = schedule.damageScale;
+  }
+  e.hp = e.maxHp = EnemyHp[i] * h;
+  e.speed = EnemySpeed[i];
+  e.damage = EnemyDamage[i] * d;
+  if (fullGame_) {
+    e.speed *= GetTrialEffects(campaign_.GetState().riskMask, campaign_.GetConfig()).speed;
+  }
   e.cooldown = (role == EnemyRole::Swarm ? 0 : 1);
   if (tier == EnemyTier::Elite) {
     e.hp *= 8;
@@ -342,10 +667,11 @@ EntityId Simulation::Spawn(EnemyRole role, Vec2 pos, EnemyTier tier,
       e.armor = 200;
   }
   if (role == EnemyRole::Boss) {
-    e.hp = e.maxHp = config_.bossHp1;
+    e.hp = e.maxHp = config_.bossHp1 * (fullGame_ && campaign_.GetState().mode==GameMode::Endless ? ScheduleWave(GameMode::Endless,state_.wave,campaign_.GetConfig()).healthScale : 1);
     e.bossPhase = 1;
     e.radius = 1.8f;
   }
+  e.position=Constrain(e.position,e.radius);
   state_.enemies.push_back(e);
   progression_.RecordEncounter(e.role, e.mutations);
   return e.id;
@@ -365,10 +691,19 @@ void Simulation::SpawnWave(float dt) {
   if (!config_.spawning || state_.statistics.elapsed < config_.spawnGrace)
     return;
   int effective = config_.sixWaves ? std::min(3, (state_.wave - 1) * 4 / 6)
-                                   : state_.wave - 1;
+                                   : std::min(3, state_.wave - 1);
   int caps4[] = {40, 70, 100, 130};
   int caps6[] = {30, 50, 70, 90, 110, 130};
-  int cap = config_.sixWaves ? caps6[state_.wave - 1] : caps4[effective];
+  int cap = config_.sixWaves ? caps6[std::min(5,state_.wave - 1)] : caps4[effective];
+  WaveSchedule schedule;
+  AnomalyModifiers modifiers;
+  TrialEffects trials;
+  if (fullGame_) {
+    schedule = ScheduleWave(campaign_.GetState().mode, state_.wave, campaign_.GetConfig());
+    modifiers = anomalies_.Modifiers(state_.player.position);
+    trials = GetTrialEffects(campaign_.GetState().riskMask, campaign_.GetConfig());
+    cap = std::min(int(config_.maxEnemies), int(schedule.enemyCap * trials.population));
+  }
   float f = state_.waveElapsed / state_.waveDuration;
   // Per-role budgets are distributed over six opening segments, not weighted
   // away.
@@ -385,11 +720,14 @@ void Simulation::SpawnWave(float dt) {
     float progress = std::clamp((state_.waveElapsed - begin) /
                                     std::max(.1f, state_.waveDuration - begin),
                                 0.f, 1.f);
-    int desired = int(budgets[effective][role] * progress);
+    float budget = float(fullGame_ ? schedule.roleCounts[role] : budgets[effective][role]);
+    if (fullGame_) budget *= trials.population * modifiers.spawn * CaveCatalog()[int(arena_.cave)].roleWeights[role == 1 ? 3 : role == 2 ? 1 : role == 3 ? 2 : role] *
+        (role == int(EnemyRole::Charger) ? modifiers.chargers : role == int(EnemyRole::Ranged) ? modifiers.ranged : 1);
+    int desired = int(budget * progress);
     while (waveSpawned_[role] < desired && int(state_.enemies.size()) < cap &&
            remaining-- > 0) {
-      Spawn(EnemyRole(role), Edge(),
-            role >= 2 ? EnemyTier::Variant : EnemyTier::Normal);
+      if(!Spawn(EnemyRole(role), Edge(),
+            role >= 2 ? EnemyTier::Variant : EnemyTier::Normal)) break;
       ++waveSpawned_[role];
     }
   }
@@ -398,17 +736,18 @@ void Simulation::SpawnWave(float dt) {
                                     : f > .5f ? 1
                                               : 0)
                                  : 0;
+  if (fullGame_) desired = int(schedule.eliteCount * trials.elite * f);
   while (eliteSpawned_ < desired && int(state_.enemies.size()) < cap) {
     Spawn(eliteSpawned_ == 1 ? EnemyRole::Ranged : EnemyRole::Charger, Edge(),
           EnemyTier::Elite);
     ++eliteSpawned_;
   }
-  if (!beastRolled_ && effective == 1 && f > .6f) {
+  if (!beastRolled_ && (fullGame_ || effective == 1) && f > .6f) {
     beastRolled_ = true;
     float luck =
         40 * (1 - std::exp(-std::max(0.f, state_.progression.build.stats.luck) /
                            30));
-    if (Random() < .4f * (1 + luck * .015f))
+    if (Random() < (fullGame_ ? .12f : .4f) * (1 + luck * .015f) * modifiers.beasts)
       Spawn(EnemyRole::SpiritBeast, Edge(), EnemyTier::Variant);
   }
 }
@@ -470,12 +809,15 @@ void Simulation::Hurt(float d) {
       Area(p.position, 3, 40, Element::Fire, Form::Body, false);
       break;
     }
-  if (p.hp <= 0)
+  if (p.hp <= 0) {
     state_.phase = RunPhase::Dead;
+    if (fullGame_) { campaign_.Die(); economy_.EndRun(); }
+  }
 }
 float Simulation::ScaleDamage(float damage, Element element, Form form) const {
   const auto &b = state_.progression.build;
   const auto &s = b.stats;
+  if (fullGame_) { auto m=anomalies_.Modifiers(state_.player.position); damage *= m.playerPower * (element==Element::Thunder ? m.thunderPower : 1); }
   damage *= (s.power + (powerBuff_ > 0 ? .15f : 0));
   if (element != Element::None)
     damage *= 1 + s.elementBonus[int(element)];
@@ -492,6 +834,14 @@ void Simulation::Hit(EnemyState &e, float damage, Element element, Form form,
   if (e.hp <= 0 || damageDepth_ >= 3)
     return;
   ++damageDepth_;
+  if (element == Element::Water && e.burnRemaining > 0) damage *= 1.25f;
+  if (primary && currentSource_ != SpellId::Count) {
+    int rank=1;for(auto spell:state_.progression.build.spells)if(spell.id==currentSource_)rank=spell.rank;
+    auto source=GetSpellConfig(currentSource_,rank);
+    if(source.healOnHit>0)state_.player.hp=std::min(state_.progression.build.stats.maxHp,state_.player.hp+source.healOnHit);
+    if(source.slowFraction>0){e.slowRemaining=std::max(e.slowRemaining,source.slowDuration);e.slowFraction=std::max(e.slowFraction,source.slowFraction);}
+    stun=std::max(stun,source.stun);
+  }
   const auto &b = state_.progression.build;
   const auto &s = b.stats;
   bool crit = false;
@@ -524,6 +874,7 @@ void Simulation::Hit(EnemyState &e, float damage, Element element, Form form,
     e.armor -= a;
     damage -= a;
   }
+  if(fullGame_ && element==Element::Fire)e.shield=0;
   if (e.shield > 0) {
     float factor = element == Element::Fire ? 2.f : 1.f;
     float a = std::min(e.shield, damage * factor);
@@ -646,6 +997,9 @@ void Simulation::UpdateEnemies(float dt) {
     if (e.stun > 0)
       continue;
     Down(e.cooldown, dt);
+    Down(e.slowRemaining, dt);
+    if(e.slowRemaining<=0)e.slowFraction=0;
+    const float attackDamage=e.damage*(fullGame_ && (e.role==EnemyRole::Swarm || e.role==EnemyRole::Exploder) ? anomalies_.Modifiers(state_.player.position).nightEnemyPower : 1.f);
     Vec2 delta = state_.player.position - e.position;
     float distance = Len(delta);
     Vec2 toward = Unit(delta);
@@ -660,9 +1014,9 @@ void Simulation::UpdateEnemies(float dt) {
       }
     }
     if (e.role == EnemyRole::Boss) {
+      if(fullGame_ && arena_.cave!=CaveId::ThunderMarsh) { UpdateCaveBoss(e,dt);continue; }
       if (e.windup <= 0 && e.chargeRemaining <= 0)
-        e.position = Clamp(e.position + toward * (e.speed * dt) *
-                                            (distance > 5 ? 1.f : 0.f));
+        e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt * (distance > 5 ? 1.f : 0.f), e.radius);
       bossTimer_ += dt;
       bossSummon_ += dt;
       bossShield_ += dt;
@@ -742,7 +1096,7 @@ void Simulation::UpdateEnemies(float dt) {
       if (e.windup == 0) {
         if (e.role == EnemyRole::Exploder) {
           if (distance < 2.5f + .4f)
-            Hurt(e.damage);
+            Hurt(attackDamage);
           e.hp = 0;
           e.burnRemaining = 0;
         } else if (e.role == EnemyRole::Charger || e.role == EnemyRole::Boss)
@@ -752,7 +1106,7 @@ void Simulation::UpdateEnemies(float dt) {
           p.owner = e.id;
           p.position = e.position;
           p.velocity = Unit(e.target - e.position) * 7;
-          p.damage = e.damage;
+          p.damage = attackDamage;
           p.hostile = true;
           p.life = Len(e.target - e.position) / 7;
           p.radius = .35f;
@@ -778,11 +1132,11 @@ void Simulation::UpdateEnemies(float dt) {
     }
     if (e.chargeRemaining > 0) {
       Vec2 old = e.position;
-      e.position = Clamp(e.position + e.direction * (9 * dt));
+      e.position = Steer(e.position, e.direction, 9 * dt, e.radius);
       Down(e.chargeRemaining, dt);
       if (SegmentDistance(state_.player.position, old, e.position) <
           e.radius + .4f) {
-        Hurt(e.role == EnemyRole::Boss ? 45 : e.damage);
+        Hurt(e.role == EnemyRole::Boss ? 45 : attackDamage);
         e.chargeRemaining = 0;
       }
       continue;
@@ -790,18 +1144,30 @@ void Simulation::UpdateEnemies(float dt) {
     if (e.role == EnemyRole::Boss)
       continue;
     if (e.role == EnemyRole::SpiritBeast) {
-      e.position = Clamp(e.position - toward * e.speed * dt);
+      if (fullGame_ && !arena_.beastRoute.empty()) {
+        if (Len2(e.target) < .01f || Len2(e.target-e.position)<1) {
+          std::size_t closest=0; float best=1e9f;
+          for(std::size_t k=0;k<arena_.beastRoute.size();++k) {
+            float d=Len2(arena_.beastRoute[k]-e.position);
+            if(d<best){best=d;closest=k;}
+          }
+          e.target=arena_.beastRoute[(closest+1)%arena_.beastRoute.size()];
+        }
+        e.position=Steer(e.position,Unit(e.target-e.position),e.speed*(1-e.slowFraction)*dt,e.radius);
+        continue;
+      }
+      e.position = Steer(e.position, toward * -1, e.speed * (1-e.slowFraction) * dt, e.radius);
       continue;
     }
     if (e.role == EnemyRole::Swarm) {
-      e.position = Clamp(e.position + toward * e.speed * dt);
+      e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (distance < e.radius + .4f && e.cooldown <= 0) {
-        Hurt(e.damage);
+        Hurt(attackDamage);
         e.cooldown = .8f;
       }
     }
     if (e.role == EnemyRole::Exploder) {
-      e.position = Clamp(e.position + toward * e.speed * dt);
+      e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (distance < 2.5f) {
         e.windup = .8f;
         EffectState fx;
@@ -819,7 +1185,7 @@ void Simulation::UpdateEnemies(float dt) {
       }
     }
     if (e.role == EnemyRole::Charger) {
-      e.position = Clamp(e.position + toward * e.speed * dt);
+      e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (distance < 12 && e.cooldown <= 0) {
         e.windup = 1;
         e.direction = toward;
@@ -841,9 +1207,9 @@ void Simulation::UpdateEnemies(float dt) {
     }
     if (e.role == EnemyRole::Ranged) {
       if (distance > 8)
-        e.position = Clamp(e.position + toward * e.speed * dt);
+        e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       else if (distance < 5)
-        e.position = Clamp(e.position - toward * e.speed * dt);
+        e.position = Steer(e.position, toward * -1, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (distance <= 9 && e.cooldown <= 0) {
         e.windup = .6f;
         e.target = state_.player.position;
@@ -863,7 +1229,7 @@ void Simulation::UpdateEnemies(float dt) {
     }
     if (e.role == EnemyRole::Support || e.role == EnemyRole::Summoner) {
       if (distance > 7)
-        e.position = Clamp(e.position + toward * e.speed * dt);
+        e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (e.cooldown <= 0) {
         e.windup = .6f;
         e.cooldown = e.role == EnemyRole::Support ? 5 : 4;
@@ -931,6 +1297,54 @@ void Simulation::Cast(SpellState spell) {
       fx.radius *= .8f;
     AddEffect(fx);
   };
+  if (c.behavior != SpellBehavior::Legacy) {
+    if (c.shieldOnCast > 0) { state_.player.shield += c.shieldOnCast; shieldTime_ = std::max(shieldTime_, c.duration > 0 ? c.duration : 3.f); }
+    if (c.behavior == SpellBehavior::Cone) {
+      for(auto &enemy:state_.enemies) {
+        Vec2 d=enemy.position-at; float length=Len(d);
+        float dot=length>0 ? (d.x*state_.player.facing.x+d.y*state_.player.facing.y)/length : 1;
+        if(length<=radius+enemy.radius && dot>=std::cos(c.coneDegrees*.5f*Pi/180))
+          Hit(enemy,c.damage,c.element,c.form,true,c.burnDps,c.burnDuration,c.stun);
+      }
+      EffectState fx;fx.kind=EffectKind::Slash;fx.position=at;fx.end=at+state_.player.facing*radius;
+      fx.radius=radius;fx.life=.2f;fx.source=spell.id;fx.element=c.element;fx.form=c.form;AddEffect(fx);
+    } else if (c.behavior == SpellBehavior::Field) {
+      field(c.followPlayer ? at : DenseTarget(radius), radius,c.damage,c.warning,
+          std::max(.1f,c.duration)*(config_.formResonance && b.resonance.array>=2 ? 1.25f : 1.f),c.duration<=0,std::max(.1f,c.interval));
+    } else if (c.behavior == SpellBehavior::Companion) {
+      // Count is companion count; radius in the catalog is its targeting range.
+      for(int k=0;k<c.count;++k) {
+        EffectState fx;fx.kind=EffectKind::Circle;fx.position=at;fx.radius=.6f;
+        fx.life=std::max(.1f,c.duration);fx.interval=std::max(.1f,c.interval);fx.damage=c.damage;
+        fx.oneShot=false;fx.followPlayer=true;fx.source=spell.id;fx.element=c.element;fx.form=c.form;
+        fx.burnDps=c.burnDps;fx.burnDuration=c.burnDuration;fx.stun=c.stun;AddEffect(fx);
+      }
+    } else if (c.behavior == SpellBehavior::Talisman) {
+      EnemyState *fastest=nullptr;
+      for(auto &enemy:state_.enemies)if(enemy.hp>0 && Len2(enemy.position-at)<=14*14 &&
+          (!fastest || enemy.speed>fastest->speed))fastest=&enemy;
+      if(!fastest){spellCooldowns_[Index(spell.id)]=.15f;--casts_[Index(spell.id)];return;}
+      for(int k=0;k<c.count;++k)
+        field(fastest->position,radius,c.damage,c.warning+.12f*k,.15f,true,.5f);
+    } else {
+      EnemyState *target=nullptr;
+      if(c.behavior==SpellBehavior::Talisman) {
+        for(auto &enemy:state_.enemies) if(enemy.hp>0 && Len2(enemy.position-at)<=radius*radius &&
+            (!target || enemy.speed>target->speed)) target=&enemy;
+      } else target=Target(true,radius);
+      if(!target){spellCooldowns_[Index(spell.id)]=.15f;--casts_[Index(spell.id)];return;}
+      int extra=progression_.HasMystery(3) && c.form==Form::Sword && casts_[Index(spell.id)]%5==0 ? 2 : 0;
+      for(int k=0;k<c.count+extra;++k) {
+        ProjectileState p;p.position=at;p.source=spell.id;p.damage=c.damage*(k>=c.count?.6f:1.f);p.target=target->id;
+        p.element=c.element;p.form=c.form;p.homing=true;p.pierce=c.pierce+(config_.formResonance&&c.form==Form::Sword&&b.resonance.sword>=2?1:0);p.returning=c.returning;
+        p.chains=c.chains;p.chainScale=c.chainScale;p.burnDps=c.burnDps;p.burnDuration=c.burnDuration;
+        float spread=(k-(c.count-1)*.5f)*.12f; Vec2 d=Unit(target->position-at);
+        p.velocity={14*(d.x*std::cos(spread)-d.y*std::sin(spread)),14*(d.x*std::sin(spread)+d.y*std::cos(spread))};
+        p.speed=14;p.life=radius/14;AddProjectile(p);
+      }
+    }
+    return;
+  }
   if (spell.id == SpellId::FlamePalm || spell.id == SpellId::ThunderFist) {
     EntityId first = 0;
     for (auto &e : state_.enemies) {
@@ -1115,6 +1529,10 @@ void Simulation::UpdateProjectiles(float dt) {
     if (p.life <= 0)
       continue;
     currentSource_ = p.source;
+    if(!p.hostile && p.element==Element::Water) {
+      for(auto &fire:state_.effects) if(fire.hostile && fire.kind==EffectKind::Burn &&
+          SegmentDistance(fire.position,p.previous,p.position)<=fire.radius+p.radius) fire.life=0;
+    }
     p.previous = p.position;
     if (p.orbitRemaining > 0) {
       Down(p.orbitRemaining, dt);
@@ -1209,9 +1627,19 @@ void Simulation::UpdateEffects(float dt) {
   const std::size_t n = state_.effects.size();
   for (std::size_t i = 0; i < n; ++i) {
     auto &e = state_.effects[i];
+    if(e.life<=0)continue;
     currentSource_ = e.source;
-    if (e.followPlayer)
+    if (e.followPlayer) {
       e.position = state_.player.position;
+      if (e.form == Form::Beast) {
+        float angle=state_.statistics.elapsed*1.7f + float(e.id);
+        e.position=Constrain(e.position+Vec2{std::cos(angle),std::sin(angle)}*2.2f,.2f);
+      }
+    }
+    if (!e.hostile && e.element == Element::Water && e.warning<=0) {
+      for(auto &fire:state_.effects) if(fire.hostile && fire.kind==EffectKind::Burn &&
+          Len2(fire.position-e.position)<=(e.radius+fire.radius)*(e.radius+fire.radius)) fire.life=0;
+    }
     if (e.owner && e.hostile) {
       auto *owner = Find(e.owner);
       if (!owner || owner->hp <= 0) {
@@ -1230,6 +1658,24 @@ void Simulation::UpdateEffects(float dt) {
     if (e.damage <= 0 || e.tick > 0)
       continue;
     e.tick = std::max(.05f, e.interval);
+    if (!e.hostile && e.form==Form::Beast) {
+      int rank=1;for(auto spell:state_.progression.build.spells)if(spell.id==e.source)rank=spell.rank;
+      const auto spec=GetSpellConfig(e.source,rank);
+      EnemyState *target=nullptr;float score=1e9f;
+      for(auto &enemy:state_.enemies) {
+        float distance=Len2(enemy.position-e.position);
+        float candidate=distance*(enemy.role==EnemyRole::Ranged||enemy.role==EnemyRole::Exploder?.4f:1.f);
+        if(enemy.hp>0 && distance<=spec.radius*spec.radius && candidate<score){target=&enemy;score=candidate;}
+      }
+      if(target) {
+        ProjectileState shot;shot.position=e.position;shot.previous=e.position;shot.target=target->id;
+        shot.source=e.source;shot.form=e.form;shot.element=e.element;shot.damage=e.damage;
+        shot.homing=true;shot.velocity=Unit(target->position-e.position)*14;shot.speed=14;
+        shot.life=std::max(1.f,spec.radius/14+.5f);shot.chains=spec.chains;shot.chainScale=spec.chainScale;
+        shot.burnDps=e.burnDps;shot.burnDuration=e.burnDuration;AddProjectile(shot);
+      }
+      continue;
+    }
     if (e.hostile) {
       bool inside = false;
       if (e.kind == EffectKind::FireWall) {
@@ -1282,6 +1728,9 @@ void Simulation::ResolveDeaths() {
         continue;
       }
       ++state_.statistics.kills;
+      if (fullGame_) {
+        campaign_.RecordKills(1);
+      }
       if (progression_.HasTrigger(1))
         speedBuff_ = 2;
       if (progression_.HasTrigger(4) && state_.statistics.kills % 25 == 0)
@@ -1292,7 +1741,12 @@ void Simulation::ResolveDeaths() {
       PickupState pickup;
       pickup.id = Id();
       pickup.position = e.position;
-      pickup.xp = e.tier == EnemyTier::Elite ? 25 : xp[int(e.role)];
+      if(fullGame_ && HasFeature(campaign_.GetState().tier,Feature::Economy)) {
+        float stones=EconomyConfig{}.killStones[int(e.tier)]*anomalies_.Modifiers(state_.player.position).currency;
+        pickup.spiritStones=int(stones);
+        if(Random()<stones-pickup.spiritStones)++pickup.spiritStones;
+      }
+      pickup.xp = (e.tier == EnemyTier::Elite ? 25 : xp[int(e.role)]) * (fullGame_ ? anomalies_.Modifiers(state_.player.position).xp : 1);
       auto relic =
           progression_.OnKill(e.tier, e.role == EnemyRole::SpiritBeast);
       if (relic) {
@@ -1303,8 +1757,9 @@ void Simulation::ResolveDeaths() {
         state_.pickups.push_back(pickup);
       else {
         progression_.AddXp(pickup.xp);
+        if(fullGame_)economy_.CreditStones(pickup.spiritStones);
         if (pickup.hasRelic)
-          progression_.GrantRelic(pickup.relic);
+          ReceiveRelic(pickup.relic);
         ++state_.statistics.droppedEvents;
       }
       if (e.burnRemaining > 0) {
@@ -1324,15 +1779,27 @@ void Simulation::ResolveDeaths() {
         }
     }
   }
+  if (fullGame_ && state_.phase != RunPhase::Dead && opportunityEnemy_ && state_.enemies.empty()) {
+    opportunityEnemy_ = 0; campaign_.CompleteOpportunity();
+    state_.phase = RunPhase::Rest; CollectPickups(true); progression_.BeginRest();
+    economy_.BeginRest(progression_, ++restSerial_, false);
+    state_.effects.clear(); state_.projectiles.clear(); state_.enemies.clear();
+  }
   if (bossDefeated) {
-    state_.phase = RunPhase::Won;
+    if (fullGame_) campaign_.CompleteBoss();
+    state_.phase = fullGame_ && campaign_.GetState().mode == GameMode::Endless ? RunPhase::Rest : RunPhase::Won;
     state_.bossPhase = 2;
     state_.projectiles.clear();
     state_.effects.clear();
     state_.enemies.clear();
     CollectPickups(true);
     progression_.BeginRest();
-    progression_.GenerateBossRewards();
+    if(fullGame_) progression_.GenerateBossRewards(std::uint64_t(campaign_.GetState().bosses));
+    else progression_.GenerateBossRewards();
+    if (fullGame_) {
+      if (state_.phase == RunPhase::Won) economy_.EndRun();
+      economy_.BeginRest(progression_, ++restSerial_, false);
+    }
   }
   Sync();
 }
@@ -1341,8 +1808,9 @@ void Simulation::CollectPickups(bool all) {
   for (auto &p : state_.pickups)
     if (all || Len2(p.position - state_.player.position) <= radius * radius) {
       progression_.AddXp(p.xp);
+      if(fullGame_)economy_.CreditStones(p.spiritStones);
       if (p.hasRelic)
-        progression_.GrantRelic(p.relic);
+        ReceiveRelic(p.relic);
       p.id = 0;
     }
   state_.pickups.erase(std::remove_if(state_.pickups.begin(),
@@ -1352,14 +1820,59 @@ void Simulation::CollectPickups(bool all) {
   Sync();
 }
 void Simulation::EndWave() {
+  anomalyWarningShown_=false;
   CollectPickups(true);
   state_.enemies.clear();
   state_.projectiles.clear();
   state_.effects.clear();
   state_.phase = RunPhase::Rest;
+  if (fullGame_) campaign_.CompleteWave();
   progression_.OnWaveEnded();
   progression_.BeginRest();
+  if (fullGame_) economy_.BeginRest(progression_, ++restSerial_, false);
   Sync();
+}
+void Simulation::UpdateCaveBoss(EnemyState &boss, float dt) {
+  const auto r=BossRules();const int phase=std::clamp(boss.bossPhase-1,0,1);
+  Vec2 direction=Unit(state_.player.position-boss.position);
+  if(Len2(state_.player.position-boss.position)>36)
+    boss.position=Steer(boss.position,direction,boss.speed*(1-boss.slowFraction)*dt,boss.radius);
+  bossTimer_+=dt;bossSummon_+=dt;wallTimer_+=dt;
+  auto hazard=[&](Vec2 point, bool roots) {
+    EffectState effect;effect.owner=boss.id;effect.hostile=true;
+    effect.kind=roots?EffectKind::Circle:EffectKind::Burn;
+    effect.element=roots?Element::Wood:Element::Fire;effect.form=roots?Form::Array:Form::None;
+    effect.position=Constrain(point,.1f);effect.radius=roots?r.rootRadius:r.flameRadius;
+    effect.warning=roots?r.rootWarning:r.flameWarning;
+    effect.life=roots?r.rootDuration:.3f;effect.interval=roots?r.rootTick:1;
+    effect.damage=roots?r.rootDamage[phase]:r.flameDamage[phase];effect.oneShot=!roots;
+    // The effect itself owns both warning and damage; a full cap drops both safely.
+    AddEffect(effect);
+  };
+  if(arena_.cave==CaveId::EmberMountain) {
+    if(bossTimer_>=r.flamePeriod[phase]) {
+      bossTimer_-=r.flamePeriod[phase];Vec2 side{-direction.y,direction.x};
+      for(int k=-1;k<=1;++k)hazard(boss.position+direction*5+side*(float(k)*3.5f),false);
+    }
+    if(phase==1 && wallTimer_>=r.ringPeriod) {
+      wallTimer_-=r.ringPeriod;
+      for(int k=0;k<8;++k){float angle=k*Pi/4;hazard(boss.position+Vec2{std::cos(angle),std::sin(angle)}*r.ringRadius,false);}
+    }
+    if(bossSummon_>=r.flameSummon[phase]) {
+      bossSummon_-=r.flameSummon[phase];
+      for(int k=0;k<(phase?4:2);++k)Spawn(phase?(k<2?EnemyRole::Ranged:EnemyRole::Charger):EnemyRole::Exploder,Edge(),EnemyTier::Variant);
+    }
+  } else {
+    if(bossTimer_>=r.rootPeriod[phase]) {
+      bossTimer_-=r.rootPeriod[phase];hazard(state_.player.position,true);
+      if(phase)hazard(state_.player.position+Vec2{-direction.y,direction.x}*4,true);
+    }
+    if(bossSummon_>=r.mistSummon[phase]) {
+      bossSummon_-=r.mistSummon[phase];
+      if(phase){Spawn(EnemyRole::Support,Edge(),EnemyTier::Variant);Spawn(EnemyRole::Summoner,Edge(),EnemyTier::Variant);}
+      else {Spawn(EnemyRole::Support,Edge(),EnemyTier::Variant);for(int k=0;k<2;++k)Spawn(EnemyRole::Swarm,Edge(),EnemyTier::Normal);}
+    }
+  }
 }
 void Simulation::StartBoss() {
   state_.phase = RunPhase::Boss;
@@ -1367,11 +1880,15 @@ void Simulation::StartBoss() {
   state_.waveElapsed = 0;
   bossTimer_ = bossSummon_ = bossShield_ = wallTimer_ = chargeTimer_ = 0;
   Spawn(EnemyRole::Boss, {0, -12}, EnemyTier::Boss);
-  for (int k = 0; k < 2; ++k)
-    Spawn(EnemyRole::Support, {float(k * 12 - 6), -16}, EnemyTier::Variant);
+  for (int k = 0; k < 2; ++k) {
+    EnemyRole role=EnemyRole::Support;
+    if(fullGame_ && arena_.cave==CaveId::EmberMountain)role=EnemyRole::Exploder;
+    if(fullGame_ && arena_.cave==CaveId::MistForest && k==1)role=EnemyRole::Summoner;
+    Spawn(role,{float(k*12-6),-16},EnemyTier::Variant);
+  }
 }
 void Simulation::BossPhaseTwo(EnemyState &e) {
-  e.hp = e.maxHp = config_.bossHp2;
+  e.hp = e.maxHp = config_.bossHp2 * (fullGame_ && campaign_.GetState().mode==GameMode::Endless ? ScheduleWave(GameMode::Endless,state_.wave,campaign_.GetConfig()).healthScale : 1);
   e.bossPhase = 2;
   e.windup = e.chargeRemaining = 0;
   state_.bossPhase = 2;
@@ -1385,6 +1902,14 @@ void Simulation::BossPhaseTwo(EnemyState &e) {
   fx.warning = 1.2f;
   fx.life = .4f;
   AddEffect(fx);
+  if(fullGame_ && arena_.cave!=CaveId::ThunderMarsh) {
+    for(int k=0;k<6;++k) {
+      EnemyRole role=arena_.cave==CaveId::EmberMountain ? (k<4?EnemyRole::Exploder:EnemyRole::Ranged) :
+          (k==0?EnemyRole::Support:k==1?EnemyRole::Summoner:EnemyRole::Swarm);
+      Spawn(role,Edge(),EnemyTier::Variant);
+    }
+    return;
+  }
   for (int k = 0; k < 10 && state_.enemies.size() + 1 <
                                 std::min<std::size_t>(80, config_.maxEnemies);
        ++k)

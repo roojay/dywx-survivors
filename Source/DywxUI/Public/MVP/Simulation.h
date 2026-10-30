@@ -1,11 +1,61 @@
 #pragma once
 #include "MVP/Progression.h"
 #include "MVP/Types.h"
+#include "MVP/Campaign.h"
+#include "MVP/Economy.h"
+#include "MVP/Arena.h"
 namespace dywx::mvp {
+struct RunCheckpoint;
+// Provisional non-prototype cave boss tuning; authoritative for combat and UI text.
+struct CaveBossRules {
+  std::array<float,2> flamePeriod{4,3}, flameDamage{18,26}, flameSummon{12,9};
+  float flameWarning=1, flameRadius=2.2f, ringPeriod=7, ringRadius=6;
+  std::array<float,2> rootPeriod{5.5f,4}, rootDamage{12,18}, mistSummon{11,8};
+  float rootWarning=1.3f, rootRadius=3.2f, rootDuration=3, rootTick=1, rootSlow=.35f;
+};
+struct OpportunityDetails {
+  std::string title, description;
+  unsigned experience = 0, spiritStones = 0;
+};
 class Simulation {
 public:
   void Start(std::uint64_t seed, HeroId hero,
              const RunConfig &config = RunConfig{});
+  bool StartCampaign(const CampaignProfile &profile, GameMode mode, HeroId hero,
+                     std::uint64_t seed, std::uint64_t runId,
+                     CaveId cave = CaveId::ThunderMarsh, unsigned riskMask = 0,
+                     const RunConfig &config = {}, const CampaignConfig &campaignConfig = {});
+  bool IsCampaign() const { return fullGame_; }
+  const CampaignProfile &GetCampaignProfile() const { return campaignProfile_; }
+  const Campaign &GetCampaign() const { return campaign_; }
+  const ArenaLayout &GetArena() const { return arena_; }
+  const AnomalySystem &GetAnomalies() const { return anomalies_; }
+  Economy &GetEconomy() { return economy_; }
+  const Economy &GetEconomy() const { return economy_; }
+  OpportunityDetails DescribeOpportunity(unsigned index) const;
+  static std::string DescribeEnemy(EnemyRole role);
+  static std::string DescribeMutation(unsigned index);
+  static std::string DescribeElementInteractions();
+  static CaveBossRules BossRules() { return {}; }
+  static std::string DescribeBossMechanics(CaveId cave);
+  std::string DescribeBossMechanics() const { return DescribeBossMechanics(fullGame_?arena_.cave:CaveId::ThunderMarsh); }
+  bool ChooseOpportunity(unsigned index);
+  bool ChooseBossReward(std::size_t index);
+  bool SettleCampaign(CampaignProfile &profile);
+  bool FinalizeRestExperience();
+  bool PrepareCheckpoint(RunCheckpoint &out) const;
+  bool RestoreCheckpoint(const RunCheckpoint &checkpoint, const CampaignProfile &profile);
+  bool BuyGood(std::uint64_t token);
+  bool RefreshShop();
+  bool BeginReforge(EntityId id, std::size_t affix);
+  bool ResolveReforge(bool keepNew);
+  bool OpenTreasure(bool paid = true);
+  bool RevealTreasure();
+  bool IdentifyRelic(EntityId id);
+  bool Refine(const std::vector<EntityId> &ids, RefineReward reward);
+  bool UndoRefine();
+  bool SealUpgrade(std::size_t index);
+  bool SkipUpgrade();
   void Step(float dt, const InputState &input = {});
   bool ChooseUpgrade(std::size_t index);
   bool Reroll();
@@ -31,6 +81,19 @@ public:
   }
 
 private:
+  bool fullGame_ = false;
+  Campaign campaign_;
+  CampaignProfile campaignProfile_;
+  Economy economy_;
+  ArenaLayout arena_;
+  AnomalySystem anomalies_;
+  EntityId opportunityEnemy_ = 0;
+  std::uint64_t restSerial_ = 0;
+  float terrainTimer_ = 0;
+  bool anomalyWarningShown_ = false;
+  Vec2 Constrain(Vec2 point, float radius = .45f) const;
+  Vec2 Steer(Vec2 position, Vec2 direction, float distance, float radius) const;
+  void ReceiveRelic(Relic relic);
   Snapshot state_;
   Progression progression_;
   RunConfig config_;
@@ -40,8 +103,8 @@ private:
   bool dashLatched_ = false, dashQueued_ = false;
   float spawnAccumulator_ = 0, bossTimer_ = 0, bossSummon_ = 0, bossShield_ = 0,
         wallTimer_ = 0, chargeTimer_ = 0;
-  std::array<float, 12> spellCooldowns_{};
-  std::array<int, 12> casts_{};
+  std::array<float, static_cast<std::size_t>(SpellId::Count)> spellCooldowns_{};
+  std::array<int, static_cast<std::size_t>(SpellId::Count)> casts_{};
   std::array<float, 7> procCooldowns_{};
   float speedBuff_ = 0, powerBuff_ = 0, shieldTime_ = 0, bodyProcCooldown_ = 0,
         critCooldown_ = 0, resetTimer_ = 0;
@@ -83,6 +146,7 @@ private:
   void EndWave();
   void StartBoss();
   void BossPhaseTwo(EnemyState &boss);
+  void UpdateCaveBoss(EnemyState &boss, float dt);
   void Sync();
 };
 } // namespace dywx::mvp

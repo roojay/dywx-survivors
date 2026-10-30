@@ -1,4 +1,5 @@
 #include "MVP/DywxMVPWorld.h"
+#include "MVP/SaveCodec.h"
 #include <cmath>
 #include "Camera/CameraComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -32,6 +33,20 @@ namespace {
 FVector World(Vec2 P,float Z=0) { return FVector(P.x*100,-P.y*100,Z); }
 float Heading(Vec2 P) { return FMath::RadiansToDegrees(FMath::Atan2(-P.y,P.x)); }
 const FLinearColor Fire(1.f,.24f,.035f), Thunder(.48f,.22f,1.f), Danger(1.f,.025f,.055f);
+bool AnomalyAffectsEnemy(const AnomalyState& State,const AnomalyModifiers& Mods,EnemyRole Role)
+{
+    if(!State.active) return false;
+    switch(State.id) {
+    case AnomalyId::SpiritTide: return Mods.currency>1.f || (Mods.spawn>1.f && Role!=EnemyRole::Boss && Role!=EnemyRole::SpiritBeast);
+    case AnomalyId::Fissure: return Mods.chargers>1.f && Role==EnemyRole::Charger;
+    case AnomalyId::Fog: return (Mods.ranged>1.f && Role==EnemyRole::Ranged) || (Mods.beasts>1.f && Role==EnemyRole::SpiritBeast);
+    case AnomalyId::Eclipse: return Mods.xp>1.f || Mods.nightEnemyPower>1.f;
+    // These anomalies affect terrain/the player, not enemy attributes.
+    case AnomalyId::Lightning: case AnomalyId::Array: case AnomalyId::Count: return false;
+    }
+    return false;
+}
+FName AnomalyHalo(AnomalyId Id) { return FName(*FString::Printf(TEXT("AnomalyHalo%d"),int32(Id))); }
 }
 ADywxMVPWorld::ADywxMVPWorld()
 {
@@ -51,19 +66,87 @@ ADywxMVPWorld::ADywxMVPWorld()
     Camera->PostProcessSettings.BloomIntensity=.3f;
     SetActorTickEnabled(false);
 }
+void ADywxMVPWorld::InitializeProfile()
+{
+    if(bProfileLoaded) return;
+    const bool Loaded=Profile.Load(); bProfileLoaded=true;
+    if(!Loaded && !Profile.IsWritable())
+        UE_LOG(LogDywxMVPWorld,Error,TEXT("Local profile is unreadable. Keeping the existing file intact; account mutations and campaign start are blocked."));
+}
 void ADywxMVPWorld::StartRun(HeroId Hero,uint64 Seed)
 {
-    if(bActive) SaveProfile();
-    if(!bProfileLoaded) {
-        const bool Loaded=Profile.Load(); bProfileLoaded=true;
-        if(!Loaded && IFileManager::Get().FileExists(*(FPaths::ProjectSavedDir()/TEXT("MVP/profile.json"))))
-            UE_LOG(LogDywxMVPWorld,Warning,TEXT("Existing local MVP profile could not be loaded; this session starts with empty discoveries/pity."));
-    }
-    if(!bSceneBuilt) BuildScene();
+    if(bProfileLoaded && !SaveProfile()) return;
+    InitializeProfile();
     Simulation.Start(Seed,Hero);
     Profile.Apply(Simulation.GetProgression()); Simulation.RefreshProgression();
+    ActivateRun();
+}
+bool ADywxMVPWorld::StartFullRun(int32 Hero,int32 Map,int32 Mode,uint32 RiskMask)
+{
+    InitializeProfile();
+    if(!Profile.IsWritable() || Hero<0 || Hero>=3 || Map<0 || Map>=3 || Mode<0 || Mode>=3) return false;
+    // One in-progress run per hero. A new start must not silently replace it.
+    if(Profile.HasCheckpoint(HeroId(Hero))) return false;
+    if(!SaveProfile()) return false;
+    // Validate against the account before reserving a durable id. No live run is
+    // replaced and no mesh work happens until persistence has succeeded.
+    dywx::mvp::Simulation Candidate;
+    const uint64 Proposed=Profile.GetCampaign().nextRunId;
+    const uint64 Seed=Proposed*0x9e3779b97f4a7c15ULL+uint64(Map+1);
+    if(!Candidate.StartCampaign(Profile.GetCampaign(),GameMode(Mode),HeroId(Hero),Seed,Proposed,CaveId(Map),RiskMask)) return false;
+    const uint64 RunId=Profile.AllocateRunId();
+    if(!RunId) return false;
+    if(!Candidate.StartCampaign(Profile.GetCampaign(),GameMode(Mode),HeroId(Hero),Seed,RunId,CaveId(Map),RiskMask)) return false;
+    Profile.Apply(Candidate.GetProgression()); Candidate.RefreshProgression();
+    Simulation=MoveTemp(Candidate); ActivateRun(); return true;
+}
+bool ADywxMVPWorld::PurchaseLegacy(LegacyUnlock Unlock)
+{
+    InitializeProfile(); if(bActive || !Profile.IsWritable()) return false;
+    auto Candidate=Profile;
+    if(!PurchaseUnlock(Candidate.MutableCampaign(),Unlock) || !Candidate.Save()) return false;
+    Profile=MoveTemp(Candidate); return true;
+}
+bool ADywxMVPWorld::PurchasePermanent(PermanentStat Stat)
+{
+    InitializeProfile(); if(bActive || !Profile.IsWritable()) return false;
+    auto Candidate=Profile;
+    if(!PurchaseBonus(Candidate.MutableCampaign(),Stat) || !Candidate.Save()) return false;
+    Profile=MoveTemp(Candidate); return true;
+}
+bool ADywxMVPWorld::HasSavedRun(int32 Hero) const
+{
+    return bProfileLoaded && Hero>=0 && Hero<3 && Profile.HasCheckpoint(HeroId(Hero));
+}
+bool ADywxMVPWorld::SaveRun()
+{
+    if(!bActive || !Profile.IsWritable()) return false;
+    // Prepare a projected boundary on copies; a failed write must not commit XP
+    // or consume pending choices in the live, possibly paused intermission.
+    RunCheckpoint Checkpoint; std::string Bytes;
+    if(!Simulation.PrepareCheckpoint(Checkpoint) || !SaveCodec::EncodeCheckpoint(Checkpoint,Bytes)) return false;
+    return Profile.SaveCheckpoint(HeroId(Checkpoint.campaign.hero),Bytes);
+}
+bool ADywxMVPWorld::ResumeRun(int32 Hero)
+{
+    InitializeProfile(); if(Hero<0 || Hero>=3 || !Profile.IsWritable()) return false;
+    if(!SaveProfile()) return false;
+    std::string Bytes; RunCheckpoint Checkpoint;
+    if(!Profile.GetCheckpoint(HeroId(Hero),Bytes) || !SaveCodec::DecodeCheckpoint(Bytes,Checkpoint)) return false;
+    dywx::mvp::Simulation Candidate;
+    if(!Candidate.RestoreCheckpoint(Checkpoint,Profile.GetCampaign())) return false;
+    // Consumption is durable before activation: one checkpoint cannot duplicate rewards.
+    std::string Consumed;
+    if(!Profile.ConsumeCheckpoint(HeroId(Hero),Consumed)) return false;
+    Simulation=MoveTemp(Candidate); ActivateRun(); return true;
+}
+void ADywxMVPWorld::ActivateRun()
+{
+    if(!bSceneBuilt) BuildScene();
+    RebuildArena();
     ProfileElapsed=0; ProfileWave=-1; ProfilePhase=RunPhase::Title;
-    Input={}; SoundCooldown=0; LastHP=Simulation.GetSnapshot().player.hp; LastShots=0; LastEffect=0; LastDash=0; LastLevel=1; LastPhase=RunPhase::Title; VisualTime=0; HeroWalkPhase=0; SwarmWalkPhases.Reset(); bHavePreviousPlayer=false; Transients.Reset(); PreviousEnemies.Reset(); PreviousPickups.Reset();
+    Input={}; SoundCooldown=0; LastHP=Simulation.GetSnapshot().player.hp; LastShots=0; LastEffect=0; LastDash=0; LastLevel=1; LastPhase=RunPhase::Title; VisualTime=0; HeroWalkPhase=0; SwarmWalkPhases.Reset(); bHavePreviousPlayer=false; Transients.Reset(); PreviousEnemies.Reset(); PreviousPickups.Reset(); PreviousPickupGrades.Reset();
+    LastGeneration=0;
     if(!bActive) {
         if(APlayerController* PC=GetWorld()->GetFirstPlayerController()) { PreviousView=PC->GetViewTarget(); PC->SetViewTarget(this); }
         SavedFPS=GEngine?GEngine->GetMaxFPS():0;
@@ -111,11 +194,32 @@ void ADywxMVPWorld::RefreshRunBudget()
         UE_LOG(LogDywxMVPWorld,Log,TEXT("Run budget: active=%d minimized=%d requestedFPS=%.1f readbackFPS=%.1f"),bWindowForeground,bMinimized,TargetFPS,AppliedFPS);
     }
 }
-void ADywxMVPWorld::SaveProfile()
+bool ADywxMVPWorld::SaveProfile()
 {
-    Profile.Observe(GetSnapshot().progression);
-    if(!Profile.Save()) UE_LOG(LogDywxMVPWorld,Warning,TEXT("Could not save local discovery/pity profile. Combat remains available; save will retry at the next boundary."));
+    if(!bProfileLoaded || !Profile.IsWritable()) return false;
+    if(GetSnapshot().phase==RunPhase::Title) return true; // No run discoveries/pity to observe yet.
+    auto CandidateProfile=Profile;
+    CandidateProfile.Observe(GetSnapshot().progression);
+    if(Simulation.IsCampaign()) {
+        const auto& Seen=Simulation.GetAnomalies().State().encountered;
+        for(std::size_t I=0;I<Seen.size();I++) if(Seen[I]) CandidateProfile.MutableCampaign().seenAnomalies[I]=true;
+        bool BossEncountered=GetSnapshot().phase==RunPhase::Boss || GetSnapshot().phase==RunPhase::Won || Simulation.GetCampaign().GetState().bosses>0;
+        for(const auto& Enemy:GetSnapshot().enemies) BossEncountered|=Enemy.role==EnemyRole::Boss;
+        const int32 Cave=static_cast<int32>(Simulation.GetArena().cave);
+        if(BossEncountered && Cave>=0 && Cave<3) CandidateProfile.MutableCampaign().seenBosses[static_cast<std::size_t>(Cave)]=true;
+    }
+    auto CandidateSimulation=Simulation;
+    const bool Settled=CandidateSimulation.IsCampaign() && CandidateSimulation.SettleCampaign(CandidateProfile.MutableCampaign());
+    if(!CandidateProfile.Save()) {
+        UE_LOG(LogDywxMVPWorld,Warning,TEXT("Account save failed; settlement remains pending and will retry at the next boundary."));
+        // Do not hammer a failed disk every frame; explicit user commands still retry immediately.
+        ProfileElapsed=0; ProfileWave=GetSnapshot().wave; ProfilePhase=GetSnapshot().phase;
+        return false;
+    }
+    Profile=MoveTemp(CandidateProfile);
+    if(Settled) Simulation=MoveTemp(CandidateSimulation);
     ProfileElapsed=0; ProfileWave=GetSnapshot().wave; ProfilePhase=GetSnapshot().phase;
+    return true;
 }
 void ADywxMVPWorld::EndPlay(const EEndPlayReason::Type Reason) { if(bActive) StopRun(); else if(bProfileLoaded) SaveProfile(); Super::EndPlay(Reason); }
 void ADywxMVPWorld::Tick(float Dt)
@@ -256,7 +360,7 @@ void ADywxMVPWorld::BuildScene()
         else UE_LOG(LogDywxMVPWorld,Error,TEXT("Missing required MVP cue %s. Run material/audio bootstrap before packaging."),*Path);
     }
     MakeBatch(TEXT("Ground"),TEXT("unit_box"),FLinearColor(.025,.04,.065),false);
-    MakeBatch(TEXT("Tiles"),TEXT("tile"),FLinearColor(.55,.65,.8),false);
+    MakeBatch(TEXT("Tiles"),TEXT("tile"),FLinearColor(.66,.65,.64),false);
     MakeBatch(TEXT("Rock"),TEXT("rock"),FLinearColor(.7,.8,1),false);
     MakeBatch(TEXT("Pillar"),TEXT("pillar"),FLinearColor(.8,.85,1),false);
     if(Meshes.Contains(TEXT("shrine_banner"))) MakeBatch(TEXT("Banner"),TEXT("shrine_banner"),FLinearColor::White,false);
@@ -290,29 +394,74 @@ void ADywxMVPWorld::BuildScene()
     MakeBatch(TEXT("XP"),TEXT("unit_diamond"),FLinearColor(.08,.8,.65),true,true);
     MakeBatch(TEXT("Relic"),TEXT("unit_diamond"),FLinearColor(1,.65,.13),true,true);
     MakeBatch(TEXT("RelicBeam"),TEXT("unit_box"),FLinearColor(.75,.35,1),true,true);
+    MakeBatch(TEXT("Vein"),TEXT("unit_ring"),FLinearColor(.08,.45,.4),false,true);
+    MakeBatch(TEXT("VeinCrystal"),TEXT("unit_diamond"),FLinearColor(.1,.7,.6),false,true);
+    MakeBatch(TEXT("ArrayPlatform"),TEXT("unit_ring"),FLinearColor(.2,.18,.3),false,true);
+    MakeBatch(TEXT("BeastCompanion"),TEXT("enemy_spirit"),FLinearColor(.3,1,.65));
+    MakeBatch(TEXT("BeastHalo"),TEXT("unit_ring"),FLinearColor(.1,.7,.38),true,true);
+    const FLinearColor Grades[]={FLinearColor(.75,.8,.85),FLinearColor(.1,.7,1),FLinearColor(.65,.2,1),FLinearColor(1,.65,.08)};
+    for(int32 R=0;R<4;R++) MakeBatch(FName(*FString::Printf(TEXT("RelicGrade%d"),R)),TEXT("unit_diamond"),Grades[R],true,true);
     MakeBatch(TEXT("Death"),TEXT("unit_ring"),FLinearColor(.9,.35,.1),true,true);
     MakeBatch(TEXT("Collect"),TEXT("unit_ring"),FLinearColor(.15,1,.8),true,true);
-    Add(TEXT("Ground"),FVector(0,0,-45),FVector(104,62,.4));
-    // Tile placement is visual only; six rocks below are the ONLY internal colliders.
-    for(int X=-46;X<=46;X+=4) for(int Y=-25;Y<=25;Y+=4) Add(TEXT("Tiles"),FVector(X*100,Y*100,-4),FVector(4,4,1),((X+Y)%3)*90);
-    for(auto O:GetArenaObstacles()) Add(TEXT("Rock"),World(O.position),FVector(O.radius,O.radius,O.radius),O.position.x*17);
-    Add(TEXT("Edge"),FVector(-4850,0,0),FVector(.2,55,.12)); Add(TEXT("Edge"),FVector(4850,0,0),FVector(.2,55,.12));
-    Add(TEXT("Edge"),FVector(0,-2750,0),FVector(97,.2,.12)); Add(TEXT("Edge"),FVector(0,2750,0),FVector(97,.2,.12));
-    for(int X=-44;X<=44;X+=8) for(int Y:{-29,29}) Add(TEXT("Pillar"),FVector(X*100,Y*100,0),FVector(1.1));
-    for(int Y=-20;Y<=20;Y+=8) for(int X:{-50,50}) Add(TEXT("Pillar"),FVector(X*100,Y*100,0),FVector(1.1));
-    Add(TEXT("Arch"),FVector(0,3000,0),FVector(1.5),-90);
-    for(int X:{-12,12}) Add(TEXT("Banner"),FVector(X*100,2900,0),FVector(1.5),-90);
-    Add(TEXT("FloorRune"),FVector(0,0,1),FVector(8,8,1)); Add(TEXT("FloorRune"),FVector(0,0,1),FVector(8.2,8.2,1));
     auto* Sun=NewObject<UDirectionalLightComponent>(this,TEXT("MoonLight")); Sun->SetupAttachment(RootComponent); AddInstanceComponent(Sun);
     Sun->SetMobility(EComponentMobility::Movable); Sun->SetRelativeRotation(FRotator(-55,-40,0)); Sun->SetIntensity(3.f); Sun->SetLightColor(FLinearColor(.63,.75,1)); Sun->SetCastShadows(false); Sun->RegisterComponent();
     auto* Fill=NewObject<UDirectionalLightComponent>(this,TEXT("WarmRim")); Fill->SetupAttachment(RootComponent); AddInstanceComponent(Fill);
     Fill->SetMobility(EComponentMobility::Movable); Fill->SetRelativeRotation(FRotator(-25,140,0)); Fill->SetIntensity(1.5f); Fill->SetLightColor(FLinearColor(1,.68,.38)); Fill->SetCastShadows(false); Fill->RegisterComponent();
     Flush(); bSceneBuilt=true;
 }
+void ADywxMVPWorld::RebuildArena()
+{
+    // Run-boundary only: reuse meshes/materials, clear all old map instances.
+    for(auto& Pair:Batches) if(!Pair.Value.Dynamic) {
+        Pair.Value.Component->ClearInstances(); Pair.Value.Allocated=0; Pair.Value.Pending.Reset();
+    }
+    const auto& Arena=Simulation.GetArena();
+    const bool Full=Simulation.IsCampaign();
+    const float X=Full?Arena.config.halfWidth:48, Y=Full?Arena.config.halfHeight:27;
+    const float Cut=Full?Arena.config.cornerCut:0;
+    const int32 Cave=Full?int32(Arena.cave):0;
+    const FLinearColor Palettes[]={FLinearColor(.34,.35,.38),FLinearColor(.39,.31,.28),FLinearColor(.3,.36,.32)};
+    for(const TCHAR* Key:{TEXT("Ground"),TEXT("Rock"),TEXT("Pillar"),TEXT("Edge")}) if(auto* Batch=Batches.Find(Key))
+        if(auto* Mat=Cast<UMaterialInstanceDynamic>(Batch->Component->GetMaterial(0)))
+            Mat->SetVectorParameterValue(TEXT("Tint"),Palettes[FMath::Clamp(Cave,0,2)]*(FString(Key)==TEXT("Ground")?.12f:1.f));
+    Add(TEXT("Ground"),FVector(0,0,-45),FVector((X+4)*2,(Y+4)*2,.4));
+    for(int TX=int(-X+2);TX<X-1;TX+=4) for(int TY=int(-Y+2);TY<Y-1;TY+=4)
+        if(!Full || Arena.Contains({float(TX),float(TY)},1.5f)) Add(TEXT("Tiles"),World({float(TX),float(TY)},-4),FVector(4,4,1),((TX+TY)%3)*90);
+    if(Full) { for(const auto& O:Arena.obstacles) Add(TEXT("Rock"),World(O.position),FVector(O.radius),O.position.x*17); }
+    else { for(const auto& O:GetArenaObstacles()) Add(TEXT("Rock"),World(O.position),FVector(O.radius),O.position.x*17); }
+    const Vec2 Corners[]={{-X+Cut,-Y},{X-Cut,-Y},{X,-Y+Cut},{X,Y-Cut},{X-Cut,Y},{-X+Cut,Y},{-X,Y-Cut},{-X,-Y+Cut}};
+    for(int32 I=0;I<8;I++) {
+        const FVector A=World(Corners[I],3),B=World(Corners[(I+1)%8],3),D=B-A;
+        if(D.SizeSquared()>1) Add(TEXT("Edge"),(A+B)*.5f,FVector(D.Size()/100,.15,.08),D.Rotation().Yaw);
+    }
+    if(Full) {
+        for(auto P:Arena.veins) { Add(TEXT("Vein"),World(P,2),FVector(1.3,1.3,1)); Add(TEXT("VeinCrystal"),World(P,12),FVector(.24)); }
+        for(auto P:Arena.hazards) Add(TEXT("ArrayPlatform"),World(P,2),FVector(2.2,2.2,1));
+    }
+    for(int TX=int(-X+4);TX<X;TX+=8) for(float Sign:{-1.f,1.f}) Add(TEXT("Pillar"),World({float(TX),Sign*(Y+2)}),FVector(1.1));
+    Add(TEXT("Arch"),World({0,Y+3}),FVector(1.5),-90);
+    for(float TX:{-12.f,12.f}) Add(TEXT("Banner"),World({TX,Y+2}),FVector(1.5),-90);
+    Add(TEXT("FloorRune"),FVector(0,0,1),FVector(8,8,1));
+    Flush();
+}
+FName ADywxMVPWorld::ElementBatch(Element E,const TCHAR* Suffix)
+{
+    const TCHAR* Prefix=TEXT("Neutral");
+    switch(E) {
+    case Element::Fire: Prefix=TEXT("Fire"); break;
+    case Element::Thunder: Prefix=TEXT("Thunder"); break;
+    case Element::Metal: Prefix=TEXT("Metal"); break;
+    case Element::Wood: Prefix=TEXT("Wood"); break;
+    case Element::Water: Prefix=TEXT("Water"); break;
+    case Element::Earth: Prefix=TEXT("Earth"); break;
+    default: break;
+    }
+    return FName(*(FString(Prefix)+Suffix));
+}
 void ADywxMVPWorld::Render(float Dt)
 {
     const auto& S=GetSnapshot();
-    if(S.generation!=LastGeneration) { PreviousEnemies.Reset(); PreviousPickups.Reset(); Transients.Reset(); LastEffect=0; LastShots=S.statistics.shots; LastHP=S.player.hp; LastDash=S.player.dashCooldown; LastLevel=S.progression.level; LastPhase=RunPhase::Title; LastGeneration=S.generation; bHavePreviousPlayer=false; HeroWalkPhase=0; SwarmWalkPhases.Reset(); }
+    if(S.generation!=LastGeneration) { PreviousEnemies.Reset(); PreviousPickups.Reset(); Transients.Reset(); PreviousPickupGrades.Reset(); LastEffect=0; LastShots=S.statistics.shots; LastHP=S.player.hp; LastDash=S.player.dashCooldown; LastLevel=S.progression.level; LastPhase=RunPhase::Title; LastGeneration=S.generation; bHavePreviousPlayer=false; HeroWalkPhase=0; SwarmWalkPhases.Reset(); }
     FVector Player=World(S.player.position);
     // Aspect-adaptive ground footprint. HUD overlays do not move this authoritative view.
     int32 Width=1920,Height=1080; if(auto* PC=GetWorld()->GetFirstPlayerController()) PC->GetViewportSize(Width,Height);
@@ -335,13 +484,39 @@ void ADywxMVPWorld::Render(float Dt)
     if(HeroMoving) { const FName Pose(*FString::Printf(TEXT("Walk_Hero_%d"),FMath::FloorToInt(HeroWalkPhase*8)&7)); if(Batches.Contains(Pose)) HeroBatch=Pose; }
     Add(HeroBatch,Player+FVector(0,0,Bob),FVector::OneVector,Heading(S.player.facing));
     if(S.progression.build.hero==HeroId::Sword) Add(TEXT("HeroSword"),Player+FVector(45,0,125+Bob),FVector(.8),Heading(S.player.facing));
+    if(S.progression.build.hero==HeroId::Beast) {
+        // Existing spirit mesh, deliberately recognizable as a companion, not new character art.
+        const FVector Companion=Player+FVector(FMath::Cos(VisualTime)*90,FMath::Sin(VisualTime)*90,50);
+        Add(TEXT("BeastCompanion"),Companion,FVector(.45),Heading(S.player.facing));
+        Add(TEXT("BeastHalo"),Player+FVector(0,0,5),FVector(.75,.75,1));
+    }
+    if(Simulation.IsCampaign()) {
+        const auto& A=Simulation.GetAnomalies().State();
+        const auto Mods=Simulation.GetAnomalies().Modifiers(S.player.position);
+        if(A.active && A.id==AnomalyId::Array) Add(AnomalyHalo(AnomalyId::Array),World(A.anchor,3),FVector(Simulation.GetAnomalies().Config().arrayRadius,Simulation.GetAnomalies().Config().arrayRadius,1));
+        if(Mods.playerPower>1.f) Add(AnomalyHalo(AnomalyId::Array),Player+FVector(0,0,3),FVector(.95,.95,1));
+        if(Mods.thunderPower>1.f) Add(AnomalyHalo(AnomalyId::Lightning),Player+FVector(0,0,3),FVector(1.05,1.05,1));
+    }
     Add(TEXT("PlayerRing"),Player+FVector(0,0,4),FVector(.65,.65,1));
     if(S.player.invulnerable>0 || S.player.shield>0) Add(TEXT("Invulnerable"),Player+FVector(0,0,8),FVector(.85,.85,1));
     TMap<uint64,FVector> CurrentEnemies,CurrentPickups;
+    TMap<uint64,int32> CurrentPickupGrades;
+    const float Vision=Simulation.IsCampaign()?Simulation.GetAnomalies().Modifiers(S.player.position).visionRange:1000.f;
+    if(Vision<1000.f) Add(TEXT("WaterRing"),Player+FVector(0,0,3),FVector(Vision,Vision,1));
     CurrentEnemies.Reserve(int32(S.enemies.size())); CurrentPickups.Reserve(int32(S.pickups.size()));
     const TCHAR* Roles[]={TEXT("Enemy_swarm"),TEXT("Enemy_exploder"),TEXT("Enemy_charger"),TEXT("Enemy_rangedbird"),TEXT("Enemy_supporttotem"),TEXT("Enemy_summoner"),TEXT("Enemy_boss"),TEXT("Enemy_spirit")};
     for(const auto& E:S.enemies) {
         const FVector P=World(E.position); CurrentEnemies.Add(E.id,P);
+        if(FVector::DistSquared2D(P,Player)>FMath::Square(Vision*100)) continue;
+        if(Simulation.IsCampaign()) {
+            const auto& Anomaly=Simulation.GetAnomalies();
+            if(AnomalyAffectsEnemy(Anomaly.State(),Anomaly.Modifiers(S.player.position),E.role)) {
+                // One thin, dim instance per affected visible enemy; never a light.
+                // The red hostile telegraph is always above this Z=3 ground layer.
+                const float Radius=E.radius+.12f;
+                Add(AnomalyHalo(Anomaly.State().id),P+FVector(0,0,3),FVector(Radius,Radius,1));
+            }
+        }
         const float Scale=E.tier==EnemyTier::Elite?1.55f:1.f;
         FName EnemyBatch(Roles[FMath::Clamp(int(E.role),0,7)]);
         const FVector* Previous=PreviousEnemies.Find(E.id);
@@ -376,22 +551,25 @@ void ADywxMVPWorld::Render(float Dt)
 
     }
     for(const auto& P:S.projectiles) {
-        const FVector At=World(P.position,65); const bool IsThunder=P.element==Element::Thunder;
-        Add(P.hostile?TEXT("EnemyShot"):(IsThunder?TEXT("ThunderShot"):TEXT("FireShot")),At,FVector(P.radius*1.8f,P.radius*.7f,P.radius*.7f),Heading(P.velocity));
+        const FVector At=World(P.position,65);
+        Add(P.hostile?TEXT("EnemyShot"):ElementBatch(P.element,TEXT("Shot")),At,FVector(P.radius*1.8f,P.radius*.7f,P.radius*.7f),Heading(P.velocity));
         const FVector Before=World(P.previous,65); const FVector D=At-Before;
-        if(!P.hostile && D.SizeSquared()>1) Add(IsThunder?TEXT("ThunderBeam"):TEXT("FireBeam"),(At+Before)*.5f,FVector(D.Size()/100,.055,.035),D.Rotation().Yaw);
+        if(!P.hostile && D.SizeSquared()>1) Add(ElementBatch(P.element,TEXT("Beam")),(At+Before)*.5f,FVector(D.Size()/100,.055,.035),D.Rotation().Yaw);
     }
     bool NewPalm=false, NewThunder=false; uint64 MaxEffect=LastEffect;
     RenderVFX(S,NewPalm,NewThunder,MaxEffect);
     for(const auto& P:S.pickups) {
         FVector At=World(P.position,25+FMath::Sin(VisualTime*3+P.id)*8); CurrentPickups.Add(P.id,At);
-        Add(P.hasRelic?TEXT("Relic"):TEXT("XP"),At,FVector(P.hasRelic?.42:.18),VisualTime*65);
+        if(P.hasRelic) CurrentPickupGrades.Add(P.id,int32(P.relic.rarity));
+        Add(P.hasRelic?FName(*FString::Printf(TEXT("RelicGrade%d"),FMath::Clamp(int32(P.relic.rarity),0,3))):FName(TEXT("XP")),At,FVector(P.hasRelic?.42:.18),VisualTime*65);
         if(P.hasRelic && P.relic.rarity>=Rarity::Immortal) Add(TEXT("RelicBeam"),World(P.position),FVector(.05,.05,3));
     }
     // IDs are compared within one run generation; never attach death/collect effects to recycled indices.
     for(auto& E:PreviousEnemies) if(!CurrentEnemies.Contains(E.Key) && Transients.Num()<96) Transients.Add({E.Value,0,false});
     for(auto& P:PreviousPickups) if(!CurrentPickups.Contains(P.Key) && Transients.Num()<96) Transients.Add({P.Value,0,true});
     // At most one short voice per 120 ms; critical transition cues take precedence.
+    int32 CollectedGrade=-1;
+    for(const auto& P:PreviousPickupGrades) if(!CurrentPickups.Contains(P.Key)) CollectedGrade=FMath::Max(CollectedGrade,P.Value);
     SoundCooldown=FMath::Max(0.f,SoundCooldown-Dt); FName Cue=NAME_None;
     if(S.phase!=LastPhase) {
         if(S.phase==RunPhase::Won) Cue=TEXT("win");
@@ -399,7 +577,8 @@ void ADywxMVPWorld::Render(float Dt)
         else if(S.phase==RunPhase::Boss) Cue=TEXT("boss");
     }
     if(Cue.IsNone() && SoundCooldown<=0) {
-        if(S.progression.level>LastLevel) Cue=TEXT("upgrade");
+        if(CollectedGrade>=int32(Rarity::Immortal)) Cue=TEXT("upgrade");
+        else if(S.progression.level>LastLevel) Cue=TEXT("upgrade");
         else if(S.player.hp<LastHP-.1f) Cue=TEXT("hit");
         else if(S.player.dashCooldown>LastDash+.5f) Cue=TEXT("dash");
         else if(CurrentPickups.Num()<PreviousPickups.Num()) Cue=TEXT("pickup");
@@ -407,10 +586,10 @@ void ADywxMVPWorld::Render(float Dt)
         else if(NewPalm) Cue=TEXT("palm");
         else if(S.statistics.shots>LastShots) Cue=S.progression.build.hero==HeroId::Body?TEXT("palm"):TEXT("sword");
     }
-    if(!Cue.IsNone()) { if(auto* Sound=Sounds.Find(Cue)) UGameplayStatics::PlaySound2D(this,Sound->Get(),.32f,1.f,0.f,SoundConcurrency,this); SoundCooldown=.12f; }
+    if(!Cue.IsNone()) { if(auto* Sound=Sounds.Find(Cue)) UGameplayStatics::PlaySound2D(this,Sound->Get(),.32f,CollectedGrade>=0?(.85f+.15f*CollectedGrade):1.f,0.f,SoundConcurrency,this); SoundCooldown=.12f; }
     LastEffect=MaxEffect; LastHP=S.player.hp; LastDash=S.player.dashCooldown; LastShots=S.statistics.shots; LastLevel=S.progression.level; LastPhase=S.phase;
     for(auto It=SwarmWalkPhases.CreateIterator();It;++It) if(!CurrentEnemies.Contains(It.Key())) It.RemoveCurrent();
-    PreviousEnemies=MoveTemp(CurrentEnemies); PreviousPickups=MoveTemp(CurrentPickups);
+    PreviousEnemies=MoveTemp(CurrentEnemies); PreviousPickups=MoveTemp(CurrentPickups); PreviousPickupGrades=MoveTemp(CurrentPickupGrades);
     for(int32 I=Transients.Num()-1;I>=0;I--) {
         auto& T=Transients[I]; T.Age+=Dt;
         if(T.Age>.35f) {Transients.RemoveAtSwap(I);continue;}

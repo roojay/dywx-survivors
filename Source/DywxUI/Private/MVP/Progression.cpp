@@ -4,6 +4,8 @@
 #include <limits>
 #include <numeric>
 #include <set>
+#include <sstream>
+#include <iomanip>
 namespace dywx::mvp {
 namespace {
 bool Has(const Relic &r, AffixKind k, int code) {
@@ -21,8 +23,13 @@ int &Count(Resonance &r, int code) {
     return r.body;
   case 3:
     return r.sword;
-  default:
-    return r.array;
+  case 4: return r.array;
+  case 5: return r.metal;
+  case 6: return r.wood;
+  case 7: return r.water;
+  case 8: return r.earth;
+  case 9: return r.beast;
+  default: return r.talisman;
   }
 }
 bool Same(const UpgradeOffer &a, const UpgradeOffer &b) {
@@ -38,6 +45,9 @@ int Progression::Index(int n) {
   return n > 0 ? std::min(n - 1, int(Unit() * n)) : 0;
 }
 void Progression::Reset(std::uint32_t seed, HeroId hero, bool forms) {
+  dropRiskWeight_=1;preferredRelics_.clear();lastBossOrdinal_=0;
+  fullGame_ = false;spellPoolUnlocked_=relicPoolUnlocked_=true;
+  permanentBase_ = Stats{};
   rng_.seed(seed);
   state_ = {};
   state_.build.hero = hero;
@@ -52,13 +62,33 @@ void Progression::Reset(std::uint32_t seed, HeroId hero, bool forms) {
   consumed_.fill(false);
   nextRelic_ = 1;
   state_.build.spells.push_back(
-      {hero == HeroId::Body ? SpellId::FlamePalm : SpellId::FlameSword, 1});
+      {hero == HeroId::Body ? SpellId::FlamePalm : hero == HeroId::Beast ? SpellId::WoodBeast : SpellId::FlameSword, 1});
   state_.build.passives.push_back(hero == HeroId::Body
                                       ? PassiveId::BodyScripture
-                                      : PassiveId::SwordScripture);
+                                      : hero == HeroId::Beast ? PassiveId::BeastScripture : PassiveId::SwordScripture);
   state_.seenSpells[int(state_.build.spells.front().id)] = true;
   Recompute();
 }
+void Progression::ConfigureFullGame(int layer, const Stats& bonuses, int extraRerolls) {
+  fullGame_=true;permanentBase_=ClampStats(bonuses);SetSystemLayer(layer);
+  state_.rerollsRemaining+=std::max(0,extraRerolls);Recompute();
+  if(state_.pendingUpgrades>0)MakeOffers();
+}
+void Progression::SetContentUnlocks(bool spells,bool relics){spellPoolUnlocked_=spells;relicPoolUnlocked_=relics;if(state_.pendingUpgrades>0)MakeOffers();}
+void Progression::SetSystemLayer(int layer){state_.systemLayer=std::clamp(layer,1,3);if(fullGame_)formResonance_=state_.systemLayer>=2;Recompute();}
+bool Progression::SealOffer(std::size_t index){
+  if(state_.systemLayer<2 || state_.sealsRemaining<=0 || index>=state_.offers.size())return false;
+  const auto o=state_.offers[index];
+  if(o.kind==UpgradeKind::Passive)state_.sealedPassives[int(o.passive)]=true;
+  else state_.sealedSpells[int(o.spell)]=true;
+  --state_.sealsRemaining;MakeOffers();return true;
+}
+bool Progression::SkipUpgrade(){
+  if(state_.systemLayer<2 || state_.pendingUpgrades<=0 || state_.offers.empty())return false;
+  --state_.pendingUpgrades;++state_.skippedUpgrades;state_.skipSpiritStones+=5;
+  state_.offers.clear();AddRawXp(4);if(state_.pendingUpgrades>0)MakeOffers();return true;
+}
+int Progression::TakeSkipStones(){int n=state_.skipSpiritStones;state_.skipSpiritStones=0;return n;}
 void Progression::MergeDiscoveries(const ProgressionState &previous) {
   for (std::size_t i = 0; i < state_.seenSpells.size(); ++i)
     state_.seenSpells[i] = state_.seenSpells[i] || previous.seenSpells[i];
@@ -112,10 +142,13 @@ void Progression::AddRawXp(float xp) {
 }
 std::vector<UpgradeOffer> Progression::LegalOffers() const {
   std::vector<UpgradeOffer> out;
-  for (int i = 0; i < 10; ++i) {
+  for (int i = 0; i < (fullGame_ ? int(kSpellCount) : 10); ++i) {
     auto id = SpellId(i);
+    if(IsFusion(id) || state_.sealedSpells[i])continue;
+    if(!spellPoolUnlocked_ && i>=12 && !(state_.build.hero==HeroId::Beast && (id==SpellId::WoodBeast || id==SpellId::WaterBeast)))continue;
     if ((id == SpellId::FlamePalm && state_.build.hero != HeroId::Body) ||
-        (id == SpellId::FlameSword && state_.build.hero != HeroId::Sword))
+        (id == SpellId::FlameSword && state_.build.hero != HeroId::Sword) ||
+        (id == SpellId::WoodBeast && state_.build.hero != HeroId::Beast))
       continue;
     auto it =
         std::find_if(state_.build.spells.begin(), state_.build.spells.end(),
@@ -127,24 +160,19 @@ std::vector<UpgradeOffer> Progression::LegalOffers() const {
       out.push_back({UpgradeKind::NewSpell, id, {}});
   }
   if (state_.build.passives.size() < 4)
-    for (int i = 2; i < 5; ++i)
-      if (!HasPassive(PassiveId(i)))
+    for (int i = 2; i < (fullGame_ && spellPoolUnlocked_ ? int(kPassiveCount) : 5); ++i)
+      if (i != int(PassiveId::BeastScripture) && !state_.sealedPassives[i] && !HasPassive(PassiveId(i)))
         out.push_back({UpgradeKind::Passive, {}, PassiveId(i)});
   return out;
 }
 bool Progression::Affinity(const UpgradeOffer &o) const {
-  const auto &r = state_.build.resonance;
-  if (o.kind == UpgradeKind::Passive) {
-    return o.passive == PassiveId::FireScripture      ? r.fire > 0
-           : o.passive == PassiveId::ThunderScripture ? r.thunder > 0
-                                                      : r.array > 0;
+  auto r=state_.build.resonance;
+  if(o.kind==UpgradeKind::Passive){
+    int code=o.passive==PassiveId::FireScripture?0:o.passive==PassiveId::ThunderScripture?1:o.passive==PassiveId::ClearMind?4:o.passive==PassiveId::MetalScripture?5:o.passive==PassiveId::WoodScripture?6:o.passive==PassiveId::WaterScripture?7:o.passive==PassiveId::EarthScripture?8:10;
+    return Count(r,code)>0;
   }
-  auto c = GetSpellConfig(o.spell);
-  return (c.element == Element::Fire && r.fire > 0) ||
-         (c.element == Element::Thunder && r.thunder > 0) ||
-         (c.form == Form::Body && r.body > 0) ||
-         (c.form == Form::Sword && r.sword > 0) ||
-         (c.form == Form::Array && r.array > 0);
+  const auto c=GetSpellConfig(o.spell);int e=ElementResonanceCode(c.element),f=FormResonanceCode(c.form);
+  return (e>=0 && Count(r,e)>0)||(f>=0 && Count(r,f)>0);
 }
 void Progression::MakeOffers() {
   state_.offers.clear();
@@ -175,13 +203,13 @@ void Progression::MakeOffers() {
                            state_.build.spells.end(),
                            [&](auto s) { return s.id == id && s.rank == 5; });
       };
-      SpellId a = state_.build.hero == HeroId::Body ? SpellId::FlamePalm
-                                                    : SpellId::FlameSword,
-              b = state_.build.hero == HeroId::Body ? SpellId::ThunderFist
-                                                    : SpellId::ThunderSword;
-      if (o.kind != UpgradeKind::Passive &&
-          ((o.spell == a && rank5(b)) || (o.spell == b && rank5(a))))
-        x *= 2;
+      for(const auto& recipe:FusionCatalog())
+        if(recipe.hero==state_.build.hero){
+          if(recipe.passive!=PassiveId::Count){
+            if((o.kind==UpgradeKind::Passive && o.passive==recipe.passive && rank5(recipe.first)) ||
+               (o.kind!=UpgradeKind::Passive && o.spell==recipe.first && HasPassive(recipe.passive)))x*=2;
+          } else if(o.kind!=UpgradeKind::Passive && ((o.spell==recipe.first && rank5(recipe.second)) || (o.spell==recipe.second && rank5(recipe.first))))x*=2;
+        }
       w.push_back(x);
       total += x;
     }
@@ -232,39 +260,18 @@ bool Progression::Reroll() {
   return true;
 }
 bool Progression::CanFuse(SpellId result) const {
-  if ((result != SpellId::FusionPalm && result != SpellId::FusionSwords) ||
-      (result == SpellId::FusionPalm) != (state_.build.hero == HeroId::Body) ||
-      HasSpell(result))
-    return false;
-  auto a = result == SpellId::FusionPalm ? SpellId::FlamePalm
-                                         : SpellId::FlameSword,
-       b = result == SpellId::FusionPalm ? SpellId::ThunderFist
-                                         : SpellId::ThunderSword;
-  auto max = [&](SpellId id) {
-    return std::any_of(state_.build.spells.begin(), state_.build.spells.end(),
-                       [&](auto s) { return s.id == id && s.rank == 5; });
-  };
-  return max(a) && max(b);
+  if(HasSpell(result))return false;
+  auto max=[&](SpellId id){return std::any_of(state_.build.spells.begin(),state_.build.spells.end(),[&](auto s){return s.id==id && s.rank==5;});};
+  for(const auto& r:FusionCatalog())if(r.result==result && r.hero==state_.build.hero)return max(r.first)&&(r.passive!=PassiveId::Count?HasPassive(r.passive):max(r.second));
+  return false;
 }
-bool Progression::Fuse(SpellId result) {
-  if (!CanFuse(result) || (!resting_ && state_.offers.empty()))
-    return false;
-  auto a = result == SpellId::FusionPalm ? SpellId::FlamePalm
-                                         : SpellId::FlameSword,
-       b = result == SpellId::FusionPalm ? SpellId::ThunderFist
-                                         : SpellId::ThunderSword;
-  auto &v = state_.build.spells;
-  v.erase(std::remove_if(v.begin(), v.end(),
-                         [&](auto s) { return s.id == a || s.id == b; }),
-          v.end());
-  v.push_back({result, 1});
-  consumed_[int(a)] = consumed_[int(b)] = true;
-  state_.seenSpells[int(result)] = true;
-  state_.seenFusions[result == SpellId::FusionPalm ? 0 : 1] = true;
-  Recompute();
-  if (!state_.offers.empty())
-    MakeOffers();
-  return true;
+bool Progression::Fuse(SpellId result){
+  if(!CanFuse(result)||(!resting_&&state_.offers.empty()))return false;
+  for(std::size_t i=0;i<FusionCatalog().size();++i){const auto&r=FusionCatalog()[i];if(r.result!=result)continue;
+    auto&v=state_.build.spells;v.erase(std::remove_if(v.begin(),v.end(),[&](auto sp){return sp.id==r.first||(r.passive==PassiveId::Count && sp.id==r.second);}),v.end());
+    v.push_back({result,1});consumed_[int(r.first)]=true;if(r.passive==PassiveId::Count)consumed_[int(r.second)]=true;
+    state_.seenSpells[int(result)]=true;state_.seenFusions[i]=true;Recompute();if(!state_.offers.empty())MakeOffers();return true;
+  }return false;
 }
 Stats Progression::ClampStats(Stats s) {
   s.maxHp = std::max(1.f, s.maxHp);
@@ -282,20 +289,14 @@ Stats Progression::ClampStats(Stats s) {
 }
 BuildState Progression::Derive(const std::vector<Relic> &equipment) const {
   BuildState b = state_.build;
-  b.stats = Stats{};
+  b.stats = permanentBase_;
   b.resonance = {};
   auto &s = b.stats;
   auto &r = b.resonance;
-  for (auto sp : b.spells) {
-    auto c = GetSpellConfig(sp.id);
-    if (sp.id == SpellId::FusionPalm || sp.id == SpellId::FusionSwords) {
-      ++r.fire;
-      ++r.thunder;
-      Count(r, sp.id == SpellId::FusionPalm ? 2 : 3) += 2;
-    } else {
-      Count(r, int(c.element))++;
-      Count(r, int(c.form) + 2)++;
-    }
+  auto addAspects=[&](SpellId id){auto c=GetSpellConfig(id);int e=ElementResonanceCode(c.element),f=FormResonanceCode(c.form);if(e>=0)++Count(r,e);if(f>=0)++Count(r,f);};
+  for(auto sp:b.spells){
+    if(IsFusion(sp.id)){for(const auto&recipe:FusionCatalog())if(recipe.result==sp.id){addAspects(recipe.first);if(recipe.passive==PassiveId::Count)addAspects(recipe.second);}}
+    else addAspects(sp.id);
   }
   for (auto p : b.passives)
     switch (p) {
@@ -321,6 +322,12 @@ BuildState Progression::Derive(const std::vector<Relic> &equipment) const {
       s.chainMultiplier += .15f;
       ++r.thunder;
       break;
+    case PassiveId::BeastScripture:s.regen+=.3f;s.pickupRadius+=1;s.formBonus[int(Form::Beast)]+=.1f;++r.beast;break;
+    case PassiveId::MetalScripture:s.critChance+=.06f;++r.metal;break;
+    case PassiveId::WoodScripture:s.regen+=.4f;++r.wood;break;
+    case PassiveId::WaterScripture:s.cooldownReduction+=.08f;++r.water;break;
+    case PassiveId::EarthScripture:s.armor+=.06f;s.maxHp+=15;++r.earth;break;
+    case PassiveId::TalismanScripture:s.area+=.12f;++r.talisman;break;
     case PassiveId::ClearMind:
       s.xpMultiplier += .1f;
       s.luck += 5;
@@ -375,8 +382,15 @@ BuildState Progression::Derive(const std::vector<Relic> &equipment) const {
       case AffixKind::Array:
         s.formBonus[int(a.kind) - int(AffixKind::Body)] += a.value;
         break;
+      case AffixKind::Metal:s.elementBonus[int(Element::Metal)]+=a.value;break;
+      case AffixKind::Wood:s.elementBonus[int(Element::Wood)]+=a.value;break;
+      case AffixKind::Water:s.elementBonus[int(Element::Water)]+=a.value;break;
+      case AffixKind::Earth:s.elementBonus[int(Element::Earth)]+=a.value;break;
+      case AffixKind::Beast:s.formBonus[int(Form::Beast)]+=a.value;break;
+      case AffixKind::Talisman:s.formBonus[int(Form::Talisman)]+=a.value;break;
+      case AffixKind::Count:break;
       case AffixKind::Resonance:
-        if (!resonanceAdded && a.code >= 0 && a.code < 5) {
+        if (!resonanceAdded && a.code >= 0 && a.code < int(kResonanceCount)) {
           ++Count(r, a.code);
           resonanceAdded = true;
         }
@@ -405,6 +419,19 @@ BuildState Progression::Derive(const std::vector<Relic> &equipment) const {
     s.armor += .1f;
     s.formBonus[0] += .15f;
   }
+  // Provisional full-game resonance rewards. Combat-specific legacy rewards remain in Simulation.
+  if(r.metal>=2)s.elementBonus[int(Element::Metal)]+=.15f;
+  if(r.metal>=4)s.critChance+=.1f;
+  if(r.wood>=2)s.regen+=.5f;
+  if(r.wood>=4){s.regen+=.5f;s.elementBonus[int(Element::Wood)]+=.2f;}
+  if(r.water>=2)s.elementBonus[int(Element::Water)]+=.15f;
+  if(r.water>=4)s.cooldownReduction+=.1f;
+  if(r.earth>=2)s.armor+=.08f;
+  if(r.earth>=4){s.maxHp+=30;s.elementBonus[int(Element::Earth)]+=.2f;}
+  if(formResonance_ && r.beast>=2)s.formBonus[int(Form::Beast)]+=.15f;
+  if(formResonance_ && r.beast>=4){s.regen+=.8f;s.formBonus[int(Form::Beast)]+=.15f;}
+  if(formResonance_ && r.talisman>=2)s.formBonus[int(Form::Talisman)]+=.15f;
+  if(formResonance_ && r.talisman>=4){s.area+=.2f;s.formBonus[int(Form::Talisman)]+=.15f;}
   b.stats = ClampStats(s);
   return b;
 }
@@ -413,9 +440,9 @@ void Progression::Recompute() {
   for (auto passive : state_.build.passives)
     state_.seenPassives[static_cast<std::size_t>(passive)] = true;
   const auto &r = state_.build.resonance;
-  const std::array<int, 5> counts{r.fire, r.thunder, r.body, r.sword, r.array};
+  const std::array<int, kResonanceCount> counts{r.fire, r.thunder, r.body, r.sword, r.array,r.metal,r.wood,r.water,r.earth,r.beast,r.talisman};
   for (std::size_t i = 0; i < counts.size(); ++i)
-    if (counts[i] >= 2 && (i < 2 || formResonance_))
+    if (counts[i] >= 2 && (i < 2 || (i>=5 && i<=8) || formResonance_))
       state_.seenResonances[i] = true;
 }
 bool Progression::HasTrigger(int c) const {
@@ -452,7 +479,7 @@ void Progression::GrantRelic(Relic r) {
   };
   if (duplicate(state_.equipped) || duplicate(state_.bag))
     return;
-  if (r.catalogId >= 0 && r.catalogId < 15)
+  if (r.catalogId >= 0 && r.catalogId < int(kRelicCount))
     state_.seenRelics[r.catalogId] = true;
   if (state_.equipped.size() < 6 && Compatible(r))
     state_.equipped.push_back(r);
@@ -519,7 +546,7 @@ std::vector<EntityId> Progression::FilterBag(const RelicFilter &f) const {
       continue;
     if (f.aspect >= 0 &&
         std::none_of(r.affixes.begin(), r.affixes.end(), [&](auto &a) {
-          return (int(a.kind) == int(AffixKind::Fire) + f.aspect) ||
+          return (f.aspect<int(kResonanceCount) && a.kind == AspectAffix(f.aspect)) ||
                  (a.kind == AffixKind::Resonance && a.code == f.aspect);
         }))
       continue;
@@ -613,27 +640,28 @@ void Progression::OnWaveEnded() {
   immortalThisWave_ = false;
   state_.pityWaves = pityWaves_;
 }
+std::array<float,4> Progression::DropRarityProbabilities(bool elite) const {
+  if(pityWaves_>=20)return {0,0,1,0};
+  std::array<float,4> w=elite?std::array<float,4>{0,98.3f,1.5f,.2f}:std::array<float,4>{70,29.05f,.6f,.35f};
+  const float luck=1+.015f*EffectiveLuck(state_.build.stats.luck);
+  for(int i=elite?2:1;i<4;++i)w[i]*=luck*dropRiskWeight_;
+  if(fullGame_)w[2]*=1+.1f*std::clamp(pityWaves_,0,19); // provisional gradual immortal pity
+  float total=std::accumulate(w.begin(),w.end(),0.f);for(auto&x:w)x/=total;return w;
+}
+std::string Progression::DescribeDropOdds(bool elite) const {
+  auto p=DropRarityProbabilities(elite);std::ostringstream o;o<<std::fixed<<std::setprecision(3);
+  o<<(elite?"大妖/灵兽保底法宝品阶：":"随机法宝品阶（已触发掉落后）：");
+  for(int i=0;i<4;++i)o<<RarityName(Rarity(i))<<" "<<p[i]*100<<"% ";
+  o<<"；连续未出仙品 "<<pityWaves_<<" 波；20波下一件随机掉落必仙，道品不保底";
+  if(fullGame_)o<<"；每未出仙品波仙品权重 +10%（暂定），按当前气运/劫数归一化后即上列实际概率";
+  return o.str();
+}
 Rarity Progression::RollRarity(bool elite) {
-  if (pityWaves_ >= 20) {
-    pityWaves_ = 0;
-    state_.pityWaves = 0;
-    immortalThisWave_ = true;
-    return Rarity::Immortal;
-  }
-  std::array<float, 4> w = elite ? std::array<float, 4>{0, 98.3f, 1.5f, .2f}
-                                 : std::array<float, 4>{70, 29.05f, .6f, .35f};
-  const float luck = 1 + .015f * EffectiveLuck(state_.build.stats.luck);
-  for (int i = 1; i < 4; ++i)
-    w[i] *= luck;
-  float v = Unit() * std::accumulate(w.begin(), w.end(), 0.f);
-  int i = 0;
-  for (; i < 3 && v >= w[i]; ++i)
-    v -= w[i];
-  if (i == 2) {
-    pityWaves_ = 0;
-    state_.pityWaves = 0;
-    immortalThisWave_ = true;
-  }
+  const bool hardPity=pityWaves_>=20;
+  const auto w=DropRarityProbabilities(elite);
+  float v=hardPity?0:Unit();int i=0;
+  for(;i<3 && v>=w[i];++i)v-=w[i];
+  if(i==2){pityWaves_=0;state_.pityWaves=0;immortalThisWave_=true;}
   return Rarity(i);
 }
 std::optional<Relic> Progression::OnKill(EnemyTier tier, bool beast) {
@@ -651,15 +679,19 @@ bool Progression::RollSpiritBeast() {
          std::min(1.f,
                   .4f * (1 + .015f * EffectiveLuck(state_.build.stats.luck)));
 }
+bool Progression::LegalRelic(int id) const {
+  if(id<0 || id>=int(kRelicCount))return false;
+  if(id<15)return true;
+  return fullGame_ && relicPoolUnlocked_ && (preferredRelics_.empty() || std::find(preferredRelics_.begin(),preferredRelics_.end(),id)!=preferredRelics_.end());
+}
 Relic Progression::GenerateRelic(Rarity r) {
   std::vector<int> pool;
-  for (auto &c : RelicCatalog())
-    if (c.rarity == r)
-      pool.push_back(c.id);
+  for(const auto& c:RelicCatalog())if(c.rarity==r && LegalRelic(c.id))pool.push_back(c.id);
   return GenerateRelicFromCatalog(pool[Index(int(pool.size()))]);
 }
 std::vector<Relic> Progression::BossRewards() {
-  std::vector<int> pool{9, 10, 11, 12, 13, 14};
+  std::vector<int> pool;
+  for(const auto&c:RelicCatalog())if(c.rarity>=Rarity::Immortal && LegalRelic(c.id))pool.push_back(c.id);
   std::vector<Relic> out;
   for (int i = 0; i < 3; ++i) {
     int k = Index(int(pool.size()));
@@ -667,6 +699,12 @@ std::vector<Relic> Progression::BossRewards() {
     pool.erase(pool.begin() + k);
   }
   return out;
+}
+void Progression::SetDropRiskWeight(float weight){dropRiskWeight_=std::isfinite(weight)?std::clamp(weight,1.f,10.f):1.f;}
+void Progression::SetRelicPool(const std::vector<int>& ids){preferredRelics_.clear();for(int id:ids)if(id>=0 && id<int(kRelicCount) && std::find(preferredRelics_.begin(),preferredRelics_.end(),id)==preferredRelics_.end())preferredRelics_.push_back(id);}
+void Progression::GenerateBossRewards(std::uint64_t ordinal){
+  if(ordinal==0 || ordinal<=lastBossOrdinal_)return;
+  lastBossOrdinal_=ordinal;bossRewardsGenerated_=false;GenerateBossRewards();
 }
 void Progression::GenerateBossRewards() {
   if (!bossRewardsGenerated_) {
@@ -685,44 +723,30 @@ bool Progression::ChooseBossReward(std::size_t index) {
   return true;
 }
 Relic Progression::GenerateRelicFromCatalog(int id) {
-  id = std::clamp(id, 0, 14);
+  id = std::clamp(id, 0, int(kRelicCount)-1);
   Relic r;
   r.id = nextRelic_++;
   r.catalogId = id;
   r.rarity = RelicCatalog()[id].rarity;
   int q = int(r.rarity);
-  static const float low[11][4] = {{10, 20, 35, 55},
-                                   {.02f, .04f, .07f, .10f},
-                                   {.1f, .2f, .4f, .7f},
-                                   {.04f, .07f, .12f, .18f},
-                                   {.02f, .04f, .07f, .10f},
-                                   {.04f, .07f, .12f, .18f},
-                                   {.02f, .03f, .05f, .08f},
-                                   {.02f, .03f, .05f, .08f},
-                                   {.5f, 1, 1.5f, 2.5f},
-                                   {.1f, .2f, .4f, .6f},
-                                   {1, 2, 4, 7}};
-  static const float high[11][4] = {{20, 35, 55, 80},
-                                    {.04f, .07f, .10f, .14f},
-                                    {.2f, .4f, .7f, 1},
-                                    {.07f, .12f, .18f, .26f},
-                                    {.04f, .07f, .10f, .14f},
-                                    {.07f, .12f, .18f, .25f},
-                                    {.03f, .05f, .08f, .12f},
-                                    {.03f, .05f, .08f, .10f},
-                                    {1, 1.5f, 2.5f, 3.5f},
-                                    {.2f, .4f, .6f, .9f},
-                                    {2, 4, 7, 10}};
   auto add = [&](AffixKind k, int code = 0) {
     float value = 0;
     if (k <= AffixKind::Luck)
-      value = low[int(k)][q] + Unit() * (high[int(k)][q] - low[int(k)][q]);
-    else if (k >= AffixKind::Fire && k <= AffixKind::Array)
+      { const auto range=AffixRange(k,r.rarity);value=range[0]+Unit()*(range[1]-range[0]); }
+    else if ((k >= AffixKind::Fire && k <= AffixKind::Array) || (k>=AffixKind::Metal && k<=AffixKind::Talisman))
       value = q == 1 ? .06f : q == 2 ? .10f : .15f;
     else if (k == AffixKind::Resonance)
       value = 1;
     r.affixes.push_back({k, value, code});
   };
+  if(id>=15){
+    const auto& c=RelicCatalog()[id];add(c.primary);
+    if(q==0){add(c.secondary);}
+    else {add(c.aspect);add(AffixKind::Trigger,c.trigger);}
+    if(q>=2)add(AffixKind::Mystery,c.mystery);
+    if(q==3){add(AffixKind::Resonance,c.resonanceCode);add(AffixKind::Unique,c.uniqueCode);}
+    return r;
+  }
   switch (id) {
   case 0:
     add(AffixKind::MaxHp);

@@ -1,5 +1,9 @@
 # 《道衍万象》游戏文档
 
+## 当前完整功能原型
+
+最新指令已扩大到完整设计功能。先读 [完整设计交接](full-game/HANDOFF.md)、[最终需求复核](full-game/REQUIREMENTS-COVERAGE-FINAL.md)、[自然操作样例](full-game/NATURAL-PLAY-CHECK.md)。下方旧 MVP 资料是历史阶段证据，不能作为当前三模式/新增内容的实机验收。
+
 ## 文档目录
 
 | 文档 | 内容与用途 |

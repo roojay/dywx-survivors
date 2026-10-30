@@ -1,80 +1,86 @@
 {
-  "artifact": "UE5 survivors MVP source and original resources",
-  "status": "offline_verified; Unreal build and playable binary delivery pending",
-  "source_baseline": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
+  "artifact": "UE5 full-design gameplay prototype source and original resources",
+  "status": "source_implemented_and_offline_verified; Unreal and human acceptance pending",
+  "source_baseline": "c77483eb59985fc344879c59fd40e239ab053ef2",
+  "remote_last_verified": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
   "gameplay_reference": [
     "docs/gameplay-design-v0.1.md",
     "docs/mvp-prototype-config-v0.1.md"
   ],
   "implemented": {
-    "heroes": 2,
-    "base_spells": 10,
-    "passives": 5,
-    "fusion_recipes": 2,
-    "relics": 15,
-    "default_wave_durations": [
-      100,
-      120,
-      140,
-      160
+    "heroes": 3,
+    "caves": 3,
+    "base_spells": 30,
+    "fusion_recipes": 6,
+    "passives": 11,
+    "relic_themes": 80,
+    "modes": [
+      "quick",
+      "traditional",
+      "endless"
     ],
-    "boss_phase_hp": [
-      14000,
-      16000
+    "quick_waves": [
+      4,
+      6
     ],
-    "mode": "quick",
+    "traditional_waves": 10,
+    "endless_boss_every_waves": 5,
+    "elements": 6,
+    "forms": 5,
+    "anomalies": 6,
     "inventory_slots": 6,
-    "max_live_wave_population": 130,
-    "source_mesh_count": 31
+    "source_mesh_count": 31,
+    "local_endless_ranking_limit": 20,
+    "systems": [
+      "layered unlocks",
+      "legacy and trials",
+      "seeded connected finite arenas",
+      "cave-specific boss mechanics and relic pools",
+      "opportunities",
+      "currency shops and reforge",
+      "hidden affix identification and treasure reveal",
+      "seal and skip",
+      "per-hero consumed boundary saves",
+      "numeric codex and hover comparison"
+    ]
   },
-  "passed_offline": [
-    "C++20 core and progression test suites",
-    "ASan/UBSan with leak detection disabled due host ptrace",
-    "independent acceptance and safety/stress tests",
-    "natural 8-direction playthrough victories for both heroes without state/damage/XP injection",
-    "source contracts, font metrics, geometry and media validation",
-    "same-binary and sanitizer winning replay consistency"
-  ],
-  "natural_run_examples": [
-    {
-      "hero": "Sword",
-      "seed": 12,
-      "elapsed_seconds": 636.272,
-      "boss_seconds": 116.338
-    },
-    {
-      "hero": "Body",
-      "seed": 73,
-      "elapsed_seconds": 663.815,
-      "boss_seconds": 143.881
-    }
-  ],
+  "offline_evidence": {
+    "aggregate": "passed immutable snapshot full suite normal and ASan/UBSan; final UI-label delta full normal suite passed",
+    "natural_sample_count": 10,
+    "natural_wins": 2,
+    "natural_deaths": 6,
+    "natural_sample_bound": 2,
+    "natural_normal_vs_sanitized": "byte-identical results and traces; source hashes verified",
+    "natural_report": "docs/full-game/NATURAL-PLAY-CHECK.md"
+  },
   "not_run": [
-    "UE UHT/UBT for current MVP",
+    "UE UHT/UBT for current source",
     "UE bootstrap/import/cook/package",
-    "packaged launch and actual Slate input/layout",
+    "packaged launch and Slate interaction/layout",
     "actual GPU/frame pacing/VRAM",
-    "human-play fun/balance acceptance",
-    "LeakSanitizer"
+    "real file-replacement/power-loss tests",
+    "human playability and balance acceptance",
+    "LeakSanitizer (host ptrace limitation)"
   ],
   "known_limits": [
-    "fixed six-obstacle arena rather than full procedural tile assembly",
-    "prototype art, not concept-level final fidelity",
-    "mesh-pose walking rather than skeletal animation",
-    "Body boss pacing can exceed parameter target",
-    "local profile replacement crash durability unverified"
+    "new tuning and theme variations are provisional, not 80 independent relic mechanisms",
+    "Beast fixed natural quick sample did not finish by 1200 simulated seconds",
+    "new-account tier1 sample died at wave2; novice balance not proven",
+    "traditional samples did not naturally clear; 30-40min completion target unverified",
+    "prototype lowpoly art and mesh-pose gait, not concept fidelity or skeletal animation",
+    "source/Blender checks do not establish Unreal performance"
   ],
   "proofs": [
-    "docs/mvp/COVERAGE.md",
-    "docs/mvp/PLAYTHROUGH-CALIBRATION.md",
-    "docs/mvp/UE-INTEGRATION-REVIEW.md",
-    "docs/mvp/MVP-HANDOFF.md"
+    "docs/full-game/HANDOFF.md",
+    "docs/full-game/REQUIREMENTS-COVERAGE-FINAL.md",
+    "docs/full-game/CROSS-SYSTEM-REVIEW.md",
+    "docs/full-game/UE-OFFICIAL-REVIEW.md",
+    "docs/full-game/SAVE.md",
+    "docs/full-game/FINAL-OFFLINE-VALIDATION.md"
   ],
   "delivery": {
     "new_exe": false,
-    "remote_mvp_push_verified": false,
-    "reason": "Windows offline, dot lacks UE/GPU; GitHub write confirmation did not complete"
-  },
-  "offline_video": "Art/Blender/MVP/trace-preview/simulation-trace-offline-not-ue.mp4",
-  "offline_video_warning": "Blender rendering of actual core snapshots; not Unreal runtime or performance evidence"
+    "remote_push_verified": false,
+    "blocker": "GitHub connector 16MiB request cap cannot carry 24MB fonts; CLI lacks authentication and no connected executor"
+  }
 }

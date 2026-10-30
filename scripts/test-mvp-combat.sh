@@ -10,7 +10,7 @@ if [[ "${SANITIZE:-0}" == 1 ]]; then
   # The dot execution service traces child processes; LSan cannot run under ptrace.
   export ASAN_OPTIONS="${ASAN_OPTIONS:-detect_leaks=0}"
 fi
-SOURCES=(Source/DywxUI/Private/MVP/Simulation.cpp Source/DywxUI/Private/MVP/Progression.cpp Source/DywxUI/Private/MVP/ContentCatalog.cpp)
+SOURCES=(Source/DywxUI/Private/MVP/Simulation.cpp Source/DywxUI/Private/MVP/Progression.cpp Source/DywxUI/Private/MVP/ContentCatalog.cpp Source/DywxUI/Private/MVP/{Campaign,Economy,Arena,SaveCodec}.cpp)
 for TEST in mvp_simulation_tests mvp_proc_tests; do
   "$CXX" "${FLAGS[@]}" "${SOURCES[@]}" "tests/$TEST.cpp" -o "$BUILD_DIR/$TEST"
   "$BUILD_DIR/$TEST"

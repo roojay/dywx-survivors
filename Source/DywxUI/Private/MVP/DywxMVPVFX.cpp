@@ -8,6 +8,13 @@ float Heading(Vec2 P) { return FMath::RadiansToDegrees(FMath::Atan2(-P.y,P.x)); 
 
 void ADywxMVPWorld::SetupVFX()
 {
+    const Element Elements[]={Element::Metal,Element::Wood,Element::Water,Element::Earth,Element::None};
+    const FLinearColor Colors[]={FLinearColor(.8,.8,.55),FLinearColor(.1,.65,.25),FLinearColor(.08,.55,.85),FLinearColor(.55,.35,.1),FLinearColor(.5,.5,.55)};
+    for(int32 I=0;I<5;I++) {
+        MakeBatch(ElementBatch(Elements[I],TEXT("Ring")),TEXT("unit_ring"),Colors[I],true,true);
+        MakeBatch(ElementBatch(Elements[I],TEXT("Beam")),TEXT("unit_box"),Colors[I],true,true);
+        MakeBatch(ElementBatch(Elements[I],TEXT("Shot")),TEXT("unit_diamond"),Colors[I],true,true);
+    }
     // Startup-only geometry: sparse ember strokes, no opaque ground discs or transparency sorting.
     TArray<FVector3f> V; TArray<int32> I;
     for(int32 J=0;J<3;J++) {
@@ -20,6 +27,13 @@ void ADywxMVPWorld::SetupVFX()
     for(int32 J=0;J<64;J++) { const float A=2*PI*J/64; for(float R:{100.f,98.5f}) V.Add(FVector3f(FMath::Cos(A)*R,FMath::Sin(A)*R,0)); }
     for(int32 J=0;J<64;J++) {const int32 K=(J+1)%64;I.Append({J*2,K*2,J*2+1,K*2,K*2+1,J*2+1});}
     BuildMesh(TEXT("unit_faint_boundary"),V,I,{});
+    // Distinct but subdued anomaly colors; hostile red is reserved for danger.
+    const FLinearColor AnomalyColors[]={FLinearColor(.18,.11,.32),FLinearColor(.04,.24,.19),FLinearColor(.27,.15,.04),FLinearColor(.08,.19,.24),FLinearColor(.22,.08,.22),FLinearColor(.20,.22,.08)};
+    for(int32 K=0;K<int32(AnomalyId::Count);K++)
+        MakeBatch(FName(*FString::Printf(TEXT("AnomalyHalo%d"),K)),TEXT("unit_faint_boundary"),AnomalyColors[K],true,true);
+    const Element AuraElements[]={Element::Fire,Element::Thunder,Element::Metal,Element::Wood,Element::Water,Element::Earth,Element::None};
+    const FLinearColor AuraColors[]={FLinearColor(.24,.07,.02),FLinearColor(.12,.055,.24),FLinearColor(.19,.19,.13),FLinearColor(.025,.16,.06),FLinearColor(.02,.14,.21),FLinearColor(.14,.09,.025),FLinearColor(.12,.12,.13)};
+    for(int32 K=0;K<7;K++) MakeBatch(ElementBatch(AuraElements[K],TEXT("Aura")),TEXT("unit_faint_boundary"),AuraColors[K],true,true);
     MakeBatch(TEXT("BurnEmbers"),TEXT("unit_embers"),FLinearColor(.22,.055,.008),true,true);
     MakeBatch(TEXT("AuraBoundary"),TEXT("unit_faint_boundary"),FLinearColor(.16,.075,.025),true,true);
     MakeBatch(TEXT("ThunderBoundary"),TEXT("unit_faint_boundary"),FLinearColor(.12,.055,.24),true,true);
@@ -35,13 +49,17 @@ void ADywxMVPWorld::RenderVFX(const Snapshot& S,bool& NewPalm,bool& NewThunder,u
     // Co-located large friendly areas share one boundary, even when a proc is not followPlayer.
     auto IsAura=[&](const EffectState& E) {
         const float DX=E.position.x-S.player.position.x,DY=E.position.y-S.player.position.y;
-        return !E.hostile && E.kind!=EffectKind::Slash &&
+        return !E.hostile && E.form!=Form::Beast && E.kind!=EffectKind::Slash &&
             (E.followPlayer || (E.kind==EffectKind::Burn && E.radius>1.f && DX*DX+DY*DY<.64f));
     };
-    float AuraRadius=0;
-    for(const auto& E:S.effects) if(IsAura(E))
-        AuraRadius=FMath::Max(AuraRadius,E.radius);
-    if(AuraRadius>0) { Add(TEXT("AuraBoundary"),World(S.player.position,3),FVector(AuraRadius,AuraRadius,1)); ++FriendlyInstances; }
+    std::array<float,static_cast<std::size_t>(Element::Count)> AuraRadii{};
+    for(const auto& E:S.effects) if(IsAura(E)) {
+        const int32 K=FMath::Clamp(int32(E.element),0,int32(Element::Count)-1);
+        AuraRadii[K]=FMath::Max(AuraRadii[K],E.radius);
+    }
+    for(int32 K=0;K<int32(Element::Count);K++) if(AuraRadii[K]>0) {
+        Add(ElementBatch(Element(K),TEXT("Aura")),World(S.player.position,3),FVector(AuraRadii[K],AuraRadii[K],1)); ++FriendlyInstances;
+    }
     for(const auto& E:S.effects) {
         if(E.id>LastEffect) { NewPalm |= E.source==SpellId::FlamePalm; NewThunder |= !E.hostile && E.element==Element::Thunder; }
         MaxEffect=FMath::Max(MaxEffect,uint64(E.id));
@@ -50,14 +68,19 @@ void ADywxMVPWorld::RenderVFX(const Snapshot& S,bool& NewPalm,bool& NewThunder,u
                 Add(Batch,P,Scale,Yaw); if(!E.hostile) ++FriendlyInstances;
             }
         };
-        const bool Warning=E.warning>0; const FName Ring=E.hostile?TEXT("WarningRing"):(E.element==Element::Thunder?TEXT("ThunderRing"):TEXT("FireRing"));
-        const FName Beam=E.hostile?TEXT("WarningBeam"):(E.element==Element::Thunder?TEXT("ThunderBeam"):TEXT("FireBeam"));
+        const bool Warning=E.warning>0; const FName Ring=E.hostile?TEXT("WarningRing"):ElementBatch(E.element,TEXT("Ring"));
+        const FName Beam=E.hostile?TEXT("WarningBeam"):ElementBatch(E.element,TEXT("Beam"));
         const FVector At=World(E.position,E.hostile?8:3);
         const float Radius=FMath::Max(E.radius,.05f);
         if(IsAura(E)) continue;
+        if(!E.hostile && E.form==Form::Beast) {
+            Emit(TEXT("BeastCompanion"),At+FVector(0,0,55),FVector(.35),Heading(E.position-S.player.position));
+            Emit(Ring,At,FVector(.35,.35,1));
+            continue;
+        }
         if(!E.hostile && E.kind==EffectKind::Burn) {
             // Visual-only coalescing: never mutate duration, radius, damage or core RNG.
-            if(Radius>1.f) { Emit(TEXT("FriendlyBoundary"),At,FVector(Radius,Radius,1)); continue; }
+            if(Radius>1.f) { Emit(Ring,At,FVector(Radius,Radius,1)); continue; }
             const FIntPoint Cell(FMath::FloorToInt(E.position.x/.8f),FMath::FloorToInt(E.position.y/.8f));
             if(!BurnCells.Contains(Cell)) {
                 BurnCells.Add(Cell);
@@ -109,7 +132,7 @@ void ADywxMVPWorld::RenderVFX(const Snapshot& S,bool& NewPalm,bool& NewThunder,u
             else if(E.kind==EffectKind::Lightning) {
                 if(Warning) Emit(TEXT("ThunderBoundary"),At,FVector(Radius,Radius,1));
                 else if(E.duration-E.life<.18f) Emit(Beam,At,FVector(.045,.045,2.2));
-            } else Emit(TEXT("FriendlyBoundary"),At,FVector(Radius,Radius,1));
+            } else Emit(Ring,At,FVector(Radius,Radius,1));
         }
     }
 }
