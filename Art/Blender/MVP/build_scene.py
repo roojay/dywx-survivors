@@ -4,15 +4,17 @@ from mathutils import Vector
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
 OUT=ROOT/'Content/MVP/Geometry'; HERE=Path(__file__).resolve().parent
+# Original accepted base envelopes: keep art revisions inside the collision/placement contract.
+BASE_BOUNDS={'hero_body': [[-0.65, -0.45361, 0.0], [0.499751, 0.45361, 1.793]], 'hero_sword': [[-0.61, -0.19, -0.0], [1.18, 0.19, 0.16]], 'enemy_swarm': [[-0.47, -0.480942, 0.005], [0.49, 0.480942, 1.154528]], 'enemy_exploder': [[-0.32185, -0.338121, 0.19], [0.343637, 0.338121, 1.26]], 'enemy_charger': [[-1.02, -0.431298, 0.005], [0.94, 0.431298, 1.31]], 'enemy_boss': [[-1.785, -0.754772, 0.00875], [1.645, 0.754772, 2.2925]], 'enemy_rangedbird': [[-1.0, -1.0, 0.48], [0.53, 1.0, 1.18]], 'enemy_supporttotem': [[-0.303109, -0.35, 0.0], [0.303109, 0.35, 1.33]], 'enemy_summoner': [[-0.56, -0.433013, 0.06], [0.56, 0.433013, 0.94]], 'enemy_spirit': [[-0.635453, -0.151609, 0.025004], [0.49515, 0.151609, 0.85]], 'rock': [[-0.828994, -0.818085, 0.0], [0.940872, 0.997783, 1.060426]], 'pillar': [[-0.5, -0.5, 0.0], [0.5, 0.5, 2.83]], 'tile': [[-0.49, -0.49, -0.14], [0.49, 0.49, 0.002]], 'shrine_banner': [[-0.24, -0.747063, 0.0], [0.24, 0.747063, 3.05]], 'shrine_arch': [[-0.7, -2.65, 0.0], [0.7, 2.65, 4.42]]}
 random.seed(73)
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
 # Linear-light palette; subdued stone and ivory, saturated accents restricted to details.
-P={'ivory':(.72,.69,.59,1),'white':(.9,.88,.79,1),'cloth':(.27,.30,.33,1),'ink':(.018,.024,.032,1),'skin':(.56,.32,.20,1),'gold':(.57,.30,.065,1),'brightgold':(.95,.56,.12,1),'blue':(.10,.42,.65,1),'stone':(.055,.075,.105,1),'edge':(.12,.16,.21,1),'demon':(.12,.105,.12,1),'bone':(.32,.31,.30,1),'red':(.31,.035,.022,1),'fire':(.95,.21,.025,1),'purple':(.35,.12,.68,1),'eye':(.85,.63,.21,1)}
+P={'ivory':(.72,.69,.59,1),'white':(.9,.88,.79,1),'cloth':(.27,.30,.33,1),'ink':(.018,.024,.032,1),'skin':(.56,.32,.20,1),'gold':(.36,.22,.075,1),'brightgold':(.64,.37,.105,1),'blue':(.10,.42,.65,1),'stone':(.060,.068,.078,1),'edge':(.12,.135,.15,1),'demon':(.068,.060,.069,1),'bone':(.25,.25,.23,1),'mane':(.34,.32,.27,1),'red':(.31,.035,.022,1),'fire':(.83,.105,.025,1),'purple':(.23,.085,.32,1),'eye':(.85,.63,.21,1)}
 M={}
 for k,c in P.items():
  m=bpy.data.materials.new(k); m.diffuse_color=c; m.use_nodes=True
- bs=m.node_tree.nodes.get('Principled BSDF'); bs.inputs['Base Color'].default_value=c; bs.inputs['Roughness'].default_value=.48 if 'gold' in k else .76
- if k in ['gold','brightgold']: bs.inputs['Metallic'].default_value=.6
+ bs=m.node_tree.nodes.get('Principled BSDF'); bs.inputs['Base Color'].default_value=c; bs.inputs['Roughness'].default_value=.84 if 'gold' in k else .9
+ if k in ['gold','brightgold']: bs.inputs['Metallic'].default_value=.22
  if k in ['fire','purple','eye','blue']: bs.inputs['Emission Color'].default_value=c; bs.inputs['Emission Strength'].default_value=.28
  M[k]=m
 parts=[]; assets={}
@@ -24,10 +26,16 @@ def finish(o,mat,smooth=True):
 
 def ell(pos,scale,mat,seg=10,rings=6):
  bpy.ops.mesh.primitive_uv_sphere_add(segments=seg,ring_count=rings,location=pos)
- o=bpy.context.object; o.scale=scale; return finish(o,mat)
+ o=bpy.context.object; o.scale=scale
+ # Flatten broad shell/armor planes rather than shading every mass like a bead.
+ if mat in {'stone','demon','ink'} and min(scale)>.055:
+  for v in o.data.vertices:
+   v.co=Vector(tuple(math.copysign(abs(c)**.72,c) for c in v.co))
+  return finish(o,mat,False)
+ return finish(o,mat,mat in {'skin','fire','eye'})
 def rod(a,b,r1,r2,mat,n=8):
  d=Vector(b)-Vector(a); bpy.ops.mesh.primitive_cone_add(vertices=n,radius1=r1,radius2=r2,depth=d.length,location=(Vector(a)+Vector(b))/2)
- o=bpy.context.object; o.rotation_euler=d.to_track_quat('Z','Y').to_euler(); return finish(o,mat)
+ o=bpy.context.object; o.rotation_euler=d.to_track_quat('Z','Y').to_euler(); return finish(o,mat,mat in {'skin','fire'})
 def box(pos,scale,mat,bevel=.04):
  bpy.ops.mesh.primitive_cube_add(size=2,location=pos);o=bpy.context.object;o.scale=scale
  bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
@@ -38,7 +46,20 @@ def box(pos,scale,mat,bevel=.04):
 def mesh(v,f,mat):
  d=bpy.data.meshes.new('sculpted');d.from_pydata(v,[],f);d.update();o=bpy.data.objects.new('sculpted',d);bpy.context.collection.objects.link(o);return finish(o,mat,False)
 def horn(points,r,mat,n=7):
- for i in range(len(points)-1):rod(points[i],points[i+1],r*(1-i/(len(points)-1)),r*(1-(i+1)/(len(points)-1)),mat,n)
+ # One continuous swept surface: no overlapping cone collars at every bend.
+ pts=[Vector(p) for p in points];v=[];f=[]
+ for i,p in enumerate(pts[:-1]):
+  tangent=(pts[min(i+1,len(pts)-1)]-pts[max(0,i-1)]).normalized()
+  u=tangent.cross(Vector((0,0,1)))
+  if u.length<.01:u=tangent.cross(Vector((0,1,0)))
+  u.normalize();w=tangent.cross(u).normalized();radius=r*(1-i/(len(pts)-1))
+  for j in range(n):v.append(p+radius*(u*math.cos(2*math.pi*j/n)+w*math.sin(2*math.pi*j/n)))
+ f.append(tuple(reversed(range(n))))
+ for i in range(len(pts)-2):
+  for j in range(n):f.append((i*n+j,i*n+(j+1)%n,(i+1)*n+(j+1)%n,(i+1)*n+j))
+ tip=len(v);v.append(pts[-1]);last=(len(pts)-2)*n
+ for j in range(n):f.append((last+j,last+(j+1)%n,tip))
+ return mesh(v,f,mat)
 def leaf(a,b,width,mat,depth=.025):
  # Thick tapering blade / cloth ribbon with intentional ridge.
  a,b=Vector(a),Vector(b); d=b-a; side=d.cross(Vector((0,0,1)))
@@ -59,7 +80,37 @@ def end(name):
  bpy.ops.object.transform_apply(location=False,rotation=True,scale=True)
  # Bake world transform into vertices, then pivot at feet/world origin.
  for v in o.data.vertices:v.co=o.matrix_world@v.co
- o.matrix_world.identity(); assets[name]=o;parts.clear();o.hide_render=True;o.hide_set(True)
+ o.matrix_world.identity()
+ # Keep original world-axis envelopes exactly; no simulation/collision changes.
+ if name in BASE_BOUNDS:
+  old_min,old_max=BASE_BOUNDS[name]
+  if name=='enemy_boss':old_min=[v/1.75 for v in old_min];old_max=[v/1.75 for v in old_max]
+  lo=[min(v.co[i] for v in o.data.vertices) for i in range(3)]
+  hi=[max(v.co[i] for v in o.data.vertices) for i in range(3)]
+  for v in o.data.vertices:
+   for i in range(3):v.co[i]=old_min[i]+(v.co[i]-lo[i])/(hi[i]-lo[i])*(old_max[i]-old_min[i])
+ o.data.update()
+ # Authored broad facet values, shared by Blender previews and runtime vertex colours.
+ # Not ambient-occlusion baking or a shader dependency: restrained hand-painted grouping.
+ originals=list(o.data.materials);tone_slots={}
+ for face in o.data.polygons:
+  base=originals[face.material_index]
+  if base.name in {'eye','fire','purple','blue','skin'}:continue
+  normal=face.normal
+  level=2 if normal.z>.55 else 0 if normal.z<-.25 else 1
+  # Sparse edge wear, not random per-vertex noise.
+  if base.name in {'stone','edge','demon','bone'} and face.index%17==0:level=min(2,level+1)
+  key=(base.name,level)
+  if key not in tone_slots:
+   shade=bpy.data.materials.get(base.name+'_facet_'+str(level))
+   if shade is None:
+    shade=base.copy();shade.name=base.name+'_facet_'+str(level)
+    factor=(.72,.92,1.08)[level]
+    shade.diffuse_color=tuple(min(1,c*factor) for c in base.diffuse_color[:3])+(1,)
+    shade.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=shade.diffuse_color
+   tone_slots[key]=len(o.data.materials);o.data.materials.append(shade)
+  face.material_index=tone_slots[key]
+ assets[name]=o;parts.clear();o.hide_render=True;o.hide_set(True)
  return o
 
 def robe():
@@ -172,9 +223,9 @@ def beast(boss=False):
   for k in range(3):rod((.71+k*.07,s*.125,.58),(.74+k*.07,s*.125,.48),.024,0,'bone',5)
   horn([(.42,s*.22,.92),(.28,s*.36,1.13),(.04,s*.40,1.27),(-.09,s*.38,1.31)],.095,'gold',8)
   for k in range(5):
-   horn([(.35-k*.11,s*.25,.89),(.15-k*.13,s*(.30+.018*k),1.02),(-.12-k*.15,s*(.32+.02*k),.96),(-.30-k*.16,s*(.29+.025*k),1.04)],.07,'ivory' if boss else 'gold',7)
+   horn([(.35-k*.11,s*.25,.89),(.15-k*.13,s*(.30+.018*k),1.02),(-.12-k*.15,s*(.32+.02*k),.96),(-.30-k*.16,s*(.29+.025*k),1.04)],.07,'mane' if boss else 'gold',7)
  for i in range(5):
-  horn([(.35-i*.13,0,.96),(.17-i*.14,0,1.10),(-.05-i*.16,0,1.04),(-.2-i*.18,0,1.14)],.085,'ivory' if boss else 'brightgold',7)
+  horn([(.35-i*.13,0,.96),(.17-i*.14,0,1.10),(-.05-i*.16,0,1.04),(-.2-i*.18,0,1.14)],.085,'mane' if boss else 'brightgold',7)
  horn([(-.48,0,.68),(-.85,0,.87),(-1.02,.16,1.03)],.07,'bone' if boss else 'gold')
  if boss:
   for i in range(4):
@@ -332,7 +383,7 @@ for base,prefix in [('hero_body','hero_walk'),('enemy_swarm','enemy_swarm_walk')
      weight=max(0,min(1,(-v.co.x-.12)/.5))
      v.co.y+=math.sin(phase+.6)*.025*weight
   o.data.update()
-# Export dense indexed triangles and linear palette. Smooth vertex normals included.
+# Export indexed triangles and linear palette; smooth skin and hard authored facets.
 result={'version':1,'coordinateSystem':'RH_Z_UP_X_FORWARD','winding':'CCW_OUTWARD','units':'metres','ueConversion':'(x,-y,z)*100; reverse triangle indices 1 and 2','meshes':[]}
 for name,o in assets.items():
  d=o.data;d.calc_loop_triangles();vs=[];ns=[];cs=[];ts=[];dedup={}
@@ -345,7 +396,7 @@ for name,o in assets.items():
    color=tuple(d.materials[t.material_index].diffuse_color)
    key=(vi,tuple(round(n,6) for n in normal),color)
    if key not in dedup:
-    dedup[key]=len(vs);vs.append([round(x,6) for x in v.co]);ns.append([round(x,6) for x in normal]);cs.append(list(color))
+    dedup[key]=len(vs);vs.append([round(x,6) for x in v.co]);ns.append([round(x,6) for x in normal]);cs.append([round(x,6) for x in color])
    inds.append(dedup[key])
   ts.append(inds)
  result['meshes'].append({'name':name,'vertices':vs,'triangles':ts,'colors':cs,'normals':ns})

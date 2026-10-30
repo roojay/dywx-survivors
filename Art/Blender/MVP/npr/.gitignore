@@ -1,0 +1,7 @@
+# Reproducible render intermediates; keep annotated finals and source/evidence.
+*-raw.png
+*-draft-*
+*.log
+*.blend1
+before.blend
+__pycache__/

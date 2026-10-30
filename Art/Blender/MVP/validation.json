@@ -1,14 +1,14 @@
 {
   "source": "Content/MVP/Geometry/scene.json",
-  "sha256": "4a2582433ee25bbff8783e6c57cbd9ca3bc21ec4a3434150fb704cd37277ba0c",
+  "sha256": "0081e5e1af98e9d163e83e5dcbfc807465b1ce5b92bc2cb32867d1231ce9eb11",
   "meshCount": 31,
-  "rawBytes": 4857902,
+  "rawBytes": 9147202,
   "passed": true,
   "meshes": [
     {
       "name": "hero_body",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4028,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -22,18 +22,18 @@
           1.793
         ]
       },
-      "signedVolume": 0.178295
+      "signedVolume": 0.17881
     },
     {
       "name": "hero_sword",
-      "vertices": 142,
-      "triangles": 164,
+      "vertices": 352,
+      "triangles": 158,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
           -0.61,
           -0.19,
-          -0.0
+          0.0
         ],
         "max": [
           1.18,
@@ -41,12 +41,12 @@
           0.16
         ]
       },
-      "signedVolume": 0.00728
+      "signedVolume": 0.007281
     },
     {
       "name": "enemy_swarm",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4028,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -60,12 +60,12 @@
           1.154528
         ]
       },
-      "signedVolume": 0.143534
+      "signedVolume": 0.175206
     },
     {
       "name": "enemy_exploder",
-      "vertices": 481,
-      "triangles": 874,
+      "vertices": 1568,
+      "triangles": 818,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -79,12 +79,12 @@
           1.26
         ]
       },
-      "signedVolume": 0.180946
+      "signedVolume": 0.193492
     },
     {
       "name": "enemy_charger",
-      "vertices": 1398,
-      "triangles": 2432,
+      "vertices": 5382,
+      "triangles": 2074,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -98,12 +98,12 @@
           1.31
         ]
       },
-      "signedVolume": 0.52897
+      "signedVolume": 0.65129
     },
     {
       "name": "enemy_boss",
-      "vertices": 1910,
-      "triangles": 3024,
+      "vertices": 7101,
+      "triangles": 2666,
       "triangleBudgetExclusive": 10000,
       "boundsMetres": {
         "min": [
@@ -117,11 +117,11 @@
           2.2925
         ]
       },
-      "signedVolume": 2.987639
+      "signedVolume": 3.689481
     },
     {
       "name": "enemy_rangedbird",
-      "vertices": 905,
+      "vertices": 1499,
       "triangles": 624,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
@@ -136,11 +136,11 @@
           1.18
         ]
       },
-      "signedVolume": 0.087778
+      "signedVolume": 0.098272
     },
     {
       "name": "enemy_supporttotem",
-      "vertices": 185,
+      "vertices": 530,
       "triangles": 330,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
@@ -159,7 +159,7 @@
     },
     {
       "name": "enemy_summoner",
-      "vertices": 542,
+      "vertices": 1492,
       "triangles": 744,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
@@ -174,12 +174,12 @@
           0.94
         ]
       },
-      "signedVolume": 0.265703
+      "signedVolume": 0.342892
     },
     {
       "name": "enemy_spirit",
-      "vertices": 271,
-      "triangles": 486,
+      "vertices": 1194,
+      "triangles": 462,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -193,7 +193,7 @@
           0.85
         ]
       },
-      "signedVolume": 0.051372
+      "signedVolume": 0.048366
     },
     {
       "name": "rock",
@@ -212,12 +212,12 @@
           1.060426
         ]
       },
-      "signedVolume": 1.642877
+      "signedVolume": 1.642878
     },
     {
       "name": "pillar",
-      "vertices": 1080,
-      "triangles": 756,
+      "vertices": 1492,
+      "triangles": 724,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -231,7 +231,7 @@
           2.83
         ]
       },
-      "signedVolume": 1.26885
+      "signedVolume": 1.260612
     },
     {
       "name": "tile",
@@ -254,7 +254,7 @@
     },
     {
       "name": "shrine_banner",
-      "vertices": 1058,
+      "vertices": 1704,
       "triangles": 680,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
@@ -273,8 +273,8 @@
     },
     {
       "name": "shrine_arch",
-      "vertices": 1960,
-      "triangles": 1392,
+      "vertices": 3076,
+      "triangles": 1376,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -288,12 +288,12 @@
           4.42
         ]
       },
-      "signedVolume": 6.615955
+      "signedVolume": 6.615369
     },
     {
       "name": "hero_walk_0",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4074,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -307,12 +307,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.17811
+      "signedVolume": 0.178614
     },
     {
       "name": "hero_walk_1",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4152,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -326,12 +326,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.177408
+      "signedVolume": 0.177904
     },
     {
       "name": "hero_walk_2",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4187,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -345,12 +345,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.177343
+      "signedVolume": 0.177843
     },
     {
       "name": "hero_walk_3",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4152,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -364,12 +364,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.177406
+      "signedVolume": 0.177918
     },
     {
       "name": "hero_walk_4",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4074,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -383,12 +383,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.178108
+      "signedVolume": 0.178633
     },
     {
       "name": "hero_walk_5",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4170,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -402,12 +402,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.17883
+      "signedVolume": 0.179364
     },
     {
       "name": "hero_walk_6",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4187,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -421,12 +421,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.179284
+      "signedVolume": 0.179815
     },
     {
       "name": "hero_walk_7",
-      "vertices": 1656,
-      "triangles": 2116,
+      "vertices": 4170,
+      "triangles": 1996,
       "triangleBudgetExclusive": 5000,
       "boundsMetres": {
         "min": [
@@ -440,12 +440,12 @@
           1.793
         ]
       },
-      "signedVolume": 0.178832
+      "signedVolume": 0.17935
     },
     {
       "name": "enemy_swarm_walk_0",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4046,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -459,12 +459,12 @@
           1.154528
         ]
       },
-      "signedVolume": 0.143432
+      "signedVolume": 0.175104
     },
     {
       "name": "enemy_swarm_walk_1",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4115,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -473,17 +473,17 @@
           0.008
         ],
         "max": [
-          0.553623,
+          0.553629,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.14309
+      "signedVolume": 0.174762
     },
     {
       "name": "enemy_swarm_walk_2",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4117,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -492,17 +492,17 @@
           0.008
         ],
         "max": [
-          0.578308,
+          0.578316,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.142945
+      "signedVolume": 0.174606
     },
     {
       "name": "enemy_swarm_walk_3",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4115,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -511,17 +511,17 @@
           0.008
         ],
         "max": [
-          0.553623,
+          0.553629,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.14309
+      "signedVolume": 0.174762
     },
     {
       "name": "enemy_swarm_walk_4",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4046,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -535,12 +535,12 @@
           1.154528
         ]
       },
-      "signedVolume": 0.143432
+      "signedVolume": 0.175104
     },
     {
       "name": "enemy_swarm_walk_5",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4124,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -549,17 +549,17 @@
           0.008
         ],
         "max": [
-          0.553623,
+          0.553629,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.143088
+      "signedVolume": 0.17476
     },
     {
       "name": "enemy_swarm_walk_6",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4135,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -568,17 +568,17 @@
           0.008
         ],
         "max": [
-          0.578308,
+          0.578316,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.142942
+      "signedVolume": 0.174604
     },
     {
       "name": "enemy_swarm_walk_7",
-      "vertices": 1066,
-      "triangles": 1664,
+      "vertices": 4124,
+      "triangles": 1588,
       "triangleBudgetExclusive": 3000,
       "boundsMetres": {
         "min": [
@@ -587,12 +587,12 @@
           0.008
         ],
         "max": [
-          0.553623,
+          0.553629,
           0.480942,
           1.154528
         ]
       },
-      "signedVolume": 0.143088
+      "signedVolume": 0.17476
     }
   ]
 }

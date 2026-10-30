@@ -17,5 +17,5 @@
     "shrine_banner",
     "shrine_arch"
   ],
-  "check": "exact coordinate/polygon geometry multiset against pre-animation mvp-meshes.blend; vertex indices may reorder"
+  "check": "exact coordinate/polygon geometry multiset: current contact-source mvp-meshes.blend vs current pose-source mvp-walk-poses.blend; not an old-art baseline; vertex indices may reorder"
 }

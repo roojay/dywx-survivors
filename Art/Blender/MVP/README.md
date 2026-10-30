@@ -22,7 +22,7 @@ Blender right-handed coordinates, Z up, +X facing forward; counter-clockwise out
 - `enemy_swarm`, `enemy_exploder`, `enemy_charger`, `enemy_rangedbird`, `enemy_supporttotem`, `enemy_summoner`, `enemy_boss`, `enemy_spirit`.
 - `rock`: approximately 1 m base radius, `pillar`: 1 m footprint and 2.83 m high, `tile`: 0.98 m square; tile top around Z=0 and thickness below ground.
 
-The parent approved relaxed geometry budgets during visual refinement: hero <5k triangles, regular enemies/props <3k, boss <10k. Actual highest counts remain hero 2116, charger 2432 and boss 3024; see validation for all 15 assets.
+The parent approved relaxed geometry budgets during visual refinement: hero <5k triangles, regular enemies/props <3k, boss <10k. Current counts include hero 1996, charger 2074 and boss 2666; see validation for all 15 assets.
 
 Actor origin is ground/feet. Floating bird and fiery spirit are **intentionally elevated** within their mesh bounds. Boss bounds are ~3.34 × 1.62 × 2.33 m. Exact bounds/counts are in `validation.json`.
 
@@ -50,7 +50,7 @@ These are disconnected but closed component forms assembled for economical runti
 
 ## Authored walk-pose pass
 
-`hero_walk_0..7` and `enemy_swarm_walk_0..7` use the same schema and per-mesh budgets as their bases. The original 15 base meshes were compared against the pre-animation `.blend`: exact vertex-position and polygon-geometry multisets match (Blender join can reorder indices). Pose normals are recalculated by Blender after deformation. Source mesh-part groups are authoring aids, not runtime skinning.
+`hero_walk_0..7` and `enemy_swarm_walk_0..7` use the same schema and per-mesh budgets as their bases. The current 15 base meshes are compared between the regenerated contact-source and pose-source `.blend` files: exact vertex-position and polygon-geometry multisets match (Blender join can reorder indices). This establishes current source consistency, not equality to the previous art version. Pose normals are recalculated by Blender after deformation. Source mesh-part groups are authoring aids, not runtime skinning.
 
 Reproduce the separate animation-source file and actual contact sheet without touching the previous arena preview:
 
@@ -64,6 +64,10 @@ python3 Art/Blender/MVP/validate_walk_runtime.py
 
 `walk-contact-sheet.png` shows all 16 baked poses from `mvp-walk-poses.blend`; inspected for coherent boots, claws, arms, silhouette and alternating stride. These are actual Blender CPU frames, not Unreal screenshots. No paid models, downloads, third-party art/code, new installs or shaders were used.
 
-Startup data is about 4.86 MB / 31 meshes / 45,680 triangles (all variants included); exact bytes are in `validation.json`. Loader accepts only explicitly named bases and the 16 variants, with a 64-mesh and 32-MiB file cap. Each actor emits exactly one body instance; meshes/batches are built only at scene startup. Pose/base hero and swarm batches trim historical tails to at most eight spare instances each, bounding retained occupancy to current actor count + 144 across these 18 buckets rather than eight full historical crowds. Gait advances by actual distance, not a fixed clock: one hero cycle per 1.5 simulation units and one swarm cycle per 1.1 units (scaled for elites). Hero bob follows the same gait phase. ID modulo eight seeds swarm phase; per-ID phases are removed on death and cleared on run/generation reset. Pausing or blocking movement cannot advance phase. This is a deliberately economical stylized MVP treatment, not foot-locked motion matching. Physical coordinates, collision, balance and simulation are unchanged.
+Startup data is about 9.15 MB / 31 meshes / 43,066 triangles (all variants included); exact bytes are in `validation.json`. Loader accepts only explicitly named bases and the 16 variants, with a 64-mesh and 32-MiB file cap. Each actor emits exactly one body instance; meshes/batches are built only at scene startup. Pose/base hero and swarm batches trim historical tails to at most eight spare instances each, bounding retained occupancy to current actor count + 144 across these 18 buckets rather than eight full historical crowds. Gait advances by actual distance, not a fixed clock: one hero cycle per 1.5 simulation units and one swarm cycle per 1.1 units (scaled for elites). Hero bob follows the same gait phase. ID modulo eight seeds swarm phase; per-ID phases are removed on death and cleared on run/generation reset. Pausing or blocking movement cannot advance phase. This is a deliberately economical stylized MVP treatment, not foot-locked motion matching. Physical coordinates, collision, balance and simulation are unchanged.
 
 Unreal compilation, runtime appearance, startup time, GPU cost and packaged performance remain **not_run** (no UE installation here). Source/data checks and Blender CPU art review do not certify those.
+
+## NPR material/facet refinement
+
+See [`docs/npr-mesh-refinement.md`](../../../docs/npr-mesh-refinement.md) for the 2026-10-30 transferable mesh/vertex-color changes, fixed base envelopes, source consistency checks, and increased hard-normal vertex-split cost. All mesh alpha values remain 1. Current previews were regenerated from the refined source; they remain Blender CPU demonstrations, not UE runtime evidence.

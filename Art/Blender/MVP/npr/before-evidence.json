@@ -1,0 +1,26 @@
+{
+  "source": "Art/Blender/MVP/npr/source-before.blend",
+  "source_sha256": "d43fbbe3e89f34323e7c291014a15062f78f9e70cea82ddc4f1cd75e0c2eef90",
+  "camera": {
+    "location": [
+      12.0,
+      -17.0,
+      20.0
+    ],
+    "rotation": [
+      0.8052112460136414,
+      3.050470098742153e-08,
+      0.6146628856658936
+    ],
+    "ortho_scale": 19.0
+  },
+  "resolution": [
+    1600,
+    1100
+  ],
+  "percentage": 100,
+  "samples": 24,
+  "backend": "Cycles CPU",
+  "refreshed_mesh_instances": {},
+  "offline_not_ue": true
+}

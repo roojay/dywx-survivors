@@ -15,6 +15,7 @@ python3 scripts/test-mvp-profile-contract.py
 python3 scripts/test-mvp-focus-contract.py
 python3 scripts/validate_assets.py
 python3 scripts/validate-mvp-render-contract.py
+python3 scripts/test-mvp-art-material-contract.py
 python3 Art/Blender/MVP/validate_geometry.py
 python3 -m py_compile scripts/bootstrap-mvp-assets.py scripts/test_font_layout.py Art/Audio/build_sfx.py
 if [[ "${1:-}" == "--sanitize" ]]; then

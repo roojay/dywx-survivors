@@ -9,5 +9,5 @@ def signature(o):
 before={n:signature(bpy.data.objects[n]) for n in names}
 bpy.ops.wm.open_mainfile(filepath=str(root/'mvp-walk-poses.blend'))
 for n in names:assert before[n]==signature(bpy.data.objects[n]),n
-print('PASS: all 15 base meshes have exact vertex-position/polygon geometry equality; join index order may differ')
-(root/'walk-base-comparison.json').write_text(json.dumps({'status':'passed','base_meshes':names,'check':'exact coordinate/polygon geometry multiset against pre-animation mvp-meshes.blend; vertex indices may reorder'},indent=2)+'\n')
+print('PASS: current contact-source vs pose-source: all 15 bases have exact vertex-position/polygon geometry equality; not an old-art baseline; join index order may differ')
+(root/'walk-base-comparison.json').write_text(json.dumps({'status':'passed','base_meshes':names,'check':'exact coordinate/polygon geometry multiset: current contact-source mvp-meshes.blend vs current pose-source mvp-walk-poses.blend; not an old-art baseline; vertex indices may reorder'},indent=2)+'\n')

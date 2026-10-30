@@ -1,0 +1,43 @@
+{
+  "source": "Art/Blender/MVP/npr/source-before.blend",
+  "source_sha256": "d43fbbe3e89f34323e7c291014a15062f78f9e70cea82ddc4f1cd75e0c2eef90",
+  "camera": {
+    "location": [
+      12.0,
+      -17.0,
+      20.0
+    ],
+    "rotation": [
+      0.8052112460136414,
+      3.050470098742153e-08,
+      0.6146628856658936
+    ],
+    "ortho_scale": 19.0
+  },
+  "resolution": [
+    1600,
+    1100
+  ],
+  "percentage": 100,
+  "samples": 24,
+  "backend": "Cycles CPU",
+  "refreshed_mesh_instances": {
+    "tile": 221,
+    "shrine_banner": 4,
+    "shrine_arch": 1,
+    "rock": 3,
+    "pillar": 6,
+    "hero_sword": 1,
+    "hero_body": 1,
+    "enemy_swarm": 22,
+    "enemy_supporttotem": 1,
+    "enemy_summoner": 1,
+    "enemy_spirit": 1,
+    "enemy_rangedbird": 2,
+    "enemy_exploder": 1,
+    "enemy_charger": 2,
+    "enemy_boss": 1
+  },
+  "mesh_source_sha256": "717c03dec04c789ff8bfc6721105037990fc977c71d3d904726c7e973bf21b73",
+  "offline_not_ue": true
+}
