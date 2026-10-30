@@ -1,0 +1,77 @@
+[
+  {
+    "path": "Content/UI/Fonts/NOTO-LICENSE.txt",
+    "bytes": 14712,
+    "sha256": "849f4ea9c214fa4ac3593b770c699f387534b11ce671264c1b10d85bdcb5997b"
+  },
+  {
+    "path": "Content/UI/Fonts/NotoSansSC-Regular.otf",
+    "bytes": 16437340,
+    "sha256": "8a2053ea6e57c0b4255df2ad428529fe2503433506505835e1f1a0fca66def40"
+  },
+  {
+    "path": "Content/UI/Fonts/NotoSerifSC-Regular.otf",
+    "bytes": 24543056,
+    "sha256": "c532c85bab70897f70f04a0c9a90e49526f046cc4ef233cfb79e737c90a9fc92"
+  },
+  {
+    "path": "Content/UI/Images/battle-background.png",
+    "bytes": 3051247,
+    "sha256": "b627787f193ae430e2ed2edfad37caf35e8ed27620619568169dde814912da9d"
+  },
+  {
+    "path": "Content/UI/Images/button-gold.png",
+    "bytes": 1279049,
+    "sha256": "d64d61a1816ec765be2f589f4a4e5ae478fa22cccc2fa80e6fa0486909bb1a87"
+  },
+  {
+    "path": "Content/UI/Images/character-background.png",
+    "bytes": 2633628,
+    "sha256": "8a6e0d66af0c3da21614c2dfe1739ba3c60b3c883c81a16f49a7003f0e3c2dc2"
+  },
+  {
+    "path": "Content/UI/Images/character-portraits.png",
+    "bytes": 2899293,
+    "sha256": "513692fc76d476bfe453df02255e0607d3338cf7f20603ed66f30b05243c9d04"
+  },
+  {
+    "path": "Content/UI/Images/icon-arrow.png",
+    "bytes": 135530,
+    "sha256": "cee6576a038c9f0679de9280de800d645d2c1a496991833bfd2770be416a7810"
+  },
+  {
+    "path": "Content/UI/Images/icon-dash.png",
+    "bytes": 137015,
+    "sha256": "3b98c7582b6aa6a75e18a84852dff9d0c50f94cd85d72ceeaecb8cd3b2265e38"
+  },
+  {
+    "path": "Content/UI/Images/icon-mirror.png",
+    "bytes": 209480,
+    "sha256": "5f97e8b2938701591dd3ecd67f4ea67421e51c96a421cfdf15aa789136dbf660"
+  },
+  {
+    "path": "Content/UI/Images/icon-orbit.png",
+    "bytes": 145182,
+    "sha256": "24e4b65d1ad7fc20f91ae72ed407e3a037e090a4d35cefd323b94d965d37ca5a"
+  },
+  {
+    "path": "Content/UI/Images/icon-slash.png",
+    "bytes": 118371,
+    "sha256": "f80a352385a84e787e63c65fb104d1ae17391c1b63756dc18d311fcfbe47897b"
+  },
+  {
+    "path": "Content/UI/Images/icon-stone.png",
+    "bytes": 133295,
+    "sha256": "c4f8004dc5cb3ec28c81116349c34de680669f2590548fee0ecb7cdd78ecbbb8"
+  },
+  {
+    "path": "Content/UI/Images/main-background.png",
+    "bytes": 2329238,
+    "sha256": "26d17c49a3487a0ca5d93006d83289d45975eb8d6b77250539bae35e6188d576"
+  },
+  {
+    "path": "Content/UI/Images/map-background.png",
+    "bytes": 2747908,
+    "sha256": "a38d7279c78a42b3157a78d4ea96d19cc9bd28d560b3dfe50d0dbeae6ca5120c"
+  }
+]

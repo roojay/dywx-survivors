@@ -1,0 +1,30 @@
+[
+  {
+    "file": "Content/UI/Images/map-background.png",
+    "tool": "built-in image_gen",
+    "generated_utc": "2026-10-30",
+    "input_reference": "03-map.png",
+    "prompt": "Art/Generated/map-background.prompt.txt",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "sha256": "a38d7279c78a42b3157a78d4ea96d19cc9bd28d560b3dfe50d0dbeae6ca5120c",
+    "inspection": "Visually inspected; no text or HUD baked into background.",
+    "purpose": "Static UI background; not a playable environment or performance evidence."
+  },
+  {
+    "file": "Content/UI/Images/battle-background.png",
+    "tool": "built-in image_gen",
+    "generated_utc": "2026-10-30",
+    "input_reference": "04-battle-hud.png",
+    "prompt": "Art/Generated/battle-background.prompt.txt",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "sha256": "b627787f193ae430e2ed2edfad37caf35e8ed27620619568169dde814912da9d",
+    "inspection": "Visually inspected; no text or HUD baked into background.",
+    "purpose": "Static UI background; not a playable environment or performance evidence."
+  }
+]

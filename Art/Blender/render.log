@@ -1,0 +1,16 @@
+Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
+socket(): Operation not permitted
+/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/build_ui_icons.py:32: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+00:03.496  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-slash.png'
+00:05.722  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-orbit.png'
+00:07.514  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-arrow.png'
+00:09.259  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-dash.png'
+00:10.999  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-stone.png'
+00:13.625  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/icon-mirror.png'
+00:13.639  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_6_87a12bb510025584bf078ac93fb35250.png.png"
+Info: Saved as "ui-icons.blend"
+DYWX_UI_ICONS_COMPLETE /workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
+
+Blender quit

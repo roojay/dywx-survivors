@@ -1,0 +1,27 @@
+{
+  "artifact": "native UE5.8 UI source prototype",
+  "date_utc": "2026-10-30",
+  "baseline_commit": "cffa4ed845ea88a2d7960e0aeea9eb319810b47f",
+  "implemented_screens": [
+    "main menu",
+    "character selection",
+    "map and mode selection",
+    "battle HUD"
+  ],
+  "passed": [
+    "C++20 dependency-free navigation tests",
+    "17 resource/configuration checks",
+    "Blender source reopen and six icon verification",
+    "shell syntax and Python syntax"
+  ],
+  "not_run": [
+    "UHT/UBT compilation",
+    "UE Editor and PIE",
+    "native UI visual/focus/DPI checks",
+    "cook/package/standalone launch",
+    "actual combat integration and performance"
+  ],
+  "reason": "No Unreal installation in the authorized dot environment",
+  "combat": "explicit static preview fixture, not implemented gameplay",
+  "publication": "not pushed at source-package preparation"
+}
