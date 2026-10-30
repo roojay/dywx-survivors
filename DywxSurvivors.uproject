@@ -3,5 +3,6 @@
   "EngineAssociation": "5.8",
   "Category": "Games",
   "Description": "道衍万象 native UE UI prototype. UI preview, not a playable combat implementation.",
-  "Modules": [{"Name": "DywxUI", "Type": "Runtime", "LoadingPhase": "Default"}]
+  "Modules": [{"Name": "DywxUI", "Type": "Runtime", "LoadingPhase": "Default"}],
+  "Plugins": [{"Name": "AndroidFileServer", "Enabled": false}]
 }

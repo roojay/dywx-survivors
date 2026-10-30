@@ -54,9 +54,9 @@ void ADywxUIPlayerController::SetEndlessUnlocked(bool bUnlocked)
 {
     if (RootWidget.IsValid()) RootWidget->SetEndlessUnlocked(bUnlocked);
 }
-void ADywxUIPlayerController::RequestRun(int32 Character, int32 Map, int32 Mode)
+void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, int32 ModeIndex)
 {
-    OnRunRequested.Broadcast(Character, Map, Mode);
+    OnRunRequested.Broadcast(CharacterIndex, MapIndex, ModeIndex);
 }
 void ADywxUIPlayerController::RequestDash() { OnDashRequested.Broadcast(); }
 void ADywxUIPlayerController::SetUIPaused(bool bPaused)

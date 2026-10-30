@@ -1,6 +1,15 @@
 # 原生 UE UI 验证记录
 
-日期：2026-10-30。范围：主菜单、角色选择、地图选择与战斗 HUD 的源码和资源。本文不是 UE 编译通过或实机视觉验收证明。
+日期：2026-10-30。范围：主菜单、角色选择、地图选择与战斗 HUD。dot 阶段校验与随后 win-dev 的真实 UE 构建分开记录；本文不是实机视觉验收证明。
+
+## win-dev Windows 构建
+
+- UE 5.8.4 / CL 58902052，MSVC 14.50.35725（工具目录 14.50.35717），Windows SDK 10.0.26100.0。
+- Editor 和 Game 的 UHT、UBT 编译/链接通过。修复了 `RequestRun` 参数 `Character` 遮蔽 UE `AController::Character` 触发的 C4458 编译错误。
+- Win64 Development Cook、Stage、Archive 通过，AutomationTool 退出码 0。Cook 明确报告 0 errors、0 warnings。
+- 原始运行目录 58 文件、669,210,292 字节；无 PDB。15 个 `Content/UI` 文件与源码 SHA256 完全一致，包含两套中文字体、许可和全部 PNG。
+- 运行目录含 AMD64 PE EXE、依赖 DLL、PAK/IoStore、配置及 x64 VC 运行库安装包。清单和证据见 [Windows 演示说明](WINDOWS-DEMO.md)。
+- 保留一个 UE 5.8 支持但已弃用的文件路径字体构造器警告 C4996；编译成功，后续升级引擎时应迁移到 FCompositeFont。
 
 ## 已执行
 
@@ -12,19 +21,18 @@
 
 金边按钮按 UV 纵向 0.21–0.77 使用，显著 alpha（>1/255）边界完全落在裁切范围内；范围外仅有最多 1/255 的生成噪点。四角色图集按水平四等分取 UV，四区均非空；此检查不替代 Slate 九宫格和采样边缘实测。
 
-## 环境阻塞与未执行
+## dot 阶段环境记录与当前未执行项目
 
-`bash scripts/build-ui.sh --check` 返回 `NOT_RUN: UE_ROOT is unset`，退出码 2。dot 未提供可用 Unreal Editor；没有转到用户电脑或其他云端执行。
+dot 阶段 `bash scripts/build-ui.sh --check` 返回 `NOT_RUN: UE_ROOT is unset`，退出码 2。随后经用户授权在 win-dev 完成了上面的真实构建，不再将 UHT/UBT 或 Cook/Package 标为未运行。
 
 以下均为 **not_run**：
 
-1. UnrealBuildTool / UnrealHeaderTool 编译与链接。
-2. 编辑器打开、PIE 与独立程序启动。
-3. Cook、Package 与最终包中的 PNG/字体读取。
-4. Slate 实际渲染、鼠标命中、Tab/手柄导航、焦点与跨分辨率布局。
-5. 真实战斗数据驱动、暂停接入、地图加载、角色动画与 GPU 性能。
+1. 编辑器交互打开、PIE 与打包后独立程序启动。
+2. 打包运行时的 PNG/字体绘制（文件存在性和哈希已验证）。
+3. Slate 实际渲染、鼠标命中、Tab/手柄导航、焦点与跨分辨率布局。
+4. 真实战斗数据驱动、暂停接入、地图加载、角色动画与 GPU 性能。
 
-静态测试无法证明上述项目通过。工程目标 UE 5.8；需在实际安装中核对编译器、SDK 与具体引擎补丁版。
+静态测试和成功打包都无法证明上述项目通过。工程目标 UE 5.8，已构建版本为 UE 5.8.4；具体环境见 Windows 构建记录。
 
 ## 有引擎后必须检查
 

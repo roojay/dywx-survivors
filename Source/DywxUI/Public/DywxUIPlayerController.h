@@ -27,7 +27,7 @@ public:
     UPROPERTY(BlueprintAssignable, Category="道衍万象|UI") FDywxUIAction OnDashRequested;
     UPROPERTY(BlueprintAssignable, Category="道衍万象|UI") FDywxPauseChanged OnPauseChanged;
     UPROPERTY(BlueprintAssignable, Category="道衍万象|UI") FDywxUIAction OnReturnToMenu;
-    void RequestRun(int32 Character, int32 Map, int32 Mode);
+    void RequestRun(int32 CharacterIndex, int32 MapIndex, int32 ModeIndex);
     void RequestDash();
     void SetUIPaused(bool bPaused);
     void ApplyUIInput(bool bLive, bool bModalOpen);

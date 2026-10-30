@@ -1,0 +1,57 @@
+{
+  "date_utc": "2026-10-30",
+  "host": "win-dev",
+  "source_commit": "f5e3419c79a3adf00eb87374d0f924d7148f2dba",
+  "original_dot_source_commit": "bd79e139eaab200be7344db6c073457ca8f78214",
+  "source_zip_sha256": "7948fa3d0ca3479ea6e3410a6de9ce85bac1ed6028041d004d2c48e0278b2a9e",
+  "engine": "5.8.4-58902052+++UE5+Release-5.8",
+  "compiler_reported": "Visual Studio 14.50.35725",
+  "compiler_directory": "14.50.35717",
+  "windows_sdk": "10.0.26100.0",
+  "configuration": "Win64 Development",
+  "results": {
+    "editor_uht_ubt": "passed",
+    "game_uht_ubt": "passed",
+    "cook": "passed (0 errors, 0 warnings)",
+    "stage": "passed",
+    "archive": "passed",
+    "uat_exit_code": 0,
+    "packaged_ui_sha256_matches": "15/15",
+    "packaged_game_pe_machine": "AMD64 (0x8664)",
+    "runtime_file_count": 58,
+    "runtime_size_bytes": 669210292
+  },
+  "fix": "Rename RequestRun parameters to CharacterIndex/MapIndex/ModeIndex to avoid MSVC C4458 inherited member shadowing. This fix is included with the build report.",
+  "warnings": [
+    "C4996: FSlateFontInfo path constructor is deprecated; supported by this UE 5.8.4 build."
+  ],
+  "raw_logs_preserved_in_local_build_evidence": [
+    {
+      "file": "build-evidence/UBA-DywxSurvivorsEditor-Win64-Development.txt",
+      "size_bytes": 13067,
+      "sha256": "52bcd42e1a619fba5fa880f8c6520b06b242e5c70b289a9d3a8a275d42002f78"
+    },
+    {
+      "file": "build-evidence-final/UBT-Editor.log",
+      "size_bytes": 8629,
+      "sha256": "16cd31cd7427145b6268f43d93cc77da7c4a5b4a3ec7b6943294f12379d48222"
+    },
+    {
+      "file": "build-evidence-final/UAT/UBA-DywxSurvivorsEditor-Win64-Development.txt",
+      "size_bytes": 11144,
+      "sha256": "1c6727dc0eedf54e0723c622bc7618ed761d2a38fc979e2e3aa435aaabca7008"
+    },
+    {
+      "file": "build-evidence-final/UAT/Log.txt",
+      "size_bytes": 231810,
+      "sha256": "69f63239c4a4c5c3dc79d5049955f826ebce55ea70c462f1768cd769a3f66e30"
+    }
+  ],
+  "not_run": [
+    "Packaged standalone startup",
+    "Interactive editor and PIE",
+    "Slate rendering/font/focus/DPI and resolution acceptance",
+    "Real combat integration and performance"
+  ],
+  "project_packaging_cleanup": "Disable the unused AndroidFileServer plugin to prevent Cook from writing Android debug configuration; final rebuild/cook/archive passed with unchanged DefaultEngine.ini."
+}

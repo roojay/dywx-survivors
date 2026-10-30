@@ -6,9 +6,10 @@
 
 `DywxSurvivors.uproject` 包含主菜单、角色选择、洞天／模式选择、战斗 HUD 的 C++ Slate 实现。控件、中文文本、导航、弹窗与状态绑定独立于背景图；背景、头像、金色按钮与六枚 Blender 图标均随工程提供。
 
-**当前不是已验收的可玩游戏。** dot 环境没有 Unreal Editor。已运行独立 C++ 状态测试和资源校验；UE 编译、UHT、编辑器启动、打包、实际界面与性能全部未运行。战斗页默认明确展示静态 HUD 示例，通过接口接入真实玩法后才隐藏预览背景。
+**当前是可打包的原生界面演示，不是完整战斗游戏。** win-dev 已用 UE 5.8.4 完成 UHT、编辑器/游戏 UBT 编译和 Windows Development Cook、Stage、Archive。完整包中的 15 个 UI 图片/字体/许可文件已逐字节校验；独立启动、实际界面、焦点、分辨率与性能仍待运行验收。战斗页明确展示静态 HUD 示例，通过接口接入真实玩法后才隐藏预览背景。
 
 - [启动、构建与玩法接口](docs/UE-UI-IMPLEMENTATION.md)
+- [Windows 演示包运行说明与构建证据](docs/WINDOWS-DEMO.md)
 - [验证记录与待验收项目](docs/UI-VALIDATION.md)
 - [资源来源与许可](Art/ASSET-PROVENANCE.md)
 - [Blender 图标源文件与复现](Art/Blender/README.md)
