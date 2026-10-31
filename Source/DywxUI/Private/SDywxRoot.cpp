@@ -1,6 +1,7 @@
 #include "SDywxRoot.h"
 #include "DywxUIPlayerController.h"
 #include "MVP/Simulation.h"
+#include "MVP/DywxRunSession.h"
 #include "MVP/ContentCatalog.h"
 #include "MVP/DywxMVPProfile.h"
 #include "Widgets/Layout/SScrollBox.h"
@@ -320,7 +321,7 @@ void SDywxRoot::BattleScreen()
             if(FusionRecipe.hero!=Run.progression.build.hero)continue;
             const SpellId Fusion=FusionRecipe.result;
         const auto* Sim = Owner.IsValid() ? Owner->Simulation() : nullptr;
-        const bool CanFuseNow = Sim && !Run.paused && Sim->GetProgression().CanFuse(Fusion)
+        const bool CanFuseNow = Sim && !Run.paused && Sim->CanFuse(Fusion)
             && (Run.phase == RunPhase::Rest || !Run.progression.offers.empty());
         const FString Recipe=CN(DescribeFusion(FusionRecipe));
         Fusions->AddSlot().Padding(0,2)[SNew(SBox).HeightOverride(80)[Button(TEXT("破境 · ")+CN(GetSpellConfig(Fusion).name),
@@ -331,9 +332,7 @@ void SDywxRoot::BattleScreen()
                     const auto& Now = S->GetSnapshot();
                     if (Now.generation != Generation || Now.paused ||
                         (Now.phase != RunPhase::Wave && Now.phase != RunPhase::Boss && Now.phase != RunPhase::Rest)) return;
-                    auto& P = S->GetProgression();
-                    if (P.CanFuse(Fusion) && (Now.phase == RunPhase::Rest || !Now.progression.offers.empty()) && P.Fuse(Fusion))
-                        S->RefreshProgression();
+                    if (auto* Commands = Owner->Session()) Commands->Fuse(Fusion);
                 });
             },true,CanFuseNow,Recipe+TEXT("。仅调息或有待选顿悟时可破境；暂停时不可用。破境继承道象，消耗配方指定的术法。"))]];
         }
@@ -360,18 +359,18 @@ void SDywxRoot::UpgradePanel()
         auto Card=SNew(SVerticalBox)
             +SVerticalBox::Slot().AutoHeight()[Button(FString::Printf(TEXT("%d  "),I+1)+Name,[this,I,O,Generation=Run.generation]{return RunCommand([this,I,O,Generation]{auto*S=Owner->Simulation();if(!S)return;const auto&Now=S->GetSnapshot();if(Now.generation!=Generation||I>=int(Now.progression.offers.size()))return;const auto&Current=Now.progression.offers[I];if(Current.kind==O.kind&&Current.spell==O.spell&&Current.passive==O.passive)Owner->ChooseUpgrade(I);});})]
             +SVerticalBox::Slot().FillHeight(1).Padding(8,8)[SNew(SScrollBox)+SScrollBox::Slot()[Paragraph(Desc,230,18,Paper)]];
-        Card->AddSlot().AutoHeight()[Button(FString::Printf(TEXT("封存 · 余%d"),Run.progression.sealsRemaining),[this,I]{return RunCommand([this,I]{auto* S=Owner->Simulation();RunNotice=S&&S->SealUpgrade(I)?TEXT("本局已封存"):TEXT("不可封存：第二层开放，每局限三次。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)&&Run.progression.sealsRemaining>0,TEXT("永久从本局候选池移除；每局三次。"))];
+        Card->AddSlot().AutoHeight()[Button(FString::Printf(TEXT("封存 · 余%d"),Run.progression.sealsRemaining),[this,I]{return RunCommand([this,I]{auto* S=Owner->Simulation();RunNotice=S&&Owner->Session()->SealUpgrade(I)?TEXT("本局已封存"):TEXT("不可封存：第二层开放，每局限三次。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)&&Run.progression.sealsRemaining>0,TEXT("永久从本局候选池移除；每局三次。"))];
         At(1080+I*270,290,260,220,Panel(Card,Ink,6));
     }
-    At(1080,520,365,60,Button(TEXT("跳过 · 修为与灵石"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();RunNotice=S&&S->SkipUpgrade()?TEXT("已跳过本次顿悟"):TEXT("不可跳过：需要第二层与有效顿悟。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)));
-    At(1460,520,430,60,Button(FString::Printf(TEXT("重悟 · 剩余 %d 次"),Run.progression.rerollsRemaining),[this]{return RunCommand([this]{if(auto* S=Owner->Simulation())S->Reroll();});},false,Run.progression.rerollsRemaining>0));
+    At(1080,520,365,60,Button(TEXT("跳过 · 修为与灵石"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();RunNotice=S&&Owner->Session()->SkipUpgrade()?TEXT("已跳过本次顿悟"):TEXT("不可跳过：需要第二层与有效顿悟。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)));
+    At(1460,520,430,60,Button(FString::Printf(TEXT("重悟 · 剩余 %d 次"),Run.progression.rerollsRemaining),[this]{return RunCommand([this]{if(auto* S=Owner->Simulation())Owner->Session()->Reroll();});},false,Run.progression.rerollsRemaining>0));
 }
 void SDywxRoot::ResultPanel()
 {
     for(int32 I=0;I<int(Run.progression.bossRewards.size()) && I<3;++I)
     {
         const auto R=Run.progression.bossRewards[I];FString Tip=CN(RarityName(R.rarity));for(const auto&A:R.affixes)Tip+=TEXT("\n")+CN(DescribeAffix(A));
-        At(430+I*360,220,350,65,Button(CN(RelicCatalog()[R.catalogId].name),[this,I]{return RunCommand([this,I]{if(auto*S=Owner->Simulation()){S->ChooseBossReward(I);}});},false,true,Tip));
+        At(430+I*360,220,350,65,Button(CN(RelicCatalog()[R.catalogId].name),[this,I]{return RunCommand([this,I]{if(auto*S=Owner->Simulation()){Owner->Session()->ChooseBossReward(I);}});},false,true,Tip));
     }
     At(510,825,900,60,LiveText([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return S?FString::Printf(TEXT("本局道韵 %llu · 账号道韵 %llu"),static_cast<unsigned long long>(S->GetCampaign().Reward()),static_cast<unsigned long long>(Owner->CampaignProfile().daoYun)):FString();},24,Gold));
     At(510,300,900,500,Panel(SNew(SVerticalBox)
@@ -502,13 +501,13 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         Add(Label(FString::Printf(TEXT("洞府与宝匣 · 灵石 %d"),E.Stones()),30,Gold),65);
         auto List=SNew(SScrollBox);
         if(!Layer2)List->AddSlot()[Paragraph(TEXT("洞府祭炼已开放；灵石商店与刷新须首胜开启第二层。"),560,20,Muted)];
-        auto Action=[this](TFunction<bool(dywx::mvp::Simulation&)> Fn) {
+        auto Action=[this](TFunction<bool(UDywxRunSession&)> Fn) {
             auto* Sim=Owner.IsValid()?Owner->Simulation():nullptr;
             if(!Sim||Nav.modal!=dywx::Modal::Economy||Sim->GetSnapshot().generation!=Run.generation||Sim->GetSnapshot().phase!=RunPhase::Rest||Sim->GetSnapshot().paused) return FReply::Handled();
             std::vector<EntityId> Before;
             for(const auto& R:Sim->GetSnapshot().progression.bag)Before.push_back(R.id);
             for(const auto& R:Sim->GetSnapshot().progression.equipped)Before.push_back(R.id);
-            RunNotice=Fn(*Sim)?TEXT("操作完成"):TEXT("不可用：检查层级、机缘、余额、锁定或待选交易。未扣除额外费用。");
+            RunNotice=Fn(*Owner->Session())?TEXT("操作完成"):TEXT("不可用：检查层级、机缘、余额、锁定或待选交易。未扣除额外费用。");
             auto Reveal=[&](const Relic& R){bool Existed=false;for(auto Id:Before)if(Id==R.id)Existed=true;if(!Existed)RunNotice+=TEXT("\n获得：")+CN(RelicCatalog()[R.catalogId].name)+TEXT(" · ")+CN(RarityName(R.rarity))+(Sim->GetEconomy().IsUnidentified(R.id)?TEXT(" · 未祭炼"):TEXT(""));};
             for(const auto& R:Sim->GetSnapshot().progression.bag)Reveal(R);
             for(const auto& R:Sim->GetSnapshot().progression.equipped)Reveal(R);
@@ -516,22 +515,22 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         };
         for(const auto& G:E.Shop()) {
             FString Tip;for(const auto& A:G.relic.affixes)Tip+=CN(DescribeAffix(A))+TEXT("\n");
-            List->AddSlot().Padding(0,5)[Button(CN(RelicCatalog()[G.relic.catalogId].name)+FString::Printf(TEXT(" · %d灵石%s"),G.price,G.sold?TEXT(" · 售罄"):TEXT("")),[Action,Token=G.token]()mutable{return Action([Token](Simulation& Sim){return Sim.BuyGood(Token);});},false,Layer2&&!G.sold&&E.Stones()>=G.price,Tip)];
+            List->AddSlot().Padding(0,5)[Button(CN(RelicCatalog()[G.relic.catalogId].name)+FString::Printf(TEXT(" · %d灵石%s"),G.price,G.sold?TEXT(" · 售罄"):TEXT("")),[Action,Token=G.token]()mutable{return Action([Token](UDywxRunSession& Sim){return Sim.BuyGood(Token);});},false,Layer2&&!G.sold&&E.Stones()>=G.price,Tip)];
         }
-        List->AddSlot().Padding(0,5)[Button(TEXT("刷新洞府 · 免费传承或15灵石"),[Action]()mutable{return Action([](Simulation& Sim){return Sim.RefreshShop();});},false,Layer2&&Cave,TEXT("第二层开启；仅洞府可用；快速不可刷新；每处免费一次需传承。"))];
+        List->AddSlot().Padding(0,5)[Button(TEXT("刷新洞府 · 免费传承或15灵石"),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.RefreshShop();});},false,Layer2&&Cave,TEXT("第二层开启；仅洞府可用；快速不可刷新；每处免费一次需传承。"))];
         const auto Prob=E.TreasureProbabilities(S->GetProgression());
         List->AddSlot()[Paragraph(FString::Printf(TEXT("第三层开放重铸与宝匣。\n宝匣概率：凡 %.2f%% / 灵 %.2f%% / 仙 %.2f%% / 道 %.2f%%\n已额外开启 %d / 5，仙品受20波保底，道品无保底。"),Prob[0]*100,Prob[1]*100,Prob[2]*100,Prob[3]*100,E.PaidTreasureCount()),560,20,Gold)];
-        List->AddSlot()[Button(FString::Printf(TEXT("额外开匣 · %d灵石"),E.TreasurePrice()),[Action]()mutable{return Action([](Simulation& Sim){return Sim.OpenTreasure(true);});},false,Layer3&&E.Stones()>=E.TreasurePrice()&&E.PaidTreasureCount()<5,TEXT("第三层开放；余额须足够；每局额外开启最多五次。"))];
-        if(E.HasTreasureToReveal()) List->AddSlot()[Button(TEXT("揭示匣中法宝"),[Action]()mutable{return Action([](Simulation& Sim){return Sim.RevealTreasure();});},true)];
+        List->AddSlot()[Button(FString::Printf(TEXT("额外开匣 · %d灵石"),E.TreasurePrice()),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.OpenTreasure(true);});},false,Layer3&&E.Stones()>=E.TreasurePrice()&&E.PaidTreasureCount()<5,TEXT("第三层开放；余额须足够；每局额外开启最多五次。"))];
+        if(E.HasTreasureToReveal()) List->AddSlot()[Button(TEXT("揭示匣中法宝"),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.RevealTreasure();});},true)];
         if(E.PendingReforge()) {
             const auto& R=*E.PendingReforge();
             List->AddSlot()[Paragraph(TEXT("已付费 · 旧纹：")+CN(DescribeAffix(R.oldAffix))+TEXT("\n新纹：")+CN(DescribeAffix(R.newAffix)),560,22,Gold)];
-            for(int I=0;I<2;++I)List->AddSlot()[Button(I?TEXT("保留新纹"):TEXT("保留旧纹（不退款）"),[Action,I]()mutable{return Action([I](Simulation& Sim){return Sim.ResolveReforge(I!=0);});})];
+            for(int I=0;I<2;++I)List->AddSlot()[Button(I?TEXT("保留新纹"):TEXT("保留旧纹（不退款）"),[Action,I]()mutable{return Action([I](UDywxRunSession& Sim){return Sim.ResolveReforge(I!=0);});})];
         }
         auto Item=[&](const Relic& R) {
-            if(E.IsUnidentified(R.id)) { List->AddSlot()[Button(TEXT("祭炼 · ")+CN(RelicCatalog()[R.catalogId].name),[Action,Id=R.id]()mutable{return Action([Id](Simulation& Sim){return Sim.IdentifyRelic(Id);});},false,Cave,TEXT("仅所选洞府可祭炼；未祭炼灵纹不生效。"))];return; }
+            if(E.IsUnidentified(R.id)) { List->AddSlot()[Button(TEXT("祭炼 · ")+CN(RelicCatalog()[R.catalogId].name),[Action,Id=R.id]()mutable{return Action([Id](UDywxRunSession& Sim){return Sim.IdentifyRelic(Id);});},false,Cave,TEXT("仅所选洞府可祭炼；未祭炼灵纹不生效。"))];return; }
             List->AddSlot().Padding(0,8)[Label(CN(RelicCatalog()[R.catalogId].name),21,Gold)];
-            for(size_t I=0;I<R.affixes.size();++I)if(R.affixes[I].kind!=AffixKind::Mystery&&R.affixes[I].kind!=AffixKind::Unique)List->AddSlot()[Button(FString::Printf(TEXT("重铸 · %d灵石 · "),E.ReforgePrice(R.id))+CN(AffixName(R.affixes[I])),[Action,Id=R.id,I]()mutable{return Action([Id,I](Simulation& Sim){return Sim.BeginReforge(Id,I);});},false,Layer3&&Cave&&!R.locked&&!E.PendingReforge(),CN(DescribeAffix(R.affixes[I])))];
+            for(size_t I=0;I<R.affixes.size();++I)if(R.affixes[I].kind!=AffixKind::Mystery&&R.affixes[I].kind!=AffixKind::Unique)List->AddSlot()[Button(FString::Printf(TEXT("重铸 · %d灵石 · "),E.ReforgePrice(R.id))+CN(AffixName(R.affixes[I])),[Action,Id=R.id,I]()mutable{return Action([Id,I](UDywxRunSession& Sim){return Sim.BeginReforge(Id,I);});},false,Layer3&&Cave&&!R.locked&&!E.PendingReforge(),CN(DescribeAffix(R.affixes[I])))];
         };
         for(const auto& R:Run.progression.equipped)Item(R);for(const auto& R:Run.progression.bag)Item(R);
         Add(List,470);Add(Paragraph(RunNotice,596,19,Gold),70);Add(Button(TEXT("返回整理"),[this]{return CloseModal();}),65);break;
@@ -692,7 +691,7 @@ void SDywxRoot::RestPanel()
         if(C.offerCount && C.selected<0) {
             for(unsigned I=0;I<C.offerCount;++I) {
                 const auto Details=Sim->DescribeOpportunity(I);
-                Choices->AddSlot().Padding(0,4)[Button(CN(Details.title),[this,I]{return RunCommand([this,I]{auto*S=Owner->Simulation();RunNotice=S&&S->ChooseOpportunity(I)?TEXT("机缘已选择"):TEXT("不可选择：机缘已解决或状态改变。");});},false,true,CN(Details.description))];
+                Choices->AddSlot().Padding(0,4)[Button(CN(Details.title),[this,I]{return RunCommand([this,I]{auto*S=Owner->Simulation();RunNotice=S&&Owner->Session()->ChooseOpportunity(I)?TEXT("机缘已选择"):TEXT("不可选择：机缘已解决或状态改变。");});},false,true,CN(Details.description))];
                 Choices->AddSlot().Padding(8,0,8,12)[Paragraph(CN(Details.description),780,20,Paper)];
             }
         }
@@ -701,7 +700,7 @@ void SDywxRoot::RestPanel()
             Choices->AddSlot()[Paragraph(CN(Details.title)+TEXT("\n")+CN(Details.description),780,20,Gold)];
         }
         const bool CaveSelected=C.selected>=0&&C.selected<int(C.offerCount)&&C.offers[C.selected]==OpportunityKind::Cave;
-        for(size_t I=0;I<Run.progression.bossRewards.size();++I)Choices->AddSlot()[Button(TEXT("洞主赠宝 · ")+CN(RelicCatalog()[Run.progression.bossRewards[I].catalogId].name),[this,I]{return RunCommand([this,I]{if(auto*S=Owner->Simulation())S->ChooseBossReward(I);});})];
+        for(size_t I=0;I<Run.progression.bossRewards.size();++I)Choices->AddSlot()[Button(TEXT("洞主赠宝 · ")+CN(RelicCatalog()[Run.progression.bossRewards[I].catalogId].name),[this,I]{return RunCommand([this,I]{if(auto*S=Owner->Simulation())Owner->Session()->ChooseBossReward(I);});})];
         Choices->AddSlot()[Button(FString::Printf(TEXT("灵石 %d · 洞府 / 重铸 / 宝匣"),Sim->GetEconomy().Stones()),[this]{return OpenModal(dywx::Modal::Economy);},false,dywx::CanOpenRestServices(HasFeature(Owner->CampaignProfile(),Feature::Economy),CaveSelected),TEXT("所选洞府第一层即可祭炼；商店首胜开启，重铸宝匣第三层开启。"))];
         Choices->AddSlot()[Button(bRefineStones?TEXT("炼化所得：灵石（点击切换）"):TEXT("炼化所得：修为（点击切换）"),[this]{bRefineStones=!bRefineStones;bRefinePreview=false;Rebuild();return FReply::Handled();},false,HasFeature(Owner->CampaignProfile(),Feature::Economy))];
         At(1080,290,810,280,Choices);
@@ -738,19 +737,19 @@ void SDywxRoot::RestPanel()
     }
     if(Visible.empty())Bag->AddSlot()[Label(TEXT("储物袋 · 暂无法宝"),22,Muted)];
     At(45,420,475,275,Equipped);At(540,420,480,275,Bag);
-    At(45,705,225,60,Button(TEXT("换装"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(S&&S->GetSnapshot().phase==RunPhase::Rest){RunNotice=S->GetProgression().Equip(SelectedBag,SelectedSlot)?TEXT("换装完成"):TEXT("无法换装：请选择首个空槽，或检查互斥灵纹。");S->RefreshProgression();}});},false,SelectedBag!=0));
-    At(280,705,225,60,Button(TEXT("卸下"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(S&&S->GetSnapshot().phase==RunPhase::Rest){S->GetProgression().Unequip(SelectedSlot);S->RefreshProgression();}});},false,SelectedSlot<int(Run.progression.equipped.size())));
-    At(515,705,245,60,Button(TEXT("锁定 / 解锁"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(!S||S->GetSnapshot().phase!=RunPhase::Rest)return;auto&P=S->GetProgression();uint64 Id=SelectedBag;if(!Id&&SelectedSlot<int(Run.progression.equipped.size()))Id=Run.progression.equipped[SelectedSlot].id;for(const auto&R:Run.progression.bag)if(R.id==Id){P.SetLocked(Id,!R.locked);S->RefreshProgression();return;}for(const auto&R:Run.progression.equipped)if(R.id==Id){P.SetLocked(Id,!R.locked);S->RefreshProgression();return;}}); }));
-    At(770,705,250,60,Button(TEXT("一键排序"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation()){S->GetProgression().SortBag();S->RefreshProgression();}});}));
+    At(45,705,225,60,Button(TEXT("换装"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(S&&S->GetSnapshot().phase==RunPhase::Rest){RunNotice=Owner->Session()->Equip(SelectedBag,SelectedSlot)?TEXT("换装完成"):TEXT("无法换装：请选择首个空槽，或检查互斥灵纹。");}});},false,SelectedBag!=0));
+    At(280,705,225,60,Button(TEXT("卸下"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(S&&S->GetSnapshot().phase==RunPhase::Rest){Owner->Session()->Unequip(SelectedSlot);}});},false,SelectedSlot<int(Run.progression.equipped.size())));
+    At(515,705,245,60,Button(TEXT("锁定 / 解锁"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();if(!S||S->GetSnapshot().phase!=RunPhase::Rest)return;uint64 Id=SelectedBag;if(!Id&&SelectedSlot<int(Run.progression.equipped.size()))Id=Run.progression.equipped[SelectedSlot].id;for(const auto&R:Run.progression.bag)if(R.id==Id){Owner->Session()->SetLocked(Id,!R.locked);return;}for(const auto&R:Run.progression.equipped)if(R.id==Id){Owner->Session()->SetLocked(Id,!R.locked);return;}}); }));
+    At(770,705,250,60,Button(TEXT("一键排序"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation()){Owner->Session()->SortBag();}});}));
     At(45,775,470,60,Button(TEXT("炼化筛选结果 · 先预览"),[this]{bRefinePreview=true;Rebuild();return FReply::Handled();},false,!Visible.empty()));
-    At(540,775,480,60,Button(TEXT("撤销上次炼化"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation()){RunNotice=S->UndoRefine()?TEXT("已撤销炼化，返还法宝并扣回所得。"):TEXT("无法撤销：没有可撤销记录，或所得灵石已花费、余额不足。");}});},false,true));
+    At(540,775,480,60,Button(TEXT("撤销上次炼化"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation()){RunNotice=Owner->Session()->UndoRefine()?TEXT("已撤销炼化，返还法宝并扣回所得。"):TEXT("无法撤销：没有可撤销记录，或所得灵石已花费、余额不足。");}});},false,true));
     if(bRefinePreview)
     {
         const auto Preview=Sim->GetEconomy().PreviewRefine(P,Visible,bRefineStones?RefineReward::Stones:RefineReward::Experience);
         FString List;for(auto Id:Preview.ids)for(const auto&R:Run.progression.bag)if(R.id==Id)List+=CN(RelicCatalog()[R.catalogId].name)+TEXT("  ");
         At(1080,590,810,70,Paragraph(FString::Printf(TEXT("炼化 %d 件，获得 %d %s"),int(Preview.ids.size()),Preview.amount,bRefineStones?TEXT("灵石"):TEXT("修为（迎战时入账）")),800,22,Gold));
         At(1080,655,810,75,SNew(SScrollBox)+SScrollBox::Slot()[Paragraph(List,790,19,Paper)]);
-        At(1080,740,395,60,Button(TEXT("确认炼化"),[this,Ids=Preview.ids]{return RunCommand([this,Ids]{if(auto*S=Owner->Simulation()){RunNotice=S->Refine(Ids,bRefineStones?RefineReward::Stones:RefineReward::Experience)?TEXT("炼化完成，可在迎战前撤销。"):TEXT("炼化失败：当前法宝锁定、交易占用或状态已改变。");}bRefinePreview=false;SelectedBag=0;});},false,!Preview.ids.empty()));
+        At(1080,740,395,60,Button(TEXT("确认炼化"),[this,Ids=Preview.ids]{return RunCommand([this,Ids]{if(auto*S=Owner->Simulation()){RunNotice=Owner->Session()->Refine(Ids,bRefineStones?RefineReward::Stones:RefineReward::Experience)?TEXT("炼化完成，可在迎战前撤销。"):TEXT("炼化失败：当前法宝锁定、交易占用或状态已改变。");}bRefinePreview=false;SelectedBag=0;});},false,!Preview.ids.empty()));
         At(1490,740,395,60,Button(TEXT("取消预览"),[this]{bRefinePreview=false;Rebuild();return FReply::Handled();}));
     }
     else
@@ -776,6 +775,6 @@ void SDywxRoot::RestPanel()
             Inspection->AddSlot().AutoHeight()[Comparison(Run.progression.build.stats,P.PreviewEquip(SelectedBag,SelectedSlot))];
         }
         At(1080,590,810,150,SNew(SScrollBox)+SScrollBox::Slot()[Inspection]);
-        At(1080,750,810,70,Button(Run.progression.pendingUpgrades>0?TEXT("先完成待选顿悟"):TEXT("迎战 · 炼化修为入账"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation())RunNotice=S->BeginNextWave()?TEXT(""):TEXT("尚不能迎战：先完成机缘、顿悟、洞主赠宝或待选重铸/宝匣。");});},true,Run.progression.pendingUpgrades==0));
+        At(1080,750,810,70,Button(Run.progression.pendingUpgrades>0?TEXT("先完成待选顿悟"):TEXT("迎战 · 炼化修为入账"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation())RunNotice=Owner->Session()->BeginNextWave()?TEXT(""):TEXT("尚不能迎战：先完成机缘、顿悟、洞主赠宝或待选重铸/宝匣。");});},true,Run.progression.pendingUpgrades==0));
     }
 }

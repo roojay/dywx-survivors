@@ -1,11 +1,12 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Types.h"
 #include <array>
 #include <string_view>
 namespace dywx::mvp {
 enum class SpellBehavior { Legacy, Cone, Projectile, Field, Companion, Talisman };
 // Rank-dependent authoritative numeric spell table, in grid units and seconds.
-struct SpellConfig {
+struct DYWXCORE_API SpellConfig {
   SpellId id{};
   SpellBehavior behavior = SpellBehavior::Legacy;
   bool provisional = false;
@@ -25,11 +26,11 @@ struct SpellConfig {
   int afterBolts = 0;
   float afterBoltScale = .4f;
 };
-struct PassiveConfig {
+struct DYWXCORE_API PassiveConfig {
   PassiveId id;
   std::string_view name, description;
 };
-struct RelicConfig {
+struct DYWXCORE_API RelicConfig {
   int id;
   std::string_view name;
   Rarity rarity;
@@ -40,24 +41,24 @@ struct RelicConfig {
   int resonanceCode = 0, uniqueCode = 1;
   int realm = -1; // -1 shared legacy pool; 0 ThunderMarsh, 1 EmberMountain, 2 MistForest.
 };
-SpellConfig GetSpellConfig(SpellId id, int rank = 1);
-const std::array<PassiveConfig, kPassiveCount> &PassiveCatalog();
-const std::array<RelicConfig, kRelicCount> &RelicCatalog();
-std::string_view RarityName(Rarity rarity);
-std::string_view AffixName(const Affix &affix);
-std::string DescribeAffix(const Affix &affix);
-std::string DescribeSpell(SpellId spell, int rank);
-bool IsFusion(SpellId id);
-struct FusionRecipe { HeroId hero; SpellId first, second, result; PassiveId passive = PassiveId::Count; };
-const std::array<FusionRecipe, kFusionCount>& FusionCatalog();
-int ElementResonanceCode(Element element);
-int FormResonanceCode(Form form);
-AffixKind AspectAffix(int code);
-std::string DescribeRelic(int catalogId);
-std::string DescribeResonance(int code);
-std::string DescribeFusion(const FusionRecipe& recipe);
-std::array<float,2> AffixRange(AffixKind kind,Rarity rarity);
-std::vector<int> RealmRelicPool(int realm);
-float EffectiveLuck(float luck);
-int RefineValue(Rarity rarity);
+DYWXCORE_API SpellConfig GetSpellConfig(SpellId id, int rank = 1);
+DYWXCORE_API const std::array<PassiveConfig, kPassiveCount> &PassiveCatalog();
+DYWXCORE_API const std::array<RelicConfig, kRelicCount> &RelicCatalog();
+DYWXCORE_API std::string_view RarityName(Rarity rarity);
+DYWXCORE_API std::string_view AffixName(const Affix &affix);
+DYWXCORE_API std::string DescribeAffix(const Affix &affix);
+DYWXCORE_API std::string DescribeSpell(SpellId spell, int rank);
+DYWXCORE_API bool IsFusion(SpellId id);
+struct DYWXCORE_API FusionRecipe { HeroId hero; SpellId first, second, result; PassiveId passive = PassiveId::Count; };
+DYWXCORE_API const std::array<FusionRecipe, kFusionCount>& FusionCatalog();
+DYWXCORE_API int ElementResonanceCode(Element element);
+DYWXCORE_API int FormResonanceCode(Form form);
+DYWXCORE_API AffixKind AspectAffix(int code);
+DYWXCORE_API std::string DescribeRelic(int catalogId);
+DYWXCORE_API std::string DescribeResonance(int code);
+DYWXCORE_API std::string DescribeFusion(const FusionRecipe& recipe);
+DYWXCORE_API std::array<float,2> AffixRange(AffixKind kind,Rarity rarity);
+DYWXCORE_API std::vector<int> RealmRelicPool(int realm);
+DYWXCORE_API float EffectiveLuck(float luck);
+DYWXCORE_API int RefineValue(Rarity rarity);
 } // namespace dywx::mvp

@@ -1,16 +1,9 @@
 #include "MVP/DywxMVPWorld.h"
-#include "MVP/SaveCodec.h"
 #include <cmath>
 #include "Camera/CameraComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SkyLightComponent.h"
-#include "Engine/Engine.h"
-#include "Engine/GameViewportClient.h"
-#include "Framework/Application/SlateApplication.h"
-#include "Widgets/SWindow.h"
-#include "GenericPlatform/GenericWindow.h"
-#include "DywxPreviewBudget.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Sound/SoundBase.h"
@@ -66,174 +59,44 @@ ADywxMVPWorld::ADywxMVPWorld()
     Camera->PostProcessSettings.BloomIntensity=.3f;
     SetActorTickEnabled(false);
 }
-void ADywxMVPWorld::InitializeProfile()
+void ADywxMVPWorld::InitializePresentation(UDywxRunSession* InSession, APlayerController* InController)
 {
-    if(bProfileLoaded) return;
-    const bool Loaded=Profile.Load(); bProfileLoaded=true;
-    if(!Loaded && !Profile.IsWritable())
-        UE_LOG(LogDywxMVPWorld,Error,TEXT("Local profile is unreadable. Keeping the existing file intact; account mutations and campaign start are blocked."));
-}
-void ADywxMVPWorld::StartRun(HeroId Hero,uint64 Seed)
-{
-    if(bProfileLoaded && !SaveProfile()) return;
-    InitializeProfile();
-    Simulation.Start(Seed,Hero);
-    Profile.Apply(Simulation.GetProgression()); Simulation.RefreshProgression();
-    ActivateRun();
-}
-bool ADywxMVPWorld::StartFullRun(int32 Hero,int32 Map,int32 Mode,uint32 RiskMask)
-{
-    InitializeProfile();
-    if(!Profile.IsWritable() || Hero<0 || Hero>=3 || Map<0 || Map>=3 || Mode<0 || Mode>=3) return false;
-    // One in-progress run per hero. A new start must not silently replace it.
-    if(Profile.HasCheckpoint(HeroId(Hero))) return false;
-    if(!SaveProfile()) return false;
-    // Validate against the account before reserving a durable id. No live run is
-    // replaced and no mesh work happens until persistence has succeeded.
-    dywx::mvp::Simulation Candidate;
-    const uint64 Proposed=Profile.GetCampaign().nextRunId;
-    const uint64 Seed=Proposed*0x9e3779b97f4a7c15ULL+uint64(Map+1);
-    if(!Candidate.StartCampaign(Profile.GetCampaign(),GameMode(Mode),HeroId(Hero),Seed,Proposed,CaveId(Map),RiskMask)) return false;
-    const uint64 RunId=Profile.AllocateRunId();
-    if(!RunId) return false;
-    if(!Candidate.StartCampaign(Profile.GetCampaign(),GameMode(Mode),HeroId(Hero),Seed,RunId,CaveId(Map),RiskMask)) return false;
-    Profile.Apply(Candidate.GetProgression()); Candidate.RefreshProgression();
-    Simulation=MoveTemp(Candidate); ActivateRun(); return true;
-}
-bool ADywxMVPWorld::PurchaseLegacy(LegacyUnlock Unlock)
-{
-    InitializeProfile(); if(bActive || !Profile.IsWritable()) return false;
-    auto Candidate=Profile;
-    if(!PurchaseUnlock(Candidate.MutableCampaign(),Unlock) || !Candidate.Save()) return false;
-    Profile=MoveTemp(Candidate); return true;
-}
-bool ADywxMVPWorld::PurchasePermanent(PermanentStat Stat)
-{
-    InitializeProfile(); if(bActive || !Profile.IsWritable()) return false;
-    auto Candidate=Profile;
-    if(!PurchaseBonus(Candidate.MutableCampaign(),Stat) || !Candidate.Save()) return false;
-    Profile=MoveTemp(Candidate); return true;
-}
-bool ADywxMVPWorld::HasSavedRun(int32 Hero) const
-{
-    return bProfileLoaded && Hero>=0 && Hero<3 && Profile.HasCheckpoint(HeroId(Hero));
-}
-bool ADywxMVPWorld::SaveRun()
-{
-    if(!bActive || !Profile.IsWritable()) return false;
-    // Prepare a projected boundary on copies; a failed write must not commit XP
-    // or consume pending choices in the live, possibly paused intermission.
-    RunCheckpoint Checkpoint; std::string Bytes;
-    if(!Simulation.PrepareCheckpoint(Checkpoint) || !SaveCodec::EncodeCheckpoint(Checkpoint,Bytes)) return false;
-    return Profile.SaveCheckpoint(HeroId(Checkpoint.campaign.hero),Bytes);
-}
-bool ADywxMVPWorld::ResumeRun(int32 Hero)
-{
-    InitializeProfile(); if(Hero<0 || Hero>=3 || !Profile.IsWritable()) return false;
-    if(!SaveProfile()) return false;
-    std::string Bytes; RunCheckpoint Checkpoint;
-    if(!Profile.GetCheckpoint(HeroId(Hero),Bytes) || !SaveCodec::DecodeCheckpoint(Bytes,Checkpoint)) return false;
-    dywx::mvp::Simulation Candidate;
-    if(!Candidate.RestoreCheckpoint(Checkpoint,Profile.GetCampaign())) return false;
-    // Consumption is durable before activation: one checkpoint cannot duplicate rewards.
-    std::string Consumed;
-    if(!Profile.ConsumeCheckpoint(HeroId(Hero),Consumed)) return false;
-    Simulation=MoveTemp(Candidate); ActivateRun(); return true;
+    check(!bActive);
+    Session = InSession;
+    OwningController = InController;
 }
 void ADywxMVPWorld::ActivateRun()
 {
+    if (!Session || !Session->IsRunActive() || !OwningController.IsValid()) return;
     if(!bSceneBuilt) BuildScene();
     RebuildArena();
-    ProfileElapsed=0; ProfileWave=-1; ProfilePhase=RunPhase::Title;
-    Input={}; SoundCooldown=0; LastHP=Simulation.GetSnapshot().player.hp; LastShots=0; LastEffect=0; LastDash=0; LastLevel=1; LastPhase=RunPhase::Title; VisualTime=0; HeroWalkPhase=0; SwarmWalkPhases.Reset(); bHavePreviousPlayer=false; Transients.Reset(); PreviousEnemies.Reset(); PreviousPickups.Reset(); PreviousPickupGrades.Reset();
+    SoundCooldown=0; LastHP=GetSnapshot().player.hp; LastShots=0; LastEffect=0; LastDash=0; LastLevel=1; LastPhase=RunPhase::Title; VisualTime=0; HeroWalkPhase=0; SwarmWalkPhases.Reset(); bHavePreviousPlayer=false; Transients.Reset(); PreviousEnemies.Reset(); PreviousPickups.Reset(); PreviousPickupGrades.Reset();
     LastGeneration=0;
     if(!bActive) {
-        if(APlayerController* PC=GetWorld()->GetFirstPlayerController()) { PreviousView=PC->GetViewTarget(); PC->SetViewTarget(this); }
-        SavedFPS=GEngine?GEngine->GetMaxFPS():0;
-        AppliedFPS=-1.f;
+        APlayerController* PC=OwningController.Get();
+        PreviousView=PC->GetViewTarget(); PC->SetViewTarget(this);
     }
-    bFocusPauseRequested=false; bActive=true; RefreshRunBudget(); SetActorHiddenInGame(false); SetActorTickEnabled(true); Render(0);
+    bActive=true; SetActorHiddenInGame(false); SetActorTickEnabled(true); Render(0);
 }
 void ADywxMVPWorld::StopRun()
 {
     if(!bActive) return;
-    SaveProfile();
-    bActive=false; Input={}; SetActorTickEnabled(false); SetActorHiddenInGame(true);
-    if(APlayerController* PC=GetWorld()->GetFirstPlayerController()) if(PC->GetViewTarget()==this && PreviousView.IsValid()) PC->SetViewTarget(PreviousView.Get());
-    if(!GIsEditor && GEngine && GEngine->GetMaxFPS()==AppliedFPS) GEngine->SetMaxFPS(SavedFPS);
-    PreviousView.Reset(); AppliedFPS=-1.f; bWindowForeground=true; bFocusPauseRequested=false;
+    bActive=false; SetActorTickEnabled(false); SetActorHiddenInGame(true);
+    if(APlayerController* PC=OwningController.Get()) if(PC->GetViewTarget()==this && PreviousView.IsValid()) PC->SetViewTarget(PreviousView.Get());
+    PreviousView.Reset();
 }
-void ADywxMVPWorld::RefreshRunBudget()
+void ADywxMVPWorld::EndPlay(const EEndPlayReason::Type Reason)
 {
-    // The live world is the sole budget owner, including while its simulation is
-    // paused. No second ticker/delegate, and never disable the actual 3D scene.
-    bool bMinimized=false;
-    bWindowForeground=true;
-    if(FSlateApplication::IsInitialized()) {
-        UGameViewportClient* Viewport=GetWorld()?GetWorld()->GetGameViewport():nullptr;
-        const TSharedPtr<SWindow> Window=Viewport?Viewport->GetWindow():nullptr;
-        const auto NativeWindow=Window.IsValid()?Window->GetNativeWindow():nullptr;
-        bMinimized=NativeWindow.IsValid() && NativeWindow->IsMinimized();
-        bWindowForeground=FSlateApplication::Get().IsActive()
-            && (!NativeWindow.IsValid() || NativeWindow->IsForegroundWindow()) && !bMinimized;
-    }
-    // Do this before Step even if the UI/controller ticks later this frame.
-    // Returning to the window never resumes combat; the existing pause UI does.
-    if(!bWindowForeground) {
-        Input={};
-        if(!GetSnapshot().paused) { Simulation.Pause(true); bFocusPauseRequested=true; }
-    }
-    if(GIsEditor || !GEngine) return; // Never cap the shared editor process.
-    const float CurrentFPS=GEngine->GetMaxFPS();
-    const bool bExternalCapChanged=AppliedFPS>=0.f && CurrentFPS!=AppliedFPS;
-    SavedFPS=Dywx::PreviewBaseline(SavedFPS,AppliedFPS,CurrentFPS);
-    const float TargetFPS=Dywx::PreviewFPS(bWindowForeground,bMinimized,SavedFPS);
-    if(bExternalCapChanged || !FMath::IsNearlyEqual(AppliedFPS,TargetFPS)) {
-        GEngine->SetMaxFPS(TargetFPS);
-        AppliedFPS=GEngine->GetMaxFPS(); // Track the accepted value, not the request.
-        UE_LOG(LogDywxMVPWorld,Log,TEXT("Run budget: active=%d minimized=%d requestedFPS=%.1f readbackFPS=%.1f"),bWindowForeground,bMinimized,TargetFPS,AppliedFPS);
-    }
+    StopRun(); Session=nullptr; OwningController.Reset(); Super::EndPlay(Reason);
 }
-bool ADywxMVPWorld::SaveProfile()
-{
-    if(!bProfileLoaded || !Profile.IsWritable()) return false;
-    if(GetSnapshot().phase==RunPhase::Title) return true; // No run discoveries/pity to observe yet.
-    auto CandidateProfile=Profile;
-    CandidateProfile.Observe(GetSnapshot().progression);
-    if(Simulation.IsCampaign()) {
-        const auto& Seen=Simulation.GetAnomalies().State().encountered;
-        for(std::size_t I=0;I<Seen.size();I++) if(Seen[I]) CandidateProfile.MutableCampaign().seenAnomalies[I]=true;
-        bool BossEncountered=GetSnapshot().phase==RunPhase::Boss || GetSnapshot().phase==RunPhase::Won || Simulation.GetCampaign().GetState().bosses>0;
-        for(const auto& Enemy:GetSnapshot().enemies) BossEncountered|=Enemy.role==EnemyRole::Boss;
-        const int32 Cave=static_cast<int32>(Simulation.GetArena().cave);
-        if(BossEncountered && Cave>=0 && Cave<3) CandidateProfile.MutableCampaign().seenBosses[static_cast<std::size_t>(Cave)]=true;
-    }
-    auto CandidateSimulation=Simulation;
-    const bool Settled=CandidateSimulation.IsCampaign() && CandidateSimulation.SettleCampaign(CandidateProfile.MutableCampaign());
-    if(!CandidateProfile.Save()) {
-        UE_LOG(LogDywxMVPWorld,Warning,TEXT("Account save failed; settlement remains pending and will retry at the next boundary."));
-        // Do not hammer a failed disk every frame; explicit user commands still retry immediately.
-        ProfileElapsed=0; ProfileWave=GetSnapshot().wave; ProfilePhase=GetSnapshot().phase;
-        return false;
-    }
-    Profile=MoveTemp(CandidateProfile);
-    if(Settled) Simulation=MoveTemp(CandidateSimulation);
-    ProfileElapsed=0; ProfileWave=GetSnapshot().wave; ProfilePhase=GetSnapshot().phase;
-    return true;
-}
-void ADywxMVPWorld::EndPlay(const EEndPlayReason::Type Reason) { if(bActive) StopRun(); else if(bProfileLoaded) SaveProfile(); Super::EndPlay(Reason); }
 void ADywxMVPWorld::Tick(float Dt)
 {
     Super::Tick(Dt);
     if(!bActive) return;
-    RefreshRunBudget();
-    // Simulation performs its own 60 Hz fixed accumulator; do not double-integrate here.
-    Simulation.Step(FMath::Clamp(Dt,0.f,.1f),Input);
+    if(!Session || !Session->IsRunActive()) { StopRun(); return; }
     const auto& S=GetSnapshot();
-    ProfileElapsed+=FMath::Clamp(Dt,0.f,.1f);
-    if(ProfileElapsed>=10 || ProfileWave!=S.wave || ProfilePhase!=S.phase) SaveProfile();
     const bool Frozen=S.paused || (S.phase!=RunPhase::Wave && S.phase!=RunPhase::Boss);
-    const float VisualDt=Frozen?0.f:FMath::Min(Dt,.1f);
+    const float VisualDt=Frozen?0.f:FMath::Clamp(Dt,0.f,.1f);
     VisualTime+=VisualDt;
     Render(VisualDt);
 }
@@ -415,6 +278,7 @@ void ADywxMVPWorld::RebuildArena()
     for(auto& Pair:Batches) if(!Pair.Value.Dynamic) {
         Pair.Value.Component->ClearInstances(); Pair.Value.Allocated=0; Pair.Value.Pending.Reset();
     }
+    const auto& Simulation=*Session->GetSimulation();
     const auto& Arena=Simulation.GetArena();
     const bool Full=Simulation.IsCampaign();
     const float X=Full?Arena.config.halfWidth:48, Y=Full?Arena.config.halfHeight:27;
@@ -460,11 +324,12 @@ FName ADywxMVPWorld::ElementBatch(Element E,const TCHAR* Suffix)
 }
 void ADywxMVPWorld::Render(float Dt)
 {
+    const auto& Simulation=*Session->GetSimulation();
     const auto& S=GetSnapshot();
     if(S.generation!=LastGeneration) { PreviousEnemies.Reset(); PreviousPickups.Reset(); Transients.Reset(); PreviousPickupGrades.Reset(); LastEffect=0; LastShots=S.statistics.shots; LastHP=S.player.hp; LastDash=S.player.dashCooldown; LastLevel=S.progression.level; LastPhase=RunPhase::Title; LastGeneration=S.generation; bHavePreviousPlayer=false; HeroWalkPhase=0; SwarmWalkPhases.Reset(); }
     FVector Player=World(S.player.position);
     // Aspect-adaptive ground footprint. HUD overlays do not move this authoritative view.
-    int32 Width=1920,Height=1080; if(auto* PC=GetWorld()->GetFirstPlayerController()) PC->GetViewportSize(Width,Height);
+    int32 Width=1920,Height=1080; if(auto* PC=OwningController.Get()) PC->GetViewportSize(Width,Height);
     const float Aspect=float(FMath::Max(Width,1))/FMath::Max(Height,1);
     Camera->OrthoWidth=FMath::Max(3200.f,1800.f*Aspect);
     const float HalfX=FMath::Min(4990.f,Camera->OrthoWidth*.5f);

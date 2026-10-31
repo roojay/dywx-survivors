@@ -39,3 +39,7 @@
 ## 后续 dot 复查（2026-10-31）
 
 见 `dot-review-20261031/REVIEW.md`。追加战斗、经济/存档边界修复及 UI 输入入口防护，新增回归已进入总门禁。最终冻结源码全量 ASan/UBSan 与自然样例普通/消毒器均通过；自然样例为3胜4死3上限，仍不代表新号平衡或UE实机验收。Windows当前离线，完整推送/包交付的最新具体范围确认仍待用户答复；本轮先本地提交并保存备份，不修改远端。
+
+## 架构重整
+
+新增 DywxCore → DywxRuntime → DywxUI 模块边界，详见 `../architecture/UE-LAYERING.md`。旧源码位置已迁移，历史证据保留原路径而不篡改；按更新后的 scripts 运行。Runtime 限 Standalone，尚无网络复制；UE构建需重新生成工程并重点核对跨模块DLL导出及Subsystem生命周期。后续代码以GitHub为唯一新增交付目标，不再保存Space代码备份；dot Git写入认证当前仍阻塞，保留本地提交待可认证环境推送。

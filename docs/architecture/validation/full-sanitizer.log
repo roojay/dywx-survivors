@@ -1,0 +1,1176 @@
+PASS: navigation, locked content, repeated actions, back/pause, selection retention, invalid fractions
+PASS: preview foreground/background/minimized caps and stricter user limits (policy only, not UE/GPU validation)
+MVP progression: all assertions passed; normal drops 557/100000
+MVP discoveries: metadata, reset, merge, RNG and encounter assertions passed
+mvp_simulation_tests: 10 suites passed
+mvp_proc_tests: T2/T5/T6/M5/M6/U1 + boss caps passed across 200 fixed seeds
+Owned-spell combat tests passed: rank4 aura cadence, rank5 hurt burst/cooldown, rank4 ring rotation
+MELEE post-empty-cast 0.7s enemy-front: dealt=18 taken=0
+STRESS seed=991 ticks=36000 simulated_seconds=600 maxEnemies=150 cappedEvents=42543 wall_ms=489.567 (explicit harness HP resets; not balance)
+PASS 607413 checks; elapsed_ms=493.346
+PASS 100% upgrade-passive-title: 197.89/248 width; 48/208 height
+PASS 100% fusion-action: 355.53/510 width; 59/80 height
+PASS 100% main-title: 440.00/610 width; 134/155 height
+PASS 100% main-primary: 192.00/490 width; 57/90 height
+PASS 100% codex-button: 96.00/440 width; 48/70 height
+PASS 100% legacy-button: 96.00/440 width; 48/70 height
+PASS 100% quit-button: 160.00/440 width; 48/70 height
+PASS 100% back-button: 169.38/190 width; 48/60 height
+PASS 100% map-mode: 355.53/580 width; 59/85 height
+PASS 100% map-caption: 291.22/580 width; 49/80 height
+PASS 100% dash-button: 211.12/400 width; 48/65 height
+PASS 100% screen-heading: 268.00/800 width; 82/100 height
+PASS 100% map-title: 469.00/800 width; 82/100 height
+PASS 100% hud-resonance: 571.33/800 width; 30/40 height
+PASS 100% rest-refine: 353.22/470 width; 48/60 height
+PASS 100% rest-lock: 189.64/245 width; 48/60 height
+PASS 100% rest-ready: 395.53/810 width; 59/70 height
+PASS 100% upgrade-reroll: 263.11/430 width; 48/60 height
+PASS 100% refine-confirm: 160.00/395 width; 48/60 height
+PASS 100% save-exit: 192.00/596 width; 48/65 height
+PASS 100% saved-hero: 395.53/500 width; 59/75 height
+PASS 100% economy-refresh: 458.56/596 width; 48/65 height
+PASS 100% economy-reforge: 416.45/596 width; 48/65 height
+PASS 100% economy-relic-heading: 210.00/596 width; 35/55 height
+PASS 100% codex-numeric-line: 397.44/570 width; 35/55 height
+PASS 100% opportunity-title: 321.22/810 width; 48/65 height
+PASS 100% opportunity-reward-line: 497.53/780 width; 34/55 height
+PASS 100% anomaly-benefit-line: 392.00/570 width; 35/55 height
+PASS 100% boss-realm-title: 650.23/750 width; 38/45 height
+PASS 100% local-ranking-heading: 417.22/596 width; 39/55 height
+PASS 100% local-ranking-line: 355.09/560 width; 34/55 height
+PASS 100% anomaly-hud-header: 464.91/974 width; 30/42 height
+PASS 100% anomaly-hud-numbers: 633.55/974 width; 30/42 height
+PASS 100% hover-comparison-heading: 432.80/570 width; 30/42 height
+PASS 100% rest-title: 619.47/980 width; 43/55 height
+PASS 110% upgrade-passive-title: 213.45/248 width; 52/208 height
+PASS 110% fusion-action: 387.69/510 width; 64/80 height
+PASS 110% main-title: 480.00/610 width; 146/155 height
+PASS 110% main-primary: 208.00/490 width; 62/90 height
+PASS 110% codex-button: 102.00/440 width; 52/70 height
+PASS 110% legacy-button: 102.00/440 width; 52/70 height
+PASS 110% quit-button: 172.00/440 width; 52/70 height
+PASS 110% back-button: 182.27/190 width; 52/60 height
+PASS 110% map-mode: 387.69/580 width; 64/85 height
+PASS 110% map-caption: 315.34/580 width; 53/80 height
+PASS 110% dash-button: 227.92/400 width; 52/65 height
+PASS 110% screen-heading: 296.00/800 width; 90/100 height
+PASS 110% map-title: 518.00/800 width; 90/100 height
+PASS 110% hud-resonance: 642.81/800 width; 34/40 height
+PASS 110% rest-refine: 383.34/470 width; 52/60 height
+PASS 110% rest-lock: 204.42/245 width; 52/60 height
+PASS 110% rest-ready: 431.69/810 width; 64/70 height
+PASS 110% upgrade-reroll: 284.80/430 width; 52/60 height
+PASS 110% refine-confirm: 172.00/395 width; 52/60 height
+PASS 110% save-exit: 207.00/596 width; 52/65 height
+PASS 110% saved-hero: 431.69/500 width; 64/75 height
+PASS 110% economy-refresh: 498.56/596 width; 52/65 height
+PASS 110% economy-reforge: 452.52/596 width; 52/65 height
+PASS 110% economy-relic-heading: 232.50/596 width; 39/55 height
+PASS 110% codex-numeric-line: 440.09/570 width; 39/55 height
+PASS 110% opportunity-title: 348.34/810 width; 52/65 height
+PASS 110% opportunity-reward-line: 552.75/780 width; 38/55 height
+PASS 110% anomaly-benefit-line: 434.00/570 width; 39/55 height
+PASS 110% boss-realm-title: 693.69/750 width; 39/45 height
+PASS 110% local-ranking-heading: 456.34/596 width; 43/55 height
+PASS 110% local-ranking-line: 394.44/560 width; 38/55 height
+PASS 110% anomaly-hud-header: 523.06/974 width; 34/42 height
+PASS 110% anomaly-hud-numbers: 712.89/974 width; 34/42 height
+PASS 110% hover-comparison-heading: 486.98/570 width; 34/42 height
+PASS 110% rest-title: 690.16/980 width; 48/55 height
+PASS: 70 offline checks. UE/Slate runtime validation NOT RUN.
+PASS: full game transactions
+PASS: save and leave only after success
+PASS: first-layer cave identification reachable
+PASS: data-driven opportunities and anomaly rules
+PASS: all hero fusion recipes remain selectable
+PASS: local ranking uses authoritative order
+PASS: active anomaly HUD with numeric tooltip
+PASS: authoritative complete codex rules
+PASS: shared full stat colored hover comparison
+PASS: phase notice uses paused simulation clock
+PASS: no quick-only retry
+PASS: player lore preserved
+PASS: world bridge
+PASS: six spell four passive slots
+PASS: catalog not legacy three skills
+PASS: upgrade not modal
+PASS: inventory controls
+PASS: stale widget guard
+PASS: snapshot copy excludes entity arrays
+PASS: movement and immediate choices
+PASS: bounded HUD refresh
+PASS: playable fusion action
+PASS: codex saved view without world spawn
+PASS: codex grey and lit complete list
+PASS: balanced source delimiters and 671 CJK glyphs in both actual Sarasa fonts
+NOT_RUN: UHT/C++ Unreal build, Slate input/layout, packaged gameplay, GPU/FPS
+PASS: v1 optional flags migration, v2 bounded codec, dirty/write guards and transactional consume source contract
+NOT_RUN: Unreal compile, restart/file IO, atomic replacement and power-loss fault injection
+PASS: live HUD preserves navigation-selected modal input mode
+PASS: focus navigation cannot be overwritten after nested input-mode change
+PASS: pause entry clears queued dash and stale held keys
+PASS: UIOnly entry clears keys even for non-pausing economy
+PASS: flush only through clear helper, not each player tick or upgrade
+PASS: one live integration owner; world renderer never steps
+PASS: local focus/input sampled immediately before simulation step
+PASS: native minimized/foreground and Slate active
+PASS: shared budget preserves external baseline and accepted cap
+PASS: PIE cap excluded
+PASS: focus loss pauses once per transition and never auto-resumes
+PASS: existing pause menu is idempotent, not Escape toggle
+PASS: release restores only owned exact cap and prior view
+PASS: live pause preserves scene instead of preview suppression
+PASS: modal and background input not sampled
+PASS: single budget remains bound across menu/run transitions
+PASS: world released before menu reacquires preview
+PASS: pre-step delegate removed during teardown
+NOT_RUN: Unreal compile, actual focus/minimize/input transitions, rendered pause scene, FPS/GPU measurements
+{
+  "scope": "asset and configuration checks only; not an Unreal build or runtime test",
+  "passed": true,
+  "checks": [
+    {
+      "name": "main-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "26d17c49a3487a0ca5d93006d83289d45975eb8d6b77250539bae35e6188d576"
+      }
+    },
+    {
+      "name": "character-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "8a6e0d66af0c3da21614c2dfe1739ba3c60b3c883c81a16f49a7003f0e3c2dc2"
+      }
+    },
+    {
+      "name": "map-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "a38d7279c78a42b3157a78d4ea96d19cc9bd28d560b3dfe50d0dbeae6ca5120c"
+      }
+    },
+    {
+      "name": "battle-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "b627787f193ae430e2ed2edfad37caf35e8ed27620619568169dde814912da9d"
+      }
+    },
+    {
+      "name": "icon-slash.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          43,
+          100,
+          391,
+          468
+        ],
+        "sha256": "f80a352385a84e787e63c65fb104d1ae17391c1b63756dc18d311fcfbe47897b"
+      }
+    },
+    {
+      "name": "icon-orbit.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          65,
+          65,
+          446,
+          446
+        ],
+        "sha256": "24e4b65d1ad7fc20f91ae72ed407e3a037e090a4d35cefd323b94d965d37ca5a"
+      }
+    },
+    {
+      "name": "icon-arrow.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          82,
+          75,
+          437,
+          431
+        ],
+        "sha256": "cee6576a038c9f0679de9280de800d645d2c1a496991833bfd2770be416a7810"
+      }
+    },
+    {
+      "name": "icon-dash.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          51,
+          93,
+          397,
+          402
+        ],
+        "sha256": "3b98c7582b6aa6a75e18a84852dff9d0c50f94cd85d72ceeaecb8cd3b2265e38"
+      }
+    },
+    {
+      "name": "icon-stone.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          158,
+          105,
+          354,
+          407
+        ],
+        "sha256": "c4f8004dc5cb3ec28c81116349c34de680669f2590548fee0ecb7cdd78ecbbb8"
+      }
+    },
+    {
+      "name": "icon-mirror.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          62,
+          62,
+          450,
+          451
+        ],
+        "sha256": "5f97e8b2938701591dd3ecd67f4ea67421e51c96a421cfdf15aa789136dbf660"
+      }
+    },
+    {
+      "name": "character-portraits.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1774,
+          887
+        ],
+        "uv_ranges": [
+          [
+            0.0,
+            0,
+            0.25,
+            1
+          ],
+          [
+            0.25,
+            0,
+            0.5,
+            1
+          ],
+          [
+            0.5,
+            0,
+            0.75,
+            1
+          ],
+          [
+            0.75,
+            0,
+            1.0,
+            1
+          ]
+        ],
+        "nonempty_slices": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "sha256": "abf9f34707a52a05859f788d7067b4de92d45007517941d6f29ac6f19165c9ca"
+      }
+    },
+    {
+      "name": "button-gold.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          2172,
+          724
+        ],
+        "mode": "RGBA",
+        "visible_bounds_alpha_above_1": [
+          0,
+          153,
+          2167,
+          551
+        ],
+        "uv_range": [
+          0,
+          0.21,
+          1,
+          0.77
+        ],
+        "sha256": "d64d61a1816ec765be2f589f4a4e5ae478fa22cccc2fa80e6fa0486909bb1a87"
+      }
+    },
+    {
+      "name": "SarasaUiSC-Regular.ttf",
+      "passed": true,
+      "detail": {
+        "han_glyphs_checked": 793,
+        "missing": ""
+      }
+    },
+    {
+      "name": "SarasaUiSC-Bold.ttf",
+      "passed": true,
+      "detail": {
+        "han_glyphs_checked": 793,
+        "missing": ""
+      }
+    },
+    {
+      "name": "font license present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "loose UI files included in packaging",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "runtime module declared",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "not_run": [
+    "Unreal compilation/UHT",
+    "editor launch",
+    "packaging",
+    "Slate rendering/input",
+    "GPU performance"
+  ]
+}
+{
+  "status": "passed",
+  "mesh_count": 31,
+  "triangles": 43066,
+  "scope": "JSON + staging + source contracts only",
+  "ue_compile": "not_run",
+  "ue_render": "not_run"
+}
+PASS: full-game world, persistence ordering, seeded arena and bounded six-element/companion presentation source contracts
+PASS: six-color low-priority anomaly halos gated by actual modifiers/roles; no fictitious lightning/array enemy buffs
+{
+  "status": "passed",
+  "scope": "static exported art + material source contracts only",
+  "meshes": 31,
+  "areaWeightedBaseColorLuminance": {
+    "hero_body": 0.40643581151015185,
+    "enemy_swarm": 0.07597612544427156,
+    "tile": 0.06039109869406933
+  },
+  "ue_shader_compile": "not_run",
+  "ue_render": "not_run",
+  "gpu_performance": "not_run"
+}
+{
+  "source": "Content/MVP/Geometry/scene.json",
+  "sha256": "0081e5e1af98e9d163e83e5dcbfc807465b1ce5b92bc2cb32867d1231ce9eb11",
+  "meshCount": 31,
+  "rawBytes": 9147202,
+  "passed": true,
+  "meshes": [
+    {
+      "name": "hero_body",
+      "vertices": 4028,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.0
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.17881
+    },
+    {
+      "name": "hero_sword",
+      "vertices": 352,
+      "triangles": 158,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.61,
+          -0.19,
+          0.0
+        ],
+        "max": [
+          1.18,
+          0.19,
+          0.16
+        ]
+      },
+      "signedVolume": 0.007281
+    },
+    {
+      "name": "enemy_swarm",
+      "vertices": 4028,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.005
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.175206
+    },
+    {
+      "name": "enemy_exploder",
+      "vertices": 1568,
+      "triangles": 818,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.32185,
+          -0.338121,
+          0.19
+        ],
+        "max": [
+          0.343637,
+          0.338121,
+          1.26
+        ]
+      },
+      "signedVolume": 0.193492
+    },
+    {
+      "name": "enemy_charger",
+      "vertices": 5382,
+      "triangles": 2074,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -1.02,
+          -0.431298,
+          0.005
+        ],
+        "max": [
+          0.94,
+          0.431298,
+          1.31
+        ]
+      },
+      "signedVolume": 0.65129
+    },
+    {
+      "name": "enemy_boss",
+      "vertices": 7101,
+      "triangles": 2666,
+      "triangleBudgetExclusive": 10000,
+      "boundsMetres": {
+        "min": [
+          -1.785,
+          -0.754772,
+          0.00875
+        ],
+        "max": [
+          1.645,
+          0.754772,
+          2.2925
+        ]
+      },
+      "signedVolume": 3.689481
+    },
+    {
+      "name": "enemy_rangedbird",
+      "vertices": 1499,
+      "triangles": 624,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -1.0,
+          -1.0,
+          0.48
+        ],
+        "max": [
+          0.53,
+          1.0,
+          1.18
+        ]
+      },
+      "signedVolume": 0.098272
+    },
+    {
+      "name": "enemy_supporttotem",
+      "vertices": 530,
+      "triangles": 330,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.303109,
+          -0.35,
+          0.0
+        ],
+        "max": [
+          0.303109,
+          0.35,
+          1.33
+        ]
+      },
+      "signedVolume": 0.182776
+    },
+    {
+      "name": "enemy_summoner",
+      "vertices": 1492,
+      "triangles": 744,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.56,
+          -0.433013,
+          0.06
+        ],
+        "max": [
+          0.56,
+          0.433013,
+          0.94
+        ]
+      },
+      "signedVolume": 0.342892
+    },
+    {
+      "name": "enemy_spirit",
+      "vertices": 1194,
+      "triangles": 462,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.635453,
+          -0.151609,
+          0.025004
+        ],
+        "max": [
+          0.49515,
+          0.151609,
+          0.85
+        ]
+      },
+      "signedVolume": 0.048366
+    },
+    {
+      "name": "rock",
+      "vertices": 234,
+      "triangles": 80,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.828994,
+          -0.818085,
+          0.0
+        ],
+        "max": [
+          0.940872,
+          0.997783,
+          1.060426
+        ]
+      },
+      "signedVolume": 1.642878
+    },
+    {
+      "name": "pillar",
+      "vertices": 1492,
+      "triangles": 724,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.5,
+          -0.5,
+          0.0
+        ],
+        "max": [
+          0.5,
+          0.5,
+          2.83
+        ]
+      },
+      "signedVolume": 1.260612
+    },
+    {
+      "name": "tile",
+      "vertices": 186,
+      "triangles": 74,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.49,
+          -0.49,
+          -0.14
+        ],
+        "max": [
+          0.49,
+          0.49,
+          0.002
+        ]
+      },
+      "signedVolume": 0.131917
+    },
+    {
+      "name": "shrine_banner",
+      "vertices": 1704,
+      "triangles": 680,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.24,
+          -0.747063,
+          0.0
+        ],
+        "max": [
+          0.24,
+          0.747063,
+          3.05
+        ]
+      },
+      "signedVolume": 0.025921
+    },
+    {
+      "name": "shrine_arch",
+      "vertices": 3076,
+      "triangles": 1376,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.7,
+          -2.65,
+          0.0
+        ],
+        "max": [
+          0.7,
+          2.65,
+          4.42
+        ]
+      },
+      "signedVolume": 6.615369
+    },
+    {
+      "name": "hero_walk_0",
+      "vertices": 4074,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.178614
+    },
+    {
+      "name": "hero_walk_1",
+      "vertices": 4152,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.507123,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.177904
+    },
+    {
+      "name": "hero_walk_2",
+      "vertices": 4187,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.508724,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.177843
+    },
+    {
+      "name": "hero_walk_3",
+      "vertices": 4152,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.507123,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.177918
+    },
+    {
+      "name": "hero_walk_4",
+      "vertices": 4074,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.178633
+    },
+    {
+      "name": "hero_walk_5",
+      "vertices": 4170,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.498391,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.179364
+    },
+    {
+      "name": "hero_walk_6",
+      "vertices": 4187,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.566328,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.179815
+    },
+    {
+      "name": "hero_walk_7",
+      "vertices": 4170,
+      "triangles": 1996,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.498391,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.17935
+    },
+    {
+      "name": "enemy_swarm_walk_0",
+      "vertices": 4046,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.175104
+    },
+    {
+      "name": "enemy_swarm_walk_1",
+      "vertices": 4115,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.174762
+    },
+    {
+      "name": "enemy_swarm_walk_2",
+      "vertices": 4117,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.578316,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.174606
+    },
+    {
+      "name": "enemy_swarm_walk_3",
+      "vertices": 4115,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.174762
+    },
+    {
+      "name": "enemy_swarm_walk_4",
+      "vertices": 4046,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.175104
+    },
+    {
+      "name": "enemy_swarm_walk_5",
+      "vertices": 4124,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.17476
+    },
+    {
+      "name": "enemy_swarm_walk_6",
+      "vertices": 4135,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.578316,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.174604
+    },
+    {
+      "name": "enemy_swarm_walk_7",
+      "vertices": 4124,
+      "triangles": 1588,
+      "triangleBudgetExclusive": 3000,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.17476
+    }
+  ]
+}
+MELEE post-empty-cast 0.7s enemy-front: dealt=18 taken=0
+STRESS seed=991 ticks=36000 simulated_seconds=600 maxEnemies=150 cappedEvents=42543 wall_ms=7251.69 (explicit harness HP resets; not balance)
+PASS 607413 checks; elapsed_ms=7337.5
+
+PASS: available offline gates. NOT_RUN: Unreal build/cook/launch/render/GPU/human-play acceptance.
+Full content: 30 executable base configs, 6 fusions, 80 unique themes; sealing/skip/permanent baseline passed
+Full spell behaviors: facing, healing, slow/stun, field following, companion count/orbit/projectiles, fastest-target warning/explosion, shield, pierce/return, water-fire interaction passed
+campaign: modes, guarantees, rewards, gates, risk, inheritance, replay passed
+Economy tests passed
+Arena: 1000 seeds, connectivity, clearance, reproducibility, bounded config, six anomalies and layer gates passed
+full_game_integration_tests: campaign layers, 10-wave/endless bosses, settlement, economy and layout passed
+Save codec and profile transaction tests passed
+core command regressions passed
+PASS: portable domain header: Types
+PASS: no shadow UI domain header: Types
+PASS: portable domain header: Simulation
+PASS: no shadow UI domain header: Simulation
+PASS: portable domain header: Progression
+PASS: no shadow UI domain header: Progression
+PASS: portable domain header: Campaign
+PASS: no shadow UI domain header: Campaign
+PASS: portable domain header: Economy
+PASS: no shadow UI domain header: Economy
+PASS: portable domain header: Arena
+PASS: no shadow UI domain header: Arena
+PASS: portable domain header: SaveCodec
+PASS: no shadow UI domain header: SaveCodec
+PASS: portable domain header: ContentCatalog
+PASS: no shadow UI domain header: ContentCatalog
+PASS: core-only include: Simulation.cpp -> MVP/Simulation.h
+PASS: core-only include: Simulation.cpp -> MVP/ContentCatalog.h
+PASS: core-only include: Simulation.cpp -> MVP/SaveCodec.h
+PASS: no UE types: Simulation.cpp
+PASS: core-only include: SaveCodec.cpp -> MVP/SaveCodec.h
+PASS: no UE types: SaveCodec.cpp
+PASS: core-only include: Progression.cpp -> MVP/Progression.h
+PASS: no UE types: Progression.cpp
+PASS: core-only include: Economy.cpp -> MVP/Economy.h
+PASS: no UE types: Economy.cpp
+PASS: core-only include: ContentCatalog.cpp -> MVP/ContentCatalog.h
+PASS: no UE types: ContentCatalog.cpp
+PASS: core-only include: Campaign.cpp -> MVP/Campaign.h
+PASS: no UE types: Campaign.cpp
+PASS: core-only include: Arena.cpp -> MVP/Arena.h
+PASS: no UE types: Arena.cpp
+PASS: no UE types: Export.h
+PASS: core-only include: Types.h -> MVP/Export.h
+PASS: no UE types: Types.h
+PASS: explicit export contract: Types.h
+PASS: exported domain type: Vec2
+PASS: exported domain type: Stats
+PASS: exported domain type: SpellState
+PASS: exported domain type: Resonance
+PASS: exported domain type: BuildState
+PASS: exported domain type: Affix
+PASS: exported domain type: Relic
+PASS: exported domain type: UpgradeOffer
+PASS: exported domain type: ProgressionState
+PASS: exported domain type: PlayerState
+PASS: exported domain type: EnemyState
+PASS: exported domain type: ProjectileState
+PASS: exported domain type: EffectState
+PASS: exported domain type: PickupState
+PASS: exported domain type: RunStatistics
+PASS: exported domain type: RunConfig
+PASS: exported domain type: InputState
+PASS: exported domain type: Snapshot
+PASS: exported domain type: ArenaObstacle
+PASS: core-only include: Simulation.h -> MVP/Export.h
+PASS: core-only include: Simulation.h -> MVP/Progression.h
+PASS: core-only include: Simulation.h -> MVP/Types.h
+PASS: core-only include: Simulation.h -> MVP/Campaign.h
+PASS: core-only include: Simulation.h -> MVP/Economy.h
+PASS: core-only include: Simulation.h -> MVP/Arena.h
+PASS: no UE types: Simulation.h
+PASS: explicit export contract: Simulation.h
+PASS: exported domain type: RunCheckpoint;
+PASS: exported domain type: CaveBossRules
+PASS: exported domain type: OpportunityDetails
+PASS: exported domain type: Simulation
+PASS: core-only include: SaveCodec.h -> MVP/Export.h
+PASS: core-only include: SaveCodec.h -> MVP/Campaign.h
+PASS: core-only include: SaveCodec.h -> MVP/Economy.h
+PASS: core-only include: SaveCodec.h -> MVP/Arena.h
+PASS: no UE types: SaveCodec.h
+PASS: explicit export contract: SaveCodec.h
+PASS: exported domain type: CombatBoundaryState
+PASS: exported domain type: RunCheckpoint
+PASS: exported domain type: ProfileData
+PASS: exported domain type: SaveCodec
+PASS: exported domain type: ProfileStore
+PASS: core-only include: Progression.h -> MVP/Export.h
+PASS: core-only include: Progression.h -> MVP/ContentCatalog.h
+PASS: no UE types: Progression.h
+PASS: explicit export contract: Progression.h
+PASS: exported domain type: RefinePreview
+PASS: exported domain type: RelicFilter
+PASS: exported domain type: Progression
+PASS: core-only include: Economy.h -> MVP/Export.h
+PASS: core-only include: Economy.h -> MVP/Progression.h
+PASS: no UE types: Economy.h
+PASS: explicit export contract: Economy.h
+PASS: exported domain type: EconomyConfig
+PASS: exported domain type: ShopGood
+PASS: exported domain type: EconomyRefinePreview
+PASS: exported domain type: ReforgeOffer
+PASS: exported domain type: EconomyUndo
+PASS: exported domain type: EconomyState
+PASS: exported domain type: Economy
+PASS: core-only include: ContentCatalog.h -> MVP/Export.h
+PASS: core-only include: ContentCatalog.h -> MVP/Types.h
+PASS: no UE types: ContentCatalog.h
+PASS: explicit export contract: ContentCatalog.h
+PASS: exported domain type: SpellConfig
+PASS: exported domain type: PassiveConfig
+PASS: exported domain type: RelicConfig
+PASS: exported domain type: FusionRecipe
+PASS: core-only include: Campaign.h -> MVP/Export.h
+PASS: core-only include: Campaign.h -> MVP/Types.h
+PASS: no UE types: Campaign.h
+PASS: explicit export contract: Campaign.h
+PASS: exported domain type: HeroRecord
+PASS: exported domain type: EndlessRecord
+PASS: exported domain type: CampaignProfile
+PASS: exported domain type: CampaignConfig
+PASS: exported domain type: WaveSchedule
+PASS: exported domain type: TrialEffects
+PASS: exported domain type: CampaignRunState
+PASS: exported domain type: OpportunityResolution
+PASS: exported domain type: Campaign
+PASS: core-only include: Arena.h -> MVP/Export.h
+PASS: core-only include: Arena.h -> MVP/Types.h
+PASS: no UE types: Arena.h
+PASS: explicit export contract: Arena.h
+PASS: exported domain type: CaveDefinition
+PASS: exported domain type: ArenaConfig
+PASS: exported domain type: ArenaLayout
+PASS: exported domain type: AnomalyConfig
+PASS: exported domain type: AnomalyModifiers
+PASS: exported domain type: ArenaHazardEvent
+PASS: exported domain type: AnomalyState
+PASS: exported domain type: AnomalySystem
+PASS: domain module dependency direction
+PASS: runtime cannot depend on presentation
+PASS: presentation explicitly depends on core/runtime
+PASS: three registered runtime modules
+PASS: target modules: DywxSurvivorsEditor.Target.cs
+PASS: target modules: DywxSurvivors.Target.cs
+PASS: no presentation dependency: DywxRuntimeModule.cpp
+PASS: no presentation dependency: DywxRunSession.cpp
+PASS: no presentation dependency: DywxMVPProfile.cpp
+PASS: no presentation dependency: DywxRunSession.h
+PASS: no presentation dependency: DywxMVPProfile.h
+PASS: runtime exported adapter APIs
+PASS: runtime offers read-only simulation view
+PASS: runtime world/network whitelist
+PASS: world actor is presentation only
+PASS: single simulation integration owner
+NOT_RUN: UHT/UBT modular DLL exports, UE lifecycle ordering, packaged gameplay
+combat boundary regressions: 0 failures
+Economy boundary tests passed
+Save boundary tests passed
+
+Full-design offline gates passed; UE compile/cook/runtime/performance remain NOT_RUN.

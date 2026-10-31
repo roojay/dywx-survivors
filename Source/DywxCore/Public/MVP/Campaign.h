@@ -1,4 +1,5 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Types.h"
 #include <array>
 #include <cstdint>
@@ -13,16 +14,16 @@ enum class LegacyUnlock { HeroSword, HeroBeast, RealmSecond, RealmThird, SpellPo
   RelicPool, ExtraReroll, FreeCaveRefresh, Count };
 enum class PermanentStat { Health, Armor, Regen, Power, Cooldown, Area, Critical,
   Speed, Pickup, Dash, Count }; // Luck deliberately cannot be purchased.
-struct HeroRecord {
+struct DYWXCORE_API HeroRecord {
   int hero = 0, bestWave = 0;
   std::uint64_t kills = 0, runs = 0, wins = 0, mastery = 0;
 };
-struct EndlessRecord {
+struct DYWXCORE_API EndlessRecord {
   std::uint64_t runId = 0;
   int hero = 0, wave = 0;
   std::uint64_t kills = 0;
 };
-struct CampaignProfile {
+struct DYWXCORE_API CampaignProfile {
   std::uint64_t daoYun = 0;
   bool anyWin = false, traditionalWin = false;
   std::array<bool, 6> seenAnomalies{}; // account discovery only, no combat power
@@ -35,7 +36,7 @@ struct CampaignProfile {
   std::uint64_t nextRunId = 1;
   std::array<std::uint64_t, 3> settledThrough{}; // per-hero monotonic high watermarks
 };
-struct CampaignConfig {
+struct DYWXCORE_API CampaignConfig {
   bool quickSixWaves = false; // explicit paired-config A/B experiment; default remains four
   // Provisional tuning: 10*198s + ~120s boss = 35min (excluding menus).
   float traditionalWaveSeconds = 198, endlessWaveSeconds = 180;
@@ -44,17 +45,17 @@ struct CampaignConfig {
   unsigned legacyUnlockCost = 20, permanentRankCost = 10;
   unsigned eventStones = 20, eventXp = 15;
 };
-struct WaveSchedule {
+struct DYWXCORE_API WaveSchedule {
   bool valid = false, bossAfter = false;
   float seconds = 0, healthScale = 1, damageScale = 1;
   int enemyCap = 30, eliteCount = 1;
   std::array<int, 6> roleCounts{};
 };
-struct TrialEffects {
+struct DYWXCORE_API TrialEffects {
   unsigned risk = 0;
   float population = 1, speed = 1, elite = 1, hazard = 1, highRarityWeight = 1;
 };
-struct CampaignRunState {
+struct DYWXCORE_API CampaignRunState {
   std::uint64_t runId = 0, rng = 1, kills = 0;
   GameMode mode = GameMode::Quick;
   int hero = 0, wave = 1, bosses = 0;
@@ -65,25 +66,25 @@ struct CampaignRunState {
   int selected = -1, caveAbsent = 0, chestAbsent = 0;
   bool opportunityResolved = false, settled = false;
 };
-struct OpportunityResolution {
+struct DYWXCORE_API OpportunityResolution {
   bool accepted = false;
   OpportunityKind kind = OpportunityKind::Event;
   unsigned spiritStones = 0, xp = 0;
   bool eliteEncounter = false, openCave = false, openChest = false;
 };
-std::uint64_t ReserveRunId(CampaignProfile &profile); // persist reservation before starting
-unsigned FeatureTier(const CampaignProfile &profile);
-bool HasFeature(unsigned tier, Feature feature);
-bool HasFeature(const CampaignProfile &profile, Feature feature);
-bool IsHeroUnlocked(const CampaignProfile &profile, int hero);
-bool IsRealmUnlocked(const CampaignProfile &profile, int realm);
-WaveSchedule ScheduleWave(GameMode mode, int wave, const CampaignConfig &config = {});
-TrialEffects GetTrialEffects(unsigned mask, const CampaignConfig &config = {});
-bool PurchaseUnlock(CampaignProfile &profile, LegacyUnlock unlock, const CampaignConfig &config = {});
-bool PurchaseBonus(CampaignProfile &profile, PermanentStat stat, const CampaignConfig &config = {});
-float PermanentBonus(const CampaignProfile &profile, PermanentStat stat);
-void ApplyPermanentBonuses(const CampaignProfile &profile, Stats &stats);
-class Campaign {
+DYWXCORE_API std::uint64_t ReserveRunId(CampaignProfile &profile); // persist reservation before starting
+DYWXCORE_API unsigned FeatureTier(const CampaignProfile &profile);
+DYWXCORE_API bool HasFeature(unsigned tier, Feature feature);
+DYWXCORE_API bool HasFeature(const CampaignProfile &profile, Feature feature);
+DYWXCORE_API bool IsHeroUnlocked(const CampaignProfile &profile, int hero);
+DYWXCORE_API bool IsRealmUnlocked(const CampaignProfile &profile, int realm);
+DYWXCORE_API WaveSchedule ScheduleWave(GameMode mode, int wave, const CampaignConfig &config = {});
+DYWXCORE_API TrialEffects GetTrialEffects(unsigned mask, const CampaignConfig &config = {});
+DYWXCORE_API bool PurchaseUnlock(CampaignProfile &profile, LegacyUnlock unlock, const CampaignConfig &config = {});
+DYWXCORE_API bool PurchaseBonus(CampaignProfile &profile, PermanentStat stat, const CampaignConfig &config = {});
+DYWXCORE_API float PermanentBonus(const CampaignProfile &profile, PermanentStat stat);
+DYWXCORE_API void ApplyPermanentBonuses(const CampaignProfile &profile, Stats &stats);
+class DYWXCORE_API Campaign {
 public:
   explicit Campaign(const CampaignConfig &config = {});
   bool Start(const CampaignProfile &profile, GameMode mode, int hero,

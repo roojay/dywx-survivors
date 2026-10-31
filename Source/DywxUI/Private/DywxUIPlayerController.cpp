@@ -2,6 +2,7 @@
 #include "SDywxRoot.h"
 #include "MVP/DywxMVPWorld.h"
 #include "MVP/Simulation.h"
+#include "MVP/DywxRunSession.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
@@ -22,7 +23,12 @@ void ADywxUIPlayerController::BeginPlay()
     if (IsLocalController() && GetWorld() && GetWorld()->GetGameViewport())
     {
         MVPWorld = GetWorld()->SpawnActor<ADywxMVPWorld>();
-        if (MVPWorld) MVPWorld->InitializeProfile();
+        if (auto* RunSession = Session())
+        {
+            RunSession->InitializeProfile();
+            RunSession->SetBeforeSimulationTick(FSimpleDelegate::CreateUObject(this, &ADywxUIPlayerController::PrepareSimulationTick));
+            if (MVPWorld) MVPWorld->InitializePresentation(RunSession, this);
+        }
         RootWidget = SNew(SDywxRoot).Owner(this);
         GetWorld()->GetGameViewport()->AddViewportWidgetContent(RootWidget.ToSharedRef(), 10);
         ApplyUIInput(false, false);
@@ -44,7 +50,9 @@ void ADywxUIPlayerController::HandleEscape() { if (RootWidget.IsValid()) RootWid
 void ADywxUIPlayerController::HandleDash() { if (RootWidget.IsValid()) RootWidget->HandleDash(); }
 void ADywxUIPlayerController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    if (auto* RunSession = Session()) RunSession->StopRun();
     if (MVPWorld) MVPWorld->StopRun();
+    if (auto* RunSession = Session()) RunSession->ClearBeforeSimulationTick();
     StopPreviewBudget();
     if (RootWidget.IsValid() && GetWorld() && GetWorld()->GetGameViewport())
         GetWorld()->GetGameViewport()->RemoveViewportWidgetContent(RootWidget.ToSharedRef());
@@ -57,11 +65,14 @@ void ADywxUIPlayerController::UpdateBattleHUD(const FDywxHUDState& State)
 }
 void ADywxUIPlayerController::BeginLiveHUD(const FDywxHUDState& State)
 {
+    // Root owns navigation and SyncInput, including a focus-loss pause modal.
+    // Do not overwrite its resulting input mode with an unconditional live mode.
     if (RootWidget.IsValid()) RootWidget->BeginLiveHUD(State);
-    ApplyUIInput(true, false);
+    else ApplyUIInput(true, false);
 }
 void ADywxUIPlayerController::ShowMainMenu()
 {
+    if (auto* RunSession = Session()) RunSession->StopRun();
     if (MVPWorld) MVPWorld->StopRun();
     bDashQueued = false;
     if (RootWidget.IsValid()) RootWidget->ReturnToMenu();
@@ -76,31 +87,30 @@ void ADywxUIPlayerController::SetEndlessUnlocked(bool bUnlocked)
 const dywx::mvp::CampaignProfile& ADywxUIPlayerController::CampaignProfile() const
 {
     static const dywx::mvp::CampaignProfile Empty;
-    return MVPWorld ? MVPWorld->GetCampaignProfile() : Empty;
+    return Session() ? Session()->GetCampaignProfile() : Empty;
 }
-bool ADywxUIPlayerController::PurchaseLegacy(dywx::mvp::LegacyUnlock U) { return MVPWorld && MVPWorld->PurchaseLegacy(U); }
-bool ADywxUIPlayerController::PurchasePermanent(dywx::mvp::PermanentStat S) { return MVPWorld && MVPWorld->PurchasePermanent(S); }
-bool ADywxUIPlayerController::SaveRun() { return MVPWorld && MVPWorld->SaveRun(); }
-bool ADywxUIPlayerController::HasSavedRun(int32 H) const { return MVPWorld && MVPWorld->HasSavedRun(H); }
+bool ADywxUIPlayerController::PurchaseLegacy(dywx::mvp::LegacyUnlock U) { return Session() && Session()->PurchaseLegacy(U); }
+bool ADywxUIPlayerController::PurchasePermanent(dywx::mvp::PermanentStat S) { return Session() && Session()->PurchasePermanent(S); }
+bool ADywxUIPlayerController::SaveRun() { return Session() && Session()->SaveRun(); }
+bool ADywxUIPlayerController::HasSavedRun(int32 H) const { return Session() && Session()->HasSavedRun(H); }
 bool ADywxUIPlayerController::ResumeRun(int32 H)
 {
-    if (!MVPWorld) return false;
-    StopPreviewBudget();
-    if (!MVPWorld->ResumeRun(H)) { StartPreviewBudget(); return false; }
-    const auto& C=MVPWorld->GetSimulation().GetCampaign().GetState();
-    LastHero=H; LastMap=int32(MVPWorld->GetSimulation().GetArena().cave); LastMode=int32(C.mode); LastRisk=C.riskMask;
-    StopPreviewBudget(); BeginLiveHUD(FDywxHUDState()); RefreshRunUI(); return true;
+    if (!MVPWorld || !Session()) return false;
+    if (!Session()->ResumeRun(H)) return false;
+    MVPWorld->ActivateRun();
+    const auto& C=Simulation()->GetCampaign().GetState();
+    LastHero=H; LastMap=int32(Simulation()->GetArena().cave); LastMode=int32(C.mode); LastRisk=C.riskMask;
+    BeginLiveHUD(FDywxHUDState()); RefreshRunUI(); return true;
 }
 void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, int32 ModeIndex, uint32 RiskMask)
 {
-    if (!GetWorld()) return;
-    if (!MVPWorld) { MVPWorld = GetWorld()->SpawnActor<ADywxMVPWorld>(); if (MVPWorld) MVPWorld->InitializeProfile(); }
-    if (MVPWorld && MVPWorld->HasSavedRun(CharacterIndex)) { if(RootWidget.IsValid())RootWidget->ShowNotice(TEXT("此修士已有进行中存档，请先续接；未覆盖任何存档。")); return; }
-    StopPreviewBudget();
-    if (!MVPWorld || !MVPWorld->StartFullRun(CharacterIndex,MapIndex,ModeIndex,RiskMask))
+    if (!IsLocalController() || !GetWorld() || GetNetMode() != NM_Standalone || !Session() || !MVPWorld) return;
+    if (Session() && Session()->HasSavedRun(CharacterIndex)) { if(RootWidget.IsValid())RootWidget->ShowNotice(TEXT("此修士已有进行中存档，请先续接；未覆盖任何存档。")); return; }
+    if (!Session()->StartFullRun(CharacterIndex,MapIndex,ModeIndex,RiskMask))
     { if (RootWidget.IsValid()) { RootWidget->ReturnToMenu(); RootWidget->ShowNotice(TEXT("无法开始：检查修士、洞天、模式、劫数解锁或存档状态。")); } StartPreviewBudget(); return; }
+    MVPWorld->ActivateRun();
     LastHero=CharacterIndex; LastMap=MapIndex; LastMode=ModeIndex; LastRisk=RiskMask;
-    StopPreviewBudget(); BeginLiveHUD(FDywxHUDState()); RefreshRunUI();
+    BeginLiveHUD(FDywxHUDState()); RefreshRunUI();
     OnRunRequested.Broadcast(CharacterIndex, MapIndex, ModeIndex);
 }
 void ADywxUIPlayerController::RequestDash() { bDashQueued = true; OnDashRequested.Broadcast(); }
@@ -108,21 +118,21 @@ void ADywxUIPlayerController::ClearGameplayInput()
 {
     bDashQueued = false;
     if (PlayerInput) PlayerInput->FlushPressedKeys();
-    if (MVPWorld) MVPWorld->SetInput({});
+    if (Session()) Session()->SetInput({});
 }
 void ADywxUIPlayerController::SetUIPaused(bool bPaused)
 {
     // Also clear immediately for focus-loss requests, before the input mode changes.
     if (bPaused) ClearGameplayInput();
-    if (Simulation()) Simulation()->Pause(bPaused);
+    if (Session()) Session()->Pause(bPaused);
     OnPauseChanged.Broadcast(bPaused);
 }
 void ADywxUIPlayerController::ApplyUIInput(bool bLive, bool bModalOpen)
 {
     // A live pause is an overlay over the real scene, not a preview screen.
-    bLive = bLive || (MVPWorld && MVPWorld->IsRunActive());
-    if (bLive) StopPreviewBudget();
-    else StartPreviewBudget();
+    bLive = bLive || (Session() && Session()->IsRunActive());
+    bGameplayInputAllowed = bLive && !bModalOpen;
+    StartPreviewBudget();
     bShowMouseCursor = true; // Upgrade cards remain clickable while combat continues.
     if (!bLive || bModalOpen)
     {
@@ -147,6 +157,8 @@ void ADywxUIPlayerController::ApplyUIInput(bool bLive, bool bModalOpen)
             GetWorld()->GetGameViewport()->SetIgnoreInput(bSavedIgnoreInput);
         }
     }
+    // Refresh last: focus-loss navigation may install a modal input mode recursively.
+    RefreshPreviewBudget();
 }
 void ADywxUIPlayerController::ConfirmQuit()
 {
@@ -155,7 +167,7 @@ void ADywxUIPlayerController::ConfirmQuit()
 
 void ADywxUIPlayerController::StartPreviewBudget()
 {
-    if (bPreviewBudgetActive || (MVPWorld && MVPWorld->IsRunActive()) || !IsLocalController() || !GetWorld()) return;
+    if (bPreviewBudgetActive || !IsLocalController() || !GetWorld()) return;
     UGameViewportClient* Viewport = GetWorld()->GetGameViewport();
     if (!Viewport) return;
     PreviewViewport = Viewport;
@@ -169,7 +181,7 @@ void ADywxUIPlayerController::StartPreviewBudget()
     AppliedMaxFPS = -1.f;
     bPreviewBudgetActive = true;
     // Slate still draws; do not submit the entirely obscured Entry/preview world.
-    Viewport->bDisableWorldRendering = true;
+    Viewport->bDisableWorldRendering = !(Session() && Session()->IsRunActive());
     if (FSlateApplication::IsInitialized())
         ActivationHandle = FSlateApplication::Get().OnApplicationActivationStateChanged().AddUObject(
             this, &ADywxUIPlayerController::HandleApplicationActivation);
@@ -177,7 +189,7 @@ void ADywxUIPlayerController::StartPreviewBudget()
     // which is not identical to application activation (e.g. multiple app windows).
     PreviewTicker = FTSTicker::GetCoreTicker().AddTicker(
         FTickerDelegate::CreateUObject(this, &ADywxUIPlayerController::TickPreviewBudget), 0.25f);
-    RefreshPreviewBudget();
+    // ApplyUIInput refreshes after installing the input mode, never during setup.
 }
 
 void ADywxUIPlayerController::StopPreviewBudget()
@@ -229,6 +241,16 @@ void ADywxUIPlayerController::RefreshPreviewBudget()
     const bool bActive = FSlateApplication::Get().IsActive()
         && (!Window.IsValid() || !Window->GetNativeWindow().IsValid()
             || Window->GetNativeWindow()->IsForegroundWindow());
+    const bool bWasForeground = bWindowForeground;
+    bWindowForeground = bActive && !bMinimized;
+    const bool bRunActive = Session() && Session()->IsRunActive();
+    Viewport->bDisableWorldRendering = bRunActive ? bSavedWorldRenderingDisabled : true;
+    if (bRunActive && !bWindowForeground && (bWasForeground || !Session()->GetSnapshot().paused))
+    {
+        ClearGameplayInput();
+        Session()->Pause(true);
+        if (RootWidget.IsValid()) RootWidget->HandleFocusLoss();
+    }
     const float CurrentMaxFPS = GEngine->GetMaxFPS();
     const bool bExternalCapChanged = AppliedMaxFPS >= 0.f && CurrentMaxFPS != AppliedMaxFPS;
     if (!GIsEditor)
@@ -246,28 +268,36 @@ void ADywxUIPlayerController::RefreshPreviewBudget()
 }
 
 
-dywx::mvp::Simulation* ADywxUIPlayerController::Simulation() { return MVPWorld ? &MVPWorld->GetSimulation() : nullptr; }
-void ADywxUIPlayerController::RefreshRunUI() { if (MVPWorld && RootWidget.IsValid()) RootWidget->SetSnapshot(MVPWorld->GetSnapshot()); }
+UDywxRunSession* ADywxUIPlayerController::Session() const
+{
+    return IsLocalController() && GetWorld() && GetNetMode() == NM_Standalone
+        ? GetWorld()->GetSubsystem<UDywxRunSession>() : nullptr;
+}
+const dywx::mvp::Simulation* ADywxUIPlayerController::Simulation() const { return Session() ? Session()->GetSimulation() : nullptr; }
+void ADywxUIPlayerController::RefreshRunUI() { if (Session() && RootWidget.IsValid()) RootWidget->SetSnapshot(Session()->GetSnapshot()); }
 void ADywxUIPlayerController::RetryRun() { RequestRun(LastHero,LastMap,LastMode,LastRisk); }
-void ADywxUIPlayerController::ChooseUpgrade(int32 Index) { if (Simulation() && !Simulation()->GetSnapshot().paused) { Simulation()->ChooseUpgrade(Index); RefreshRunUI(); } }
+void ADywxUIPlayerController::ChooseUpgrade(int32 Index) { if (Simulation() && !Simulation()->GetSnapshot().paused) { Session()->ChooseUpgrade(Index); RefreshRunUI(); } }
 void ADywxUIPlayerController::UpgradeOne() { ChooseUpgrade(0); }
 void ADywxUIPlayerController::UpgradeTwo() { ChooseUpgrade(1); }
 void ADywxUIPlayerController::UpgradeThree() { ChooseUpgrade(2); }
-void ADywxUIPlayerController::PlayerTick(float DeltaTime)
+void ADywxUIPlayerController::PrepareSimulationTick()
 {
-    Super::PlayerTick(DeltaTime);
-    if (!MVPWorld) return;
-    if (MVPWorld->IsRunActive() && RootWidget.IsValid() && MVPWorld->ConsumeFocusPauseRequest())
-        RootWidget->HandleFocusLoss();
+    RefreshPreviewBudget();
+    if (!Session()) return;
     dywx::mvp::InputState Input;
-    if (MVPWorld->IsWindowForeground() && !MVPWorld->GetSnapshot().paused && FSlateApplication::IsInitialized() && FSlateApplication::Get().IsActive())
+    if (bGameplayInputAllowed && bWindowForeground && !Session()->GetSnapshot().paused && FSlateApplication::IsInitialized() && FSlateApplication::Get().IsActive())
     {
         Input.move.x = float(IsInputKeyDown(EKeys::D) || IsInputKeyDown(EKeys::Right)) - float(IsInputKeyDown(EKeys::A) || IsInputKeyDown(EKeys::Left));
         Input.move.y = float(IsInputKeyDown(EKeys::W) || IsInputKeyDown(EKeys::Up)) - float(IsInputKeyDown(EKeys::S) || IsInputKeyDown(EKeys::Down));
         Input.dash = bDashQueued || IsInputKeyDown(EKeys::SpaceBar);
     }
     bDashQueued = false;
-    MVPWorld->SetInput(Input);
+    Session()->SetInput(Input);
+}
+void ADywxUIPlayerController::PlayerTick(float DeltaTime)
+{
+    Super::PlayerTick(DeltaTime);
+    if (!IsLocalController() || !Session()) return;
     HUDRefreshElapsed += DeltaTime;
     if (HUDRefreshElapsed >= .05f) { HUDRefreshElapsed = 0.f; RefreshRunUI(); }
 }

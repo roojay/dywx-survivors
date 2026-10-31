@@ -17,6 +17,8 @@ bash scripts/test-mvp-economy.sh
 bash scripts/test-mvp-arena.sh
 bash scripts/test-full-game-integration.sh
 bash scripts/test-mvp-save.sh
+bash scripts/test-core-commands.sh
+python3 scripts/test-architecture-contract.py
 bash scripts/test-combat-boundaries.sh
 bash scripts/test-save-economy-boundaries.sh
 sha256sum --status -c "$SOURCE_MANIFEST" || { echo 'Sources changed during this run; this is intermediate evidence, not a final full pass.' >&2; exit 2; }

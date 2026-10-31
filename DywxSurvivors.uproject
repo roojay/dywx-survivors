@@ -5,6 +5,16 @@
   "Description": "Dao Yan Wan Xiang native survivors MVP source. Current gameplay build and visual acceptance require Unreal Engine verification.",
   "Modules": [
     {
+      "Name": "DywxCore",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
+      "Name": "DywxRuntime",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    },
+    {
       "Name": "DywxUI",
       "Type": "Runtime",
       "LoadingPhase": "Default"

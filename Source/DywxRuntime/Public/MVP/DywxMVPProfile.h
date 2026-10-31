@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "MVP/SaveCodec.h"
-class FDywxMVPProfile {
+class DYWXRUNTIME_API FDywxMVPProfile {
 public:
   FDywxMVPProfile();
   bool Load();

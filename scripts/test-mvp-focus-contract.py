@@ -14,28 +14,37 @@ def body(source, signature):
         if not depth:
             return source[start:end+1]
     raise AssertionError(signature)
-budget = body(w, 'void ADywxMVPWorld::RefreshRunBudget')
-tick = body(w, 'void ADywxMVPWorld::Tick')
+root = (R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text()
+begin_hud = body(c, 'void ADywxUIPlayerController::BeginLiveHUD')
+apply_input = body(c, 'void ADywxUIPlayerController::ApplyUIInput')
+session = (R/'Source/DywxRuntime/Private/MVP/DywxRunSession.cpp').read_text()
+budget = body(c, 'void ADywxUIPlayerController::RefreshPreviewBudget')
+tick = body(session, 'void UDywxRunSession::Tick')
+prepare = body(c, 'void ADywxUIPlayerController::PrepareSimulationTick')
 stop = body(w, 'void ADywxMVPWorld::StopRun')
+release = body(c, 'void ADywxUIPlayerController::StopPreviewBudget')
 pause = body(c, 'void ADywxUIPlayerController::SetUIPaused')
 clear = body(c, 'void ADywxUIPlayerController::ClearGameplayInput')
 ui_only = body(body(c, 'void ADywxUIPlayerController::ApplyUIInput'), 'if (!bLive || bModalOpen)')
 checks = {
-    'pause entry clears queued dash and stale held keys': 'if (bPaused) ClearGameplayInput()' in pause and all(s in clear for s in ['bDashQueued = false', 'if (PlayerInput) PlayerInput->FlushPressedKeys()', 'MVPWorld->SetInput({})']) and '#include \"GameFramework/PlayerInput.h\"' in c,
+    'live HUD preserves navigation-selected modal input mode': 'if (RootWidget.IsValid()) RootWidget->BeginLiveHUD(State);\n    else ApplyUIInput(true, false);' in begin_hud and begin_hud.count('ApplyUIInput(') == 1 and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::BeginLiveHUD') and 'Nav.modal!=dywx::Modal::None' in body(root, 'void SDywxRoot::SyncInput'),
+    'focus navigation cannot be overwritten after nested input-mode change': 'RefreshPreviewBudget()' not in body(c, 'void ADywxUIPlayerController::StartPreviewBudget') and apply_input.rstrip().endswith('RefreshPreviewBudget();\n}') and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::HandleFocusLoss'),
+    'pause entry clears queued dash and stale held keys': 'if (bPaused) ClearGameplayInput()' in pause and all(s in clear for s in ['bDashQueued = false', 'if (PlayerInput) PlayerInput->FlushPressedKeys()', 'Session()->SetInput({})']) and '#include "GameFramework/PlayerInput.h"' in c,
     'UIOnly entry clears keys even for non-pausing economy': ui_only.index('ClearGameplayInput()') < ui_only.index('SetInputMode(Input)'),
-    'flush only at transition entry, not each tick or upgrade': c.count('PlayerInput->FlushPressedKeys()') == 1 and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade') and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade'),
-    'one live tick owner; no live ticker/delegate': 'AddTicker' not in w and 'AddUObject' not in w,
-    'focus checked before simulation step': tick.index('RefreshRunBudget()') < tick.index('Simulation.Step'),
+    'flush only through clear helper, not each player tick or upgrade': c.count('PlayerInput->FlushPressedKeys()') == 1 and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade'),
+    'one live integration owner; world renderer never steps': 'Simulation.Step' not in w and tick.count('Simulation.Step') == 1 and 'Simulation.Step' not in c,
+    'local focus/input sampled immediately before simulation step': tick.index('BeforeSimulationTick.ExecuteIfBound()') < tick.index('Simulation.Step') and prepare.index('RefreshPreviewBudget()') < prepare.index('Session()->SetInput(Input)') and 'SetBeforeSimulationTick(FSimpleDelegate::CreateUObject(this, &ADywxUIPlayerController::PrepareSimulationTick))' in c,
     'native minimized/foreground and Slate active': all(s in budget for s in ['IsMinimized()', 'IsForegroundWindow()', 'IsActive()']),
-    'shared budget preserves external baseline and accepted cap': all(s in budget for s in ['Dywx::PreviewBaseline', 'Dywx::PreviewFPS', 'AppliedFPS=GEngine->GetMaxFPS()', 'bExternalCapChanged ||']),
-    'PIE cap excluded': 'if(GIsEditor || !GEngine) return' in budget,
-    'focus loss pauses, clears input, and never auto-resumes': all(s in budget for s in ['Input={}', 'if(!GetSnapshot().paused)', 'Simulation.Pause(true)', 'bFocusPauseRequested=true']) and 'Pause(false)' not in w,
-    'sticky request survives tick ordering and short focus loss': 'ConsumeFocusPauseRequest' in h and 'bFocusPauseRequested=false' in h and 'MVPWorld->ConsumeFocusPauseRequest()' in c,
-    'existing pause menu is idempotent, not Escape toggle': 'void HandleFocusLoss();' in u and 'Nav.FocusLoss()' in (R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text() and 'RootWidget->HandleFocusLoss()' in c,
-    'stop restores only owned exact cap and prior view': all(s in stop for s in ['GEngine->GetMaxFPS()==AppliedFPS', 'GEngine->SetMaxFPS(SavedFPS)', 'PC->GetViewTarget()==this', 'PreviousView.IsValid()', 'SetActorTickEnabled(false)']),
-    'preview never starts over live paused scene': 'MVPWorld && MVPWorld->IsRunActive()' in body(c, 'void ADywxUIPlayerController::StartPreviewBudget') and 'bDisableWorldRendering' not in w,
-    'preview released before world starts': body(c, 'void ADywxUIPlayerController::RequestRun').index('StopPreviewBudget()') < body(c, 'void ADywxUIPlayerController::RequestRun').index('MVPWorld->StartFullRun'),
+    'shared budget preserves external baseline and accepted cap': all(s in budget for s in ['Dywx::PreviewBaseline', 'Dywx::PreviewFPS', 'AppliedMaxFPS = GEngine->GetMaxFPS()', 'bExternalCapChanged ||']),
+    'PIE cap excluded': 'if (!GIsEditor && (bExternalCapChanged ||' in budget and '!GIsEditor && GEngine' in release,
+    'focus loss pauses once per transition and never auto-resumes': all(s in budget for s in ['bWasForeground || !Session()->GetSnapshot().paused', 'ClearGameplayInput()', 'Session()->Pause(true)', 'RootWidget->HandleFocusLoss()']) and 'Pause(false)' not in budget,
+    'existing pause menu is idempotent, not Escape toggle': 'void HandleFocusLoss();' in u and 'Nav.FocusLoss()' in (R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text(),
+    'release restores only owned exact cap and prior view': all(s in release for s in ['GEngine->GetMaxFPS() == AppliedMaxFPS', 'GEngine->SetMaxFPS(SavedMaxFPS)']) and all(s in stop for s in ['PC->GetViewTarget()==this', 'PreviousView.IsValid()', 'SetActorTickEnabled(false)']),
+    'live pause preserves scene instead of preview suppression': 'Viewport->bDisableWorldRendering = bRunActive ? bSavedWorldRenderingDisabled : true' in budget and 'bDisableWorldRendering' not in w,
+    'modal and background input not sampled': 'bGameplayInputAllowed && bWindowForeground && !Session()->GetSnapshot().paused' in prepare,
+    'single budget remains bound across menu/run transitions': c.count('AddTicker(') == 1 and 'StopPreviewBudget()' not in body(c, 'void ADywxUIPlayerController::RequestRun') and 'StopPreviewBudget()' not in body(c, 'void ADywxUIPlayerController::ShowMainMenu'),
     'world released before menu reacquires preview': body(c, 'void ADywxUIPlayerController::ShowMainMenu').index('MVPWorld->StopRun()') < body(c, 'void ADywxUIPlayerController::ShowMainMenu').index('RootWidget->ReturnToMenu()'),
+    'pre-step delegate removed during teardown': 'ClearBeforeSimulationTick()' in body(c, 'void ADywxUIPlayerController::EndPlay'),
 }
 for label, passed in checks.items():
     assert passed, label

@@ -2,9 +2,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MVP/Simulation.h"
-#include "MVP/DywxMVPProfile.h"
+#include "MVP/DywxRunSession.h"
 #include "DywxMVPWorld.generated.h"
 
+class APlayerController;
 class UCameraComponent;
 class UInstancedStaticMeshComponent;
 class UMaterialInterface;
@@ -12,7 +13,7 @@ class UStaticMesh;
 class USoundBase;
 class USoundConcurrency;
 
-// A single ticking owner. The simulation is authoritative; all component collision is disabled.
+// Local camera/mesh/audio presentation only. All component collision is disabled.
 UCLASS()
 class DYWXUI_API ADywxMVPWorld : public AActor
 {
@@ -21,34 +22,15 @@ public:
     ADywxMVPWorld();
     virtual void Tick(float DeltaSeconds) override;
     virtual void EndPlay(const EEndPlayReason::Type Reason) override;
-    void StartRun(dywx::mvp::HeroId Hero, uint64 Seed);
-    void StopRun();
-    void InitializeProfile();
-    bool StartFullRun(int32 Hero,int32 Map,int32 Mode,uint32 RiskMask=0);
-    const dywx::mvp::CampaignProfile& GetCampaignProfile() const { return Profile.GetCampaign(); }
-    bool PurchaseLegacy(dywx::mvp::LegacyUnlock Unlock);
-    bool PurchasePermanent(dywx::mvp::PermanentStat Stat);
-    bool SaveRun();
-    bool ResumeRun(int32 Hero);
-    bool HasSavedRun(int32 Hero) const;
-
-    bool IsRunActive() const { return bActive; }
-    bool IsWindowForeground() const { return bWindowForeground; }
-    bool ConsumeFocusPauseRequest() { const bool Requested=bFocusPauseRequested; bFocusPauseRequested=false; return Requested; }
-    void SetInput(const dywx::mvp::InputState& Value) { Input = Value; }
-    dywx::mvp::Simulation& GetSimulation() { return Simulation; }
-    const dywx::mvp::Snapshot& GetSnapshot() const { return Simulation.GetSnapshot(); }
+    void InitializePresentation(UDywxRunSession* InSession, APlayerController* InController);
+    void ActivateRun();
+    void StopRun(); // Presentation only; session lifetime belongs to the world.
+    const dywx::mvp::Snapshot& GetSnapshot() const { return Session->GetSnapshot(); }
 private:
     struct FBatch { UInstancedStaticMeshComponent* Component = nullptr; TArray<FTransform> Pending; int32 Allocated = 0; bool Dynamic = true; };
     struct FTransient { FVector Position; float Age=0; bool Pickup=false; };
-    dywx::mvp::Simulation Simulation;
-    FDywxMVPProfile Profile;
-    bool bProfileLoaded=false;
-    float ProfileElapsed=0;
-    int32 ProfileWave=-1;
-    dywx::mvp::RunPhase ProfilePhase=dywx::mvp::RunPhase::Title;
-    bool SaveProfile();
-    dywx::mvp::InputState Input;
+    UPROPERTY(Transient) TObjectPtr<UDywxRunSession> Session;
+    TWeakObjectPtr<APlayerController> OwningController;
     UPROPERTY() TObjectPtr<UCameraComponent> Camera;
     UPROPERTY() TArray<TObjectPtr<UStaticMesh>> OwnedMeshes;
     UPROPERTY() TArray<TObjectPtr<UMaterialInterface>> OwnedMaterials;
@@ -66,16 +48,13 @@ private:
     TArray<FTransient> Transients;
     TWeakObjectPtr<AActor> PreviousView;
     bool bActive=false, bSceneBuilt=false;
-    bool bWindowForeground=true, bFocusPauseRequested=false;
-    void RefreshRunBudget();
-    float SavedFPS=0, AppliedFPS=-1, VisualTime=0;
+    float VisualTime=0;
     uint64 LastGeneration=0, LastShots=0, LastEffect=0;
     float LastHP=0, LastDash=0, SoundCooldown=0;
     int32 LastLevel=1;
     dywx::mvp::RunPhase LastPhase=dywx::mvp::RunPhase::Title;
     void BuildScene();
     void RebuildArena();
-    void ActivateRun();
     static FName ElementBatch(dywx::mvp::Element Element, const TCHAR* Suffix);
     void LoadGeometry();
     void SetupVFX();

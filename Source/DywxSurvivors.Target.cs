@@ -6,6 +6,6 @@ public class DywxSurvivorsTarget : TargetRules
         Type = TargetType.Game;
         DefaultBuildSettings = BuildSettingsVersion.Latest;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-        ExtraModuleNames.Add("DywxUI");
+        ExtraModuleNames.AddRange(new[] { "DywxCore", "DywxRuntime", "DywxUI" });
     }
 }

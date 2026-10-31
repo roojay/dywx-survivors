@@ -1,11 +1,12 @@
 #pragma once
+#include "MVP/Export.h"
 #include <array>
 #include <cstdint>
 #include <string>
 #include <vector>
 namespace dywx::mvp {
 using EntityId = std::uint64_t;
-struct Vec2 {
+struct DYWXCORE_API Vec2 {
   float x = 0, y = 0;
   Vec2 operator+(Vec2 b) const { return {x + b.x, y + b.y}; }
   Vec2 operator-(Vec2 b) const { return {x - b.x, y - b.y}; }
@@ -72,7 +73,7 @@ enum class EffectKind {
   Dash,
   Explosion
 };
-struct Stats {
+struct DYWXCORE_API Stats {
   float maxHp = 100, armor = 0, regen = .5f, power = 1, cooldownReduction = 0,
         area = 1, critChance = .05f, critMultiplier = 1.5f, moveSpeed = 5,
         pickupRadius = 2, dashCooldown = 6, luck = 0;
@@ -83,15 +84,15 @@ struct Stats {
   std::array<float, static_cast<std::size_t>(Element::Count)> elementBonus{};
   std::array<float, static_cast<std::size_t>(Form::Count)> formBonus{};
 };
-struct SpellState {
+struct DYWXCORE_API SpellState {
   SpellId id = SpellId::FlamePalm;
   int rank = 1;
 };
-struct Resonance {
+struct DYWXCORE_API Resonance {
   int fire = 0, thunder = 0, body = 0, sword = 0, array = 0;
   int metal = 0, wood = 0, water = 0, earth = 0, beast = 0, talisman = 0;
 };
-struct BuildState {
+struct DYWXCORE_API BuildState {
   HeroId hero = HeroId::Body;
   std::vector<SpellState> spells;
   std::vector<PassiveId> passives;
@@ -121,12 +122,12 @@ enum class AffixKind {
   Unique,
   Metal, Wood, Water, Earth, Beast, Talisman, Count
 };
-struct Affix {
+struct DYWXCORE_API Affix {
   AffixKind kind = AffixKind::Power;
   float value = 0;
   int code = 0;
 };
-struct Relic {
+struct DYWXCORE_API Relic {
   EntityId id = 0;
   int catalogId = 0;
   Rarity rarity = Rarity::Common;
@@ -135,12 +136,12 @@ struct Relic {
   bool carryOut = false;
 };
 enum class UpgradeKind { NewSpell, ImproveSpell, Passive, Fusion };
-struct UpgradeOffer {
+struct DYWXCORE_API UpgradeOffer {
   UpgradeKind kind = UpgradeKind::NewSpell;
   SpellId spell = SpellId::FlamePalm;
   PassiveId passive = PassiveId::ClearMind;
 };
-struct ProgressionState {
+struct DYWXCORE_API ProgressionState {
   BuildState build;
   float xp = 0;
   int level = 1, pendingUpgrades = 0, rerollsRemaining = 2;
@@ -160,12 +161,12 @@ struct ProgressionState {
   std::array<bool, 4> seenMutations{};
   std::array<bool, kResonanceCount> seenResonances{};
 };
-struct PlayerState {
+struct DYWXCORE_API PlayerState {
   Vec2 position{}, facing{1, 0};
   float hp = 100, shield = 0, invulnerable = 0, dashRemaining = 0,
         dashCooldown = 0;
 };
-struct EnemyState {
+struct DYWXCORE_API EnemyState {
   EntityId id = 0;
   EnemyRole role = EnemyRole::Swarm;
   EnemyTier tier = EnemyTier::Normal;
@@ -177,7 +178,7 @@ struct EnemyState {
   int burnStacks = 0, mutations = 0, bossPhase = 0;
   EntityId owner = 0;
 };
-struct ProjectileState {
+struct DYWXCORE_API ProjectileState {
   EntityId id = 0, owner = 0, target = 0;
   Vec2 position{}, previous{}, velocity{};
   float radius = .2f, damage = 0, life = 2, speed = 14, turnMultiplier = 1,
@@ -191,7 +192,7 @@ struct ProjectileState {
        pathBurn = false;
   std::vector<EntityId> hit;
 };
-struct EffectState {
+struct DYWXCORE_API EffectState {
   EntityId id = 0, owner = 0;
   EffectKind kind = EffectKind::Circle;
   Vec2 position{}, end{};
@@ -204,7 +205,7 @@ struct EffectState {
        prisonVulnerability = false;
   int pulses = 0;
 };
-struct PickupState {
+struct DYWXCORE_API PickupState {
   EntityId id = 0;
   Vec2 position{};
   float xp = 0;
@@ -212,12 +213,12 @@ struct PickupState {
   Relic relic;
   int spiritStones = 0;
 };
-struct RunStatistics {
+struct DYWXCORE_API RunStatistics {
   std::uint64_t kills = 0, shots = 0, hits = 0, dodges = 0;
   float damageDealt = 0, damageTaken = 0, elapsed = 0;
   std::uint64_t droppedEvents = 0;
 };
-struct RunConfig {
+struct DYWXCORE_API RunConfig {
   bool sixWaves = false, formResonance = true;
   std::array<float, 6> waveDurations{100, 120, 140, 160, 90, 95};
   float fixedStep = 1.f / 60.f, spawnGrace = 5;
@@ -234,11 +235,11 @@ struct RunConfig {
     return c;
   }
 };
-struct InputState {
+struct DYWXCORE_API InputState {
   Vec2 move{};
   bool dash = false;
 };
-struct Snapshot {
+struct DYWXCORE_API Snapshot {
   std::uint64_t generation = 0, tick = 0;
   RunPhase phase = RunPhase::Title;
   bool paused = false;
@@ -253,7 +254,7 @@ struct Snapshot {
   std::vector<PickupState> pickups;
   RunStatistics statistics;
 };
-struct ArenaObstacle {
+struct DYWXCORE_API ArenaObstacle {
   Vec2 position;
   float radius;
 };

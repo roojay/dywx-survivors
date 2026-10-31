@@ -1,28 +1,29 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Types.h"
 #include <array>
 #include <string_view>
 namespace dywx::mvp {
 enum class CaveId { ThunderMarsh, EmberMountain, MistForest };
 enum class AnomalyId { Lightning, SpiritTide, Fissure, Fog, Eclipse, Array, Count };
-struct CaveDefinition {
+struct DYWXCORE_API CaveDefinition {
   CaveId id; std::string_view name, bossName, palette;
   std::array<std::string_view, 6> enemies;
   std::array<float, 6> roleWeights;
   std::array<int, 4> relicPool;
   std::array<std::string_view, 3> opportunities;
 };
-const std::array<CaveDefinition, 3>& CaveCatalog();
-std::string_view AnomalyName(AnomalyId id);
-std::string_view AnomalyDescription(AnomalyId id);
+DYWXCORE_API const std::array<CaveDefinition, 3>& CaveCatalog();
+DYWXCORE_API std::string_view AnomalyName(AnomalyId id);
+DYWXCORE_API std::string_view AnomalyDescription(AnomalyId id);
 // All new balance values are provisional and configurable. Dimensions match paired v0.1 config.
-struct ArenaConfig {
+struct DYWXCORE_API ArenaConfig {
   float halfWidth=48, halfHeight=27, cornerCut=5, centralClearRadius=10;
   float gridSize=1, navigationClearance=.6f, peripheralMargin=4;
   int obstacleCount=24, placementAttempts=256, veinCount=6;
   float minObstacleRadius=1, maxObstacleRadius=2.5f, maxObstacleFraction=.25f;
 };
-struct ArenaLayout {
+struct DYWXCORE_API ArenaLayout {
   std::uint64_t seed=0; CaveId cave=CaveId::ThunderMarsh; ArenaConfig config;
   std::vector<ArenaObstacle> obstacles;
   std::vector<Vec2> veins, hazards, beastRoute, edgeSpawns;
@@ -32,10 +33,10 @@ struct ArenaLayout {
   Vec2 Constrain(Vec2 point, float radius=.45f) const;
   float ObstacleFraction() const;
 };
-ArenaLayout GenerateArena(std::uint64_t seed, CaveId cave=CaveId::ThunderMarsh,
+DYWXCORE_API ArenaLayout GenerateArena(std::uint64_t seed, CaveId cave=CaveId::ThunderMarsh,
                           const ArenaConfig& config={});
-bool ValidateArena(const ArenaLayout& layout);
-struct AnomalyConfig {
+DYWXCORE_API bool ValidateArena(const ArenaLayout& layout);
+struct DYWXCORE_API AnomalyConfig {
   float interval=24, activeDuration=16, warning=1.2f, pulseInterval=4;
   float hazardRadius=2.2f, lightningDamage=22, fissureDamage=16;
   float thunderReward=1.3f, thunderRewardDuration=5;
@@ -43,21 +44,21 @@ struct AnomalyConfig {
   float fogVision=14, fogRanged=1.8f, fogBeasts=2;
   float eclipseEnemyPower=1.3f, eclipseXp=1.35f, arrayPower=1.25f, arrayRadius=3;
 };
-std::string DescribeAnomaly(AnomalyId id, const AnomalyConfig& config);
-struct AnomalyModifiers {
+DYWXCORE_API std::string DescribeAnomaly(AnomalyId id, const AnomalyConfig& config);
+struct DYWXCORE_API AnomalyModifiers {
   float spawn=1, currency=1, chargers=1, ranged=1, beasts=1;
   float nightEnemyPower=1, xp=1, visionRange=1000, playerPower=1, thunderPower=1;
 };
-struct ArenaHazardEvent {
+struct DYWXCORE_API ArenaHazardEvent {
   AnomalyId anomaly=AnomalyId::Lightning; Vec2 position;
   float radius=0, damage=0; bool warning=false, absorbed=false;
 };
-struct AnomalyState {
+struct DYWXCORE_API AnomalyState {
   bool enabled=false, active=false; AnomalyId id=AnomalyId::Lightning;
   Vec2 anchor; float elapsed=0, remaining=0, warningRemaining=0;
   std::array<bool, 6> encountered{};
 };
-class AnomalySystem {
+class DYWXCORE_API AnomalySystem {
 public:
   void Reset(std::uint64_t seed, const ArenaLayout& layout, bool layerTwo,
              const AnomalyConfig& config={});

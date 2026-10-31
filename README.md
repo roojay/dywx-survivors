@@ -19,6 +19,18 @@
 
 [完整设计交接](docs/full-game/HANDOFF.md) · [逐条需求复核](docs/full-game/REQUIREMENTS-COVERAGE-FINAL.md) · [UE官方资料审查](docs/full-game/UE-OFFICIAL-REVIEW.md) · [新自然操作样例](docs/full-game/NATURAL-PLAY-CHECK.md)
 
+## 当前代码分层
+
+- `Source/DywxCore`：纯 C++ 规则与校验，可独立编译测试。
+- `Source/DywxRuntime`：独占模拟推进的世界会话、命令入口、存档适配。
+- `Source/DywxUI`：Slate、Controller、本地焦点与渲染/音效表现，不拥有模拟。
+
+UI 不再取得可变核心对象。当前仅实现 Standalone；只读核心查询不是网络 DTO，未实现多人复制。设计取舍及官方/社区依据见 [UE 分层架构](docs/architecture/UE-LAYERING.md)。模块拆分后必须重新生成 UE 工程文件，并完成 UHT/UBT 与 Windows DLL 链接验收。
+
+## 完全脱离 UE / UI 运行
+
+`standalone/CMakeLists.txt` 可构建纯 C++ 静态库 `Dywx::Core`、`dywx_headless` 自然模拟程序及 CTest 命令回归，不需要 Unreal SDK。其他表现层可直接链接同一库。构建与输出说明见 [独立核心与无界面演练](standalone/README.md)。
+
 ## 在 dot 可执行的检查
 
 ```sh

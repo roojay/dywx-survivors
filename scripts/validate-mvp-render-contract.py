@@ -51,18 +51,23 @@ print(json.dumps({'status':'passed','mesh_count':len(scene['meshes']),'triangles
 
 # Full-game runtime wiring. Source contracts are not UE compilation/render evidence.
 header = (ROOT/'Source/DywxUI/Public/MVP/DywxMVPWorld.h').read_text()
-def function(name):
-    start = cpp.index(name)
-    brace = cpp.index('{', start)
+runtime_header = (ROOT/'Source/DywxRuntime/Public/MVP/DywxRunSession.h').read_text()
+runtime = (ROOT/'Source/DywxRuntime/Private/MVP/DywxRunSession.cpp').read_text()
+def function(name, source=cpp):
+    start = source.index(name)
+    brace = source.index('{', start)
     depth = 1
     end = brace + 1
     while depth:
-        depth += (cpp[end] == '{') - (cpp[end] == '}')
+        depth += (source[end] == '{') - (source[end] == '}')
         end += 1
-    return cpp[brace:end]
+    return source[brace:end]
 for api in ('InitializeProfile', 'StartFullRun', 'GetCampaignProfile', 'PurchaseLegacy',
             'PurchasePermanent', 'SaveRun', 'ResumeRun', 'HasSavedRun'):
-    assert api in header
+    assert api in runtime_header and api not in header
+assert 'InitializePresentation' in header
+assert 'const auto& Simulation=*Session->GetSimulation();' in cpp
+assert 'Simulation.Step' not in cpp
 arena = function('void ADywxMVPWorld::RebuildArena')
 assert 'Simulation.GetArena()' in arena and 'Arena.obstacles' in arena
 assert 'ClearInstances()' in arena and 'Allocated=0' in arena
@@ -71,13 +76,13 @@ assert 'cornerCut' in arena and 'Corners[(I+1)%8]' in arena
 assert 'LoadGeometry' not in arena and 'BuildMesh' not in arena
 render = function('void ADywxMVPWorld::Render(float')
 assert 'RebuildArena' not in render and 'BuildMesh' not in render and 'MakeBatch' not in render
-start = function('bool ADywxMVPWorld::StartFullRun')
+start = function('bool UDywxRunSession::StartFullRun', runtime)
 assert start.index('AllocateRunId()') < start.index('Simulation=MoveTemp(Candidate)')
 assert 'if(!RunId) return false;' in start
-settle = function('bool ADywxMVPWorld::SaveProfile')
+settle = function('bool UDywxRunSession::SaveProfile', runtime)
 assert 'seenAnomalies[I]=true' in settle
 assert settle.index('CandidateProfile.Save()') < settle.index('Simulation=MoveTemp(CandidateSimulation)')
-resume = function('bool ADywxMVPWorld::ResumeRun')
+resume = function('bool UDywxRunSession::ResumeRun', runtime)
 assert resume.index('RestoreCheckpoint') < resume.index('ConsumeCheckpoint') < resume.index('Simulation=MoveTemp(Candidate)')
 for element in ('Metal', 'Wood', 'Water', 'Earth', 'Fire', 'Thunder'):
     assert f'Element::{element}' in cpp + vfx

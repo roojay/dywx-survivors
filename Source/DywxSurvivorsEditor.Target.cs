@@ -6,6 +6,6 @@ public class DywxSurvivorsEditorTarget : TargetRules
         Type = TargetType.Editor;
         DefaultBuildSettings = BuildSettingsVersion.Latest;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-        ExtraModuleNames.Add("DywxUI");
+        ExtraModuleNames.AddRange(new[] { "DywxCore", "DywxRuntime", "DywxUI" });
     }
 }

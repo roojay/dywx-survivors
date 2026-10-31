@@ -1,19 +1,20 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/ContentCatalog.h"
 #include <optional>
 #include <random>
 namespace dywx::mvp {
-struct RefinePreview {
+struct DYWXCORE_API RefinePreview {
   std::vector<EntityId> ids;
   int xp = 0;
 };
-struct RelicFilter {
+struct DYWXCORE_API RelicFilter {
   int rarity = -1;
   int aspect = -1;
   int affixKind = -1;
   bool unlockedOnly = false;
 };
-class Progression {
+class DYWXCORE_API Progression {
 public:
   void ConfigureFullGame(int layer, const Stats& permanentBonuses = Stats{}, int extraRerolls = 0);
   void SetSystemLayer(int layer);

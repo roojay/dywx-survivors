@@ -8,6 +8,7 @@
 
 class SDywxRoot;
 class ADywxMVPWorld;
+class UDywxRunSession;
 namespace dywx::mvp { class Simulation; struct CampaignProfile; enum class LegacyUnlock; enum class PermanentStat; }
 class UGameViewportClient;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDywxRunRequested, int32, CharacterIndex, int32, MapIndex, int32, ModeIndex);
@@ -20,7 +21,10 @@ class DYWXUI_API ADywxUIPlayerController : public APlayerController
     GENERATED_BODY()
 public:
     virtual void PlayerTick(float DeltaTime) override;
-    dywx::mvp::Simulation* Simulation();
+    const dywx::mvp::Simulation* Simulation() const;
+    UDywxRunSession* Session() const;
+    // Called synchronously by the session before simulation, not dependent on actor tick order.
+    void PrepareSimulationTick();
     void RefreshRunUI();
     void RetryRun();
     const dywx::mvp::CampaignProfile& CampaignProfile() const;
@@ -53,13 +57,15 @@ private:
     UPROPERTY() TObjectPtr<ADywxMVPWorld> MVPWorld;
     void ClearGameplayInput();
     bool bDashQueued = false;
+    bool bWindowForeground = true;
+    bool bGameplayInputAllowed = false;
     float HUDRefreshElapsed = 0.f;
     int32 LastHero = 0, LastMap = 0, LastMode = 0;
     uint32 LastRisk = 0;
     void UpgradeOne();
     void UpgradeTwo();
     void UpgradeThree();
-    // Preview owns these overrides only until live gameplay resumes or this controller exits.
+    // Local presentation budget spans menus and live play; restore on controller exit.
     TWeakObjectPtr<UGameViewportClient> PreviewViewport;
     FTSTicker::FDelegateHandle PreviewTicker;
     FDelegateHandle ActivationHandle;

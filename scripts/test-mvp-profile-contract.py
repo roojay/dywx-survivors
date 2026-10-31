@@ -2,8 +2,8 @@
 """Source contract only: UE file replacement/fault injection remains NOT_RUN."""
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
-profile = (root / 'Source/DywxUI/Private/MVP/DywxMVPProfile.cpp').read_text()
-codec = (root / 'Source/DywxUI/Private/MVP/SaveCodec.cpp').read_text()
+profile = (root / 'Source/DywxRuntime/Private/MVP/DywxMVPProfile.cpp').read_text()
+codec = (root / 'Source/DywxCore/Private/MVP/SaveCodec.cpp').read_text()
 for field in ('Spells', 'Relics', 'Fusions', 'Passives', 'Enemies', 'Mutations', 'Resonances'):
     assert f'ReadFlags(*Json,TEXT("{field.lower()}"),Known.seen{field})' in profile
     assert f'merge(data_.known.seen{field},s.seen{field})' in codec

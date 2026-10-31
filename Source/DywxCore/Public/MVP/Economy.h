@@ -1,10 +1,11 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Progression.h"
 #include <map>
 #include <set>
 namespace dywx::mvp {
 enum class RefineReward { Experience, Stones };
-struct EconomyConfig {
+struct DYWXCORE_API EconomyConfig {
   // Fixed v0.1 rates. Other prices/probabilities are provisional tuning values.
   std::array<int,4> killStones{1,4,20,100};
   std::array<int,4> refineStones{5,15,50,120};
@@ -15,11 +16,11 @@ struct EconomyConfig {
   float rarityWeight=1; // campaign risk, finite [1,10], applied to non-common chest weights
   std::array<double,4> treasureWeights{70,29.05,.6,.35};
 };
-struct ShopGood { std::uint64_t token=0; Relic relic; int price=0; bool sold=false; };
-struct EconomyRefinePreview { std::vector<EntityId> ids; int amount=0; RefineReward reward=RefineReward::Experience; };
-struct ReforgeOffer { EntityId relic=0; std::size_t index=0; Affix oldAffix, newAffix; int paid=0; };
-struct EconomyUndo { std::vector<Relic> relics; int amount=0; RefineReward reward=RefineReward::Experience; };
-struct EconomyState {
+struct DYWXCORE_API ShopGood { std::uint64_t token=0; Relic relic; int price=0; bool sold=false; };
+struct DYWXCORE_API EconomyRefinePreview { std::vector<EntityId> ids; int amount=0; RefineReward reward=RefineReward::Experience; };
+struct DYWXCORE_API ReforgeOffer { EntityId relic=0; std::size_t index=0; Affix oldAffix, newAffix; int paid=0; };
+struct DYWXCORE_API EconomyUndo { std::vector<Relic> relics; int amount=0; RefineReward reward=RefineReward::Experience; };
+struct DYWXCORE_API EconomyState {
   int version=1;
   EconomyConfig config;
   std::string rng;
@@ -34,7 +35,7 @@ struct EconomyState {
   std::set<std::uint64_t> freeTreasures;
   std::vector<EconomyUndo> undo;
 };
-class Economy {
+class DYWXCORE_API Economy {
 public:
   void Reset(std::uint32_t seed, bool quick, bool layer2, bool layer3, EconomyConfig config={});
   // restId must be monotonically increasing per run; repeats cannot regenerate stock.

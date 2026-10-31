@@ -1,16 +1,17 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Campaign.h"
 #include "MVP/Economy.h"
 #include "MVP/Arena.h"
 #include <functional>
 namespace dywx::mvp {
 // A completed intermission projected to the next wave/boss entry; no combat entities.
-struct CombatBoundaryState {
+struct DYWXCORE_API CombatBoundaryState {
   std::array<float,7> procCooldowns{};
   float speedBuff=0, powerBuff=0, shieldTime=0, bodyProcCooldown=0, critCooldown=0, resetTimer=0, terrainTimer=0;
   bool lowHpUsed=false, lowHpActive=false;
 };
-struct RunCheckpoint {
+struct DYWXCORE_API RunCheckpoint {
   Progression progression;
   Economy economy;
   CampaignRunState campaign;
@@ -26,13 +27,13 @@ struct RunCheckpoint {
   std::array<float,kSpellCount> spellCooldowns{};
   std::array<int,kSpellCount> casts{};
 };
-struct ProfileData {
+struct DYWXCORE_API ProfileData {
   ProgressionState known;
   CampaignProfile campaign;
   std::array<std::string,3> checkpoints;
 };
 class SaveArchive;
-class SaveCodec {
+class DYWXCORE_API SaveCodec {
 public:
   static constexpr std::size_t MaxBytes=32*1024*1024;
   static bool EncodeCheckpoint(const RunCheckpoint&, std::string&);
@@ -47,7 +48,7 @@ private:
 };
 // Persistence boundary shared by UE and standalone failure-injection tests.
 // Writer must atomically replace durable bytes; false leaves the old file intact.
-class ProfileStore {
+class DYWXCORE_API ProfileStore {
 public:
   using Writer=std::function<bool(const std::string&)>;
   explicit ProfileStore(Writer writer={}) : writer_(std::move(writer)) {}

@@ -362,6 +362,40 @@ bool Simulation::UndoRefine() {
   if (state_.paused || state_.phase!=RunPhase::Rest) return false;
   bool ok=fullGame_ ? economy_.UndoRefine(progression_) : progression_.UndoRefine(); Sync(); return ok;
 }
+bool Simulation::Equip(EntityId bagId, std::size_t slot) {
+  if (state_.paused || state_.phase != RunPhase::Rest ||
+      !progression_.Equip(bagId, slot)) return false;
+  Sync(); return true;
+}
+bool Simulation::Unequip(std::size_t slot) {
+  if (state_.paused || state_.phase != RunPhase::Rest ||
+      !progression_.Unequip(slot)) return false;
+  Sync(); return true;
+}
+bool Simulation::SetLocked(EntityId id, bool locked) {
+  if (state_.paused || state_.phase != RunPhase::Rest ||
+      !progression_.SetLocked(id, locked)) return false;
+  Sync(); return true;
+}
+bool Simulation::SortBag() {
+  if (state_.paused || state_.phase != RunPhase::Rest ||
+      !progression_.IsResting()) return false;
+  progression_.SortBag();
+  Sync(); return true;
+}
+bool Simulation::CanFuse(SpellId result) const {
+  if (state_.paused || (state_.phase != RunPhase::Wave &&
+      state_.phase != RunPhase::Boss && state_.phase != RunPhase::Rest)) return false;
+  // A pending upgrade freezes combat without setting the explicit pause flag.
+  // Match Progression's rest/offer gate as well as the authoritative run phase.
+  return (state_.phase == RunPhase::Rest || !progression_.GetState().offers.empty()) &&
+      (progression_.IsResting() || !progression_.GetState().offers.empty()) &&
+      progression_.CanFuse(result);
+}
+bool Simulation::Fuse(SpellId result) {
+  if (!CanFuse(result) || !progression_.Fuse(result)) return false;
+  Sync(); return true;
+}
 void Simulation::Pause(bool p) {
   state_.paused = p;
   accumulator_ = 0;

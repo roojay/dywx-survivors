@@ -1,0 +1,12 @@
+seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build
+11,0,0,0,veteran_unlocks_zero_stats,0,1200,won,723.184,4,122.46,1544,21,120,0,4,0,0,1,1,0,1,4,519.934,2,8.69709,6,1,0,4,"7:5;10:1;2:1;4:1;P0;2;7;4;"
+29,0,1,1,veteran_unlocks_zero_stats,0,1200,won,634.739,4,42.942,1622,23,130,0,4,0,0,6,2,0,1,4,519.934,2,32.8541,6,0,0,4,"3:5;2:5;4:1;6:5;7:1;9:4;P1;2;"
+73,0,2,2,veteran_unlocks_zero_stats,0,1200,sample_bound,1200.39,4,179.039,1773,21,130,0,4,0,0,3,2,0,0,0,519.934,1,2032.85,6,1,0,4,"26:5;2:3;7:5;22:1;15:1;27:3;P5;2;7;4;"
+11,1,0,1,veteran_unlocks_zero_stats,0,2400,dead,661.899,3,0,507,11,63,2,0,0,0,0,0,0,1,6,-1,0,0,3,0,0,2,"0:5;1:5;P0;2;"
+29,1,1,2,veteran_unlocks_zero_stats,0,2400,won,2154.93,10,100,4537,42,160,10,3,2,2,10,8,3,1,20,2034.02,2,29.8758,6,0,2,10,"3:5;2:5;14:5;9:5;4:5;15:5;P1;2;8;6;"
+73,1,2,0,veteran_unlocks_zero_stats,0,2400,dead,569.688,3,0,287,7,70,2,1,0,0,0,0,1,1,6,-1,0,0,3,0,0,2,"26:5;27:2;P5;"
+11,2,0,2,veteran_unlocks_zero_stats,0,1200,sample_bound,1200.39,5,160.095,1337,20,110,5,0,0,0,3,2,0,0,0,978.005,2,42868,6,0,0,5,"7:3;4:1;2:2;10:1;6:1;P0;2;3;9;"
+29,2,1,0,veteran_unlocks_zero_stats,0,1200,sample_bound,1200.39,5,63.1192,2259,25,79,5,1,1,0,5,3,1,0,0,909.789,2,39907.1,6,1,0,5,"7:5;11:1;4:5;2:2;P1;2;3;4;"
+73,2,2,1,veteran_unlocks_zero_stats,0,1200,dead,523.7,3,0,279,6,70,2,1,0,0,0,0,1,1,6,-1,0,0,2,0,0,2,"26:5;7:1;P5;"
+11,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,215.791,2,0,426,8,65,0,0,0,0,0,0,0,1,2,-1,0,0,2,0,0,1,"0:4;4:1;2:1;1:1;7:1;P0;"
+Natural smoke evidence: /tmp/dywx-architecture-natural-san

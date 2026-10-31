@@ -1,23 +1,24 @@
 #pragma once
+#include "MVP/Export.h"
 #include "MVP/Progression.h"
 #include "MVP/Types.h"
 #include "MVP/Campaign.h"
 #include "MVP/Economy.h"
 #include "MVP/Arena.h"
 namespace dywx::mvp {
-struct RunCheckpoint;
+struct DYWXCORE_API RunCheckpoint;
 // Provisional non-prototype cave boss tuning; authoritative for combat and UI text.
-struct CaveBossRules {
+struct DYWXCORE_API CaveBossRules {
   std::array<float,2> flamePeriod{4,3}, flameDamage{18,26}, flameSummon{12,9};
   float flameWarning=1, flameRadius=2.2f, ringPeriod=7, ringRadius=6;
   std::array<float,2> rootPeriod{5.5f,4}, rootDamage{12,18}, mistSummon{11,8};
   float rootWarning=1.3f, rootRadius=3.2f, rootDuration=3, rootTick=1, rootSlow=.35f;
 };
-struct OpportunityDetails {
+struct DYWXCORE_API OpportunityDetails {
   std::string title, description;
   unsigned experience = 0, spiritStones = 0;
 };
-class Simulation {
+class DYWXCORE_API Simulation {
 public:
   void Start(std::uint64_t seed, HeroId hero,
              const RunConfig &config = RunConfig{});
@@ -54,6 +55,13 @@ public:
   bool IdentifyRelic(EntityId id);
   bool Refine(const std::vector<EntityId> &ids, RefineReward reward);
   bool UndoRefine();
+  // Gameplay commands own phase/pause validation and snapshot refresh.
+  bool Equip(EntityId bagId, std::size_t slot);
+  bool Unequip(std::size_t slot);
+  bool SetLocked(EntityId id, bool locked);
+  bool SortBag();
+  bool CanFuse(SpellId result) const;
+  bool Fuse(SpellId result);
   bool SealUpgrade(std::size_t index);
   bool SkipUpgrade();
   void Step(float dt, const InputState &input = {});
@@ -64,9 +72,11 @@ public:
   void Restart();
   const Snapshot &GetSnapshot() const { return state_; }
   const RunConfig &GetConfig() const { return config_; }
+  // Mutable access is reserved for internal adapters and deterministic fixtures.
+  // Gameplay callers use the commands above, which refresh their own snapshots.
   Progression &GetProgression() { return progression_; }
-  // inventory commands only; call RefreshProgression afterwards
   const Progression &GetProgression() const { return progression_; }
+  // Refresh after internal/profile initialization, not after gameplay commands.
   void RefreshProgression();
   // Deterministic harness hooks; never bound to shipping input.
   EntityId TestSpawn(EnemyRole role, Vec2 position,
