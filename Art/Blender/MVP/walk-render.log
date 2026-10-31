@@ -1,7 +1,0 @@
-Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
-socket(): Operation not permitted
-00:00.404  blend            | Read blend: "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/mvp-walk-poses.blend"
-00:22.993  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/walk-contact-sheet.png'
-Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
-
-Blender quit

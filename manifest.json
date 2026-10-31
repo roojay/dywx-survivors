@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "base_commit": "6a71cd5327e49f4fd24b80f70b458e13e62a1699",
+  "target_commit": "1917c24d3776a4a927b02395d81b5ef98fe23e4f",
+  "target_tree": "3db08acbd5e9ce272fb1a16a02c9cdd42a4a9f1c",
+  "source_ref": "refs/heads/feat/playable-mvp",
+  "prerequisites": [
+    "6a71cd5327e49f4fd24b80f70b458e13e62a1699"
+  ],
+  "bundle_name": "art-delta.bundle",
+  "bytes": 26773912,
+  "sha256": "a83342b0878ff0f97ed991696692f17f47a016f3f68db463aa157ec0d8672c3f",
+  "parts": [
+    {
+      "name": "art-delta.bundle.part-000",
+      "bytes": 6291456,
+      "sha256": "8ee9d88295ed0e4c3c9fb9d25b7054f2d7bd4a51029efaa6d529a811d3a55cbc",
+      "git_blob_sha": "078a61b4b4a07c5260de0976a71c105a59c563db"
+    },
+    {
+      "name": "art-delta.bundle.part-001",
+      "bytes": 6291456,
+      "sha256": "b1587e88358278a330592ef835e9cb86a1b4e58e9e2cf92baf3cb380bc1dc22e",
+      "git_blob_sha": "7fcddb49ae5045c8938f8b820160a5dcd1c580b6"
+    },
+    {
+      "name": "art-delta.bundle.part-002",
+      "bytes": 6291456,
+      "sha256": "a993ba2a5cfe8f0fdf250d16db5405dd131eab27938b2fe4da2814a8eecf2cec",
+      "git_blob_sha": "fd0bb308eeeaa0362bd747342b4acc690da3160e"
+    },
+    {
+      "name": "art-delta.bundle.part-003",
+      "bytes": 6291456,
+      "sha256": "5a42ef39a4eef88899738479c4e074fe672ebf222a3e78bd2a4f6fda8c198e92",
+      "git_blob_sha": "4e7263b9e0ba3bf3cdf0c6c286db81fd85f9ef59"
+    },
+    {
+      "name": "art-delta.bundle.part-004",
+      "bytes": 1608088,
+      "sha256": "2b788376d3e768c3a47b92fd2961ba161e523d10e90a83b9baa09979ae184921",
+      "git_blob_sha": "3cdf36fbc11d37dac183c56cfcd7e2219c6ed1e2"
+    }
+  ],
+  "verification": "Local base import, prerequisite ancestry, delta verify/fetch, fsck and target commit/tree verified; no UE/render claim."
+}

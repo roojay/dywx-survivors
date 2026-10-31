@@ -1,8 +1,0 @@
-Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
-socket(): Operation not permitted
-/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/build_scene.py:13: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
-  m=bpy.data.materials.new(k); m.diffuse_color=c; m.use_nodes=True
-00:03.160  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_6_18f85c647457837b0b9a5cb193e4f21b.png.png"
-Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
-Warning: No mesh data to join
-Info: Saved as "mvp-walk-poses.blend"

@@ -1,7 +1,0 @@
-Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
-socket(): Operation not permitted
-00:00.393  blend            | Read blend: "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/ui-icons.blend"
-SOURCE_CHECK_PASS 41 objects 7 materials CYCLES
-Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
-
-Blender quit
