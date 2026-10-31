@@ -17,7 +17,7 @@ Authority: `gameplay-design-v0.1.md` plus numeric `mvp-prototype-config-v0.1.md`
 |---|---|---|
 | LOOP | A=4 waves 100/120/140/160s, B=6 waves 70/75/80/85/90/95s, unlimited frozen rest after each, explicit next, then two boss phases | Default assertions, shortened explicit harness full lifecycle, real-duration seeded runs |
 | HERO | Body starts palm + body scripture; Sword starts flame sword + sword scripture | State and derived statistics |
-| XP | thresholds 15+8n (first 23), queue multiple levels; choices do not pause combat | Boundary grants, tick advances with queued offers |
+| XP | thresholds 15+8n (first 23), queue multiple levels; choices freeze combat (user revision 2026-10-31) | Boundary grants, frozen snapshots with queued offers, substep stop and resume |
 | CHOICE | 3 distinct legal candidates, related candidate, 2 rerolls, six spells/four passives/max rank5 | Seeded offer loops, exhausted build, invalid command rejection |
 | FUSE | hero-gated rank5 pairs become one slot; elemental/form counts preserved | Both recipes via real upgrade choices |
 | SPELL | ten mechanically distinct skills and all rank2–5 changes | Numeric table plus runtime observations; table existence alone NOT evidence |

@@ -383,8 +383,8 @@ bool Simulation::SortBag() {
 bool Simulation::CanFuse(SpellId result) const {
   if (state_.paused || (state_.phase != RunPhase::Wave &&
       state_.phase != RunPhase::Boss && state_.phase != RunPhase::Rest)) return false;
-  // Upgrades do not pause combat. Match Progression's rest/offer eligibility
-  // as well as the authoritative run phase and explicit pause flag.
+  // Upgrade waiting freezes combat independently of explicit pause, so fusion
+  // and choice commands remain available under the existing rest/offer rules.
   return (state_.phase == RunPhase::Rest || !progression_.GetState().offers.empty()) &&
       (progression_.IsResting() || !progression_.GetState().offers.empty()) &&
       progression_.CanFuse(result);
@@ -491,8 +491,7 @@ bool Simulation::BeginNextWave() {
 void Simulation::Step(float dt, const InputState &input) {
   if (!std::isfinite(dt) || dt <= 0)
     return;
-  if (state_.paused ||
-      (state_.phase != RunPhase::Wave && state_.phase != RunPhase::Boss)) {
+  if (IsCombatFrozen()) {
     accumulator_ = 0;
     dashLatched_ = input.dash;
     dashQueued_ = false;
@@ -510,8 +509,12 @@ void Simulation::Step(float dt, const InputState &input) {
     dashQueued_ = false;
     Tick(config_.fixedStep, stepInput);
     accumulator_ -= config_.fixedStep;
-    if (state_.phase != RunPhase::Wave && state_.phase != RunPhase::Boss) {
+    // Tick can create offers through pickup XP or overflow death rewards.
+    // Read progression directly: the presentation snapshot need not be synced.
+    if (IsCombatFrozen()) {
       accumulator_ = 0;
+      dashQueued_ = false;
+      dashLatched_ = input.dash;
       break;
     }
   }
@@ -630,7 +633,9 @@ void Simulation::Tick(float dt, const InputState &input) {
   UpdateEffects(dt);
   if(state_.phase==RunPhase::Dead)return;
   ResolveDeaths();
+  if (IsAwaitingUpgrade()) return;
   CollectPickups();
+  if (IsAwaitingUpgrade()) return;
   if (state_.phase == RunPhase::Wave && !opportunityEnemy_ &&
       state_.waveElapsed >= state_.waveDuration)
     EndWave();

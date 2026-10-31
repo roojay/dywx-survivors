@@ -169,7 +169,7 @@ int main() {
     assert(!s.GetSnapshot().progression.offers.empty());
     auto tick = s.GetSnapshot().tick;
     Advance(s, .2f, {{1, 0}, false});
-    assert(s.GetSnapshot().tick > tick);
+    assert(s.GetSnapshot().tick == tick); // User rule: pending choices freeze combat.
     assert(s.ChooseUpgrade(0));
   }
   {

@@ -431,7 +431,7 @@ FReply SDywxRoot::RunCommand(TFunction<void()> Command)
 }
 void SDywxRoot::UpgradePanel()
 {
-    At(1080,225,810,55,Panel(Label(FString::Printf(TEXT("顿悟待选 %d · 战斗不停"),Run.progression.pendingUpgrades),24,Gold),Ink,6));
+    At(1080,225,810,55,Panel(Label(FString::Printf(TEXT("顿悟待选 %d · 战斗已暂停"),Run.progression.pendingUpgrades),24,Gold),Ink,6));
     for(int32 I=0;I<int(Run.progression.offers.size()) && I<3;++I)
     {
         const auto O=Run.progression.offers[I];
@@ -523,7 +523,7 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
     {
         Add(Label(TEXT("道典"),42,Paper,true),85);
         Add(Paragraph(TEXT("探索为引，认知为赏。洞天万象，皆有其律。"),596,26,Gold,true),100);
-        Add(Paragraph(TEXT("自动施展术法，移动与遁术避险。\nWASD / 方向键移动，空格遁术。\n1 / 2 / 3 选择顿悟；顿悟不暂停战斗。"),596,23,Paper),150);
+        Add(Paragraph(TEXT("自动施展术法，移动与遁术避险。\nWASD / 方向键移动，空格遁术。\n1 / 2 / 3 选择顿悟；顿悟选择期间自动暂停战斗。"),596,23,Paper),150);
         auto Entries=SNew(SScrollBox);
         // Read the saved discoveries even before the first world/run is created.
         // Observe only merges into this local view: opening the Codex never saves.

@@ -30,9 +30,13 @@ Rest. `BeginNextWave()` alone leaves Rest; after the fourth rest it starts the
 The B document does not specify individual enemy counts, so A ecological stages
 are mapped over six waves without claiming a calibrated B encounter table.
 
-Offers and level-ups **do not pause combat**. Explicit Pause, Rest, Dead and Won
-freeze simulation. Existing queued offers can be chosen while moving. Refinement
-XP commits on leaving Rest and may queue another live offer. `BeginNextWave` does
+As of the explicit user rule change on 2026-10-31, pending upgrade choices
+**freeze combat automatically**, including enemies, projectiles, effects, anomalies,
+cooldowns, wave time and presentation time. This derived waiting state does not
+change the explicit manual/focus pause flag. Choose, reroll, seal and skip remain
+legal while waiting; all queued choices must finish before combat resumes.
+Explicit Pause, Rest, Dead and Won also freeze simulation. Refinement XP commits
+on leaving Rest and may queue choices; Rest or a restored checkpoint preserves them. `BeginNextWave` does
 not implicitly select upgrades. A wave boundary collects all dropped XP/relics,
 clears surviving enemies/projectiles/effects, and grants no kill reward for
 surviving enemies. Boss phase transition does not grant victory/rewards; phase-two

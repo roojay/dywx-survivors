@@ -64,6 +64,16 @@ public:
   bool Fuse(SpellId result);
   bool SealUpgrade(std::size_t index);
   bool SkipUpgrade();
+  // Derived from authoritative progression, separate from manual/focus pause.
+  // Choice commands remain legal while this automatic combat gate is active.
+  bool IsAwaitingUpgrade() const {
+    const auto& p = progression_.GetState();
+    return p.pendingUpgrades > 0 && !p.offers.empty();
+  }
+  bool IsCombatFrozen() const {
+    return state_.paused || IsAwaitingUpgrade() ||
+        (state_.phase != RunPhase::Wave && state_.phase != RunPhase::Boss);
+  }
   void Step(float dt, const InputState &input = {});
   bool ChooseUpgrade(std::size_t index);
   bool Reroll();

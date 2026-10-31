@@ -100,8 +100,7 @@ void ADywxMVPWorld::Tick(float Dt)
     Super::Tick(Dt);
     if(!bActive) return;
     if(!Session || !Session->IsRunActive()) { StopRun(); return; }
-    const auto& S=GetSnapshot();
-    const bool Frozen=S.paused || (S.phase!=RunPhase::Wave && S.phase!=RunPhase::Boss);
+    const bool Frozen=Session->GetSimulation()->IsCombatFrozen();
     const float VisualDt=Frozen?0.f:FMath::Clamp(Dt,0.f,.1f);
     VisualTime+=VisualDt;
     Render(VisualDt);

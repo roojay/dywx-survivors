@@ -121,7 +121,10 @@ void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, i
     BeginLiveHUD(FDywxHUDState()); RefreshRunUI();
     OnRunRequested.Broadcast(CharacterIndex, MapIndex, ModeIndex);
 }
-void ADywxUIPlayerController::RequestDash() { bDashQueued = true; OnDashRequested.Broadcast(); }
+void ADywxUIPlayerController::RequestDash() {
+    if (Simulation() && Simulation()->IsCombatFrozen()) return;
+    bDashQueued = true; OnDashRequested.Broadcast();
+}
 void ADywxUIPlayerController::ClearGameplayInput()
 {
     bDashQueued = false;
@@ -292,6 +295,12 @@ void ADywxUIPlayerController::PrepareSimulationTick()
 {
     RefreshPreviewBudget();
     if (!Session()) return;
+    // Reading upgrade choices must not queue movement/dash for the resume frame.
+    // Core owns the freeze even if this controller or the Slate widget is absent.
+    if (Simulation() && Simulation()->IsAwaitingUpgrade()) {
+        ClearGameplayInput();
+        return;
+    }
     dywx::mvp::InputState Input;
     if (bGameplayInputAllowed && bWindowForeground && !Session()->GetSnapshot().paused && FSlateApplication::IsInitialized() && FSlateApplication::Get().IsActive())
     {

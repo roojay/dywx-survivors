@@ -1,0 +1,16 @@
+Test project D:/dev/Codex/2026-10-30/task-2/fullgame-core-win
+    Start 23: upgrade_pause_regressions
+1/1 Test #23: upgrade_pause_regressions ........Exit code 0xc0000409***Exception:   0.34 sec
+Assertion failed: Combat(s)==before, file D:\dev\Codex\2026-10-30\task-2\game-6a1031d\tests\upgrade_pause_regressions.cpp, line 34
+
+
+0% tests passed, 1 tests failed out of 1
+
+Label Time Summary:
+core          =   0.34 sec*proc (1 test)
+regression    =   0.34 sec*proc (1 test)
+
+Total Test time (real) =   0.35 sec
+
+The following tests FAILED:
+	 23 - upgrade_pause_regressions (Exit code 0xc0000409)  core regression

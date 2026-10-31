@@ -75,7 +75,7 @@ static void xpAndQueue() {
   CHECK(s.GetSnapshot().progression.offers.size() == 3);
   auto t = s.GetSnapshot().tick;
   advance(s, 1);
-  CHECK(s.GetSnapshot().tick > t);
+  CHECK(s.GetSnapshot().tick == t); // Upgrade selection now freezes combat.
   CHECK(s.GetSnapshot().progression.pendingUpgrades == 3);
   CHECK(s.Reroll());
   CHECK(s.Reroll());
@@ -579,12 +579,16 @@ static void sustainedStress() {
         s.TestCast(SpellId(spell), 5);
       finite(s.GetSnapshot(), s.GetConfig());
     }
+    while (s.GetSnapshot().progression.pendingUpgrades > 0)
+      CHECK(s.ChooseUpgrade(0)); // Headless policy resolves choices before advancing.
     s.Step(1.f / 60);
     high = std::max(high, s.GetSnapshot().enemies.size());
     CHECK(s.GetSnapshot().phase == RunPhase::Wave);
   }
   CHECK(high >= 150);
-  std::cout << "STRESS seed=991 ticks=36000 simulated_seconds=600 maxEnemies="
+  CHECK(s.GetSnapshot().tick == 36000);
+  std::cout << "STRESS seed=991 ticks=" << s.GetSnapshot().tick
+            << " simulated_seconds=" << s.GetSnapshot().statistics.elapsed << " maxEnemies="
             << high
             << " cappedEvents=" << s.GetSnapshot().statistics.droppedEvents
             << " wall_ms="

@@ -56,6 +56,7 @@ if(BUILD_TESTING)
         account_pity_regressions
         damage_feedback_regressions
         checkpoint_replay_regressions
+        upgrade_pause_regressions
     )
     foreach(test_name IN LISTS DYWX_CORE_TESTS)
         add_executable(${test_name} "${DYWX_ROOT}/tests/${test_name}.cpp")

@@ -18,6 +18,7 @@ bash scripts/test-mvp-arena.sh
 bash scripts/test-full-game-integration.sh
 bash scripts/test-mvp-save.sh
 bash scripts/test-core-commands.sh
+bash scripts/test-upgrade-pause.sh
 python3 scripts/test-architecture-contract.py
 bash scripts/test-combat-boundaries.sh
 bash scripts/test-save-economy-boundaries.sh

@@ -28,6 +28,8 @@ clear = body(c, 'void ADywxUIPlayerController::ClearGameplayInput')
 ui_only = body(body(c, 'void ADywxUIPlayerController::ApplyUIInput'), 'if (!bLive || bModalOpen)')
 close_modal = body(root, 'FReply SDywxRoot::CloseModal')
 checks = {
+    'upgrade waiting uses the core freeze for visual time': 'Session->GetSimulation()->IsCombatFrozen()' in body(w, 'void ADywxMVPWorld::Tick') and 'Frozen?0.f:' in body(w, 'void ADywxMVPWorld::Tick'),
+    'upgrade waiting clears input and cannot enqueue dash': 'Simulation()->IsAwaitingUpgrade()' in prepare and 'ClearGameplayInput();' in prepare and 'Simulation()->IsCombatFrozen()' in body(c, 'void ADywxUIPlayerController::RequestDash'),
     'explicit resume cannot undo a nested focus-loss pause': close_modal.index('Owner->SetUIPaused(false)') < close_modal.index('SyncInput()'),
     'live HUD preserves navigation-selected modal input mode': 'if (RootWidget.IsValid()) RootWidget->BeginLiveHUD(State);\n    else ApplyUIInput(true, false);' in begin_hud and begin_hud.count('ApplyUIInput(') == 1 and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::BeginLiveHUD') and 'Nav.modal!=dywx::Modal::None' in body(root, 'void SDywxRoot::SyncInput'),
     'focus navigation cannot be overwritten after nested input-mode change': 'RefreshPreviewBudget()' not in body(c, 'void ADywxUIPlayerController::StartPreviewBudget') and apply_input.rstrip().endswith('RefreshPreviewBudget();\n}') and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::HandleFocusLoss'),

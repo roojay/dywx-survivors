@@ -160,10 +160,11 @@ int main(){
   assert(weather.StartCampaign(p,GameMode::Traditional,HeroId::Body,999,800,CaveId::ThunderMarsh,0,slow,longCampaign));
   bool tideTested=false;
   for(int tick=0;tick<2200;++tick){
+    DrainUpgrades(weather); // Explicit headless choices; never bypass the combat freeze.
     weather.Step(.1f);const auto& anomaly=weather.GetAnomalies().State();
     if(!tideTested&&anomaly.active&&anomaly.id==AnomalyId::SpiritTide&&anomaly.remaining>10){
       int before=weather.GetEconomy().Stones();
-      for(int n=0;n<100;++n){auto id=weather.TestSpawn(EnemyRole::Swarm,{0,0});weather.TestDamageEnemy(id,1e9f);weather.Step(.02f);}
+      for(int n=0;n<100;++n){DrainUpgrades(weather);auto id=weather.TestSpawn(EnemyRole::Swarm,{0,0});weather.TestDamageEnemy(id,1e9f);weather.Step(.02f);}
       int income=weather.GetEconomy().Stones()-before;assert(income>125&&income<175);tideTested=true;
     }
   }
