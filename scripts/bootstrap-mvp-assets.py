@@ -1,5 +1,5 @@
 """Run inside UE Editor Python commandlet, never ordinary CPython.
-Creates the two cooked material assets required by the code-owned runtime meshes.
+Creates cooked materials, sampled courtyard textures and audio for runtime meshes.
 Idempotent: rebuilds graphs, saves assets, then writes a success receipt.
 """
 import json
@@ -29,7 +29,7 @@ def connect(source, output, target, input_name):
         raise RuntimeError('Material connection failed: ' + input_name)
 
 
-def build(name, vfx):
+def build(name, vfx, texture=None):
     path = '/Game/MVP/' + name
     material = unreal.load_asset(path)
     if material is None:
@@ -49,6 +49,17 @@ def build(name, vfx):
     # VertexColor exposes combined RGB as the unnamed first output in UE 5.8.
     connect(color, '', multiply, 'A')
     connect(tint, 'RGB', multiply, 'B')
+    if texture is not None:
+        sample = node(material, unreal.MaterialExpressionTextureSampleParameter2D, -650, -250)
+        sample.set_editor_property('parameter_name', 'SurfaceTexture')
+        sample.set_editor_property('texture', texture)
+        # UV0 comes from the validated geometry JSON, never a constant zero UV.
+        texcoord = node(material, unreal.MaterialExpressionTextureCoordinate, -900, -250)
+        connect(texcoord, '', sample, 'UVs')
+        textured = node(material, unreal.MaterialExpressionMultiply, -150, -200)
+        connect(sample, 'RGB', textured, 'A')
+        connect(multiply, '', textured, 'B')
+        multiply = textured
     if vfx:
         glow = node(material, unreal.MaterialExpressionScalarParameter, -350, 200)
         glow.set_editor_property('parameter_name', 'Glow')
@@ -73,7 +84,40 @@ def build(name, vfx):
     return path
 
 
-paths = [build('M_Surface', False), build('M_VFX', True)]
+# Import source artwork before creating the material; missing textures fail closed.
+texture_paths = []
+textures = {}
+for source_name, asset_name in [('courtyard_stone', 'T_CourtyardStone'), ('courtyard_rune', 'T_CourtyardRune')]:
+    source = ROOT / 'Content/MVP/TextureSource' / (source_name + '.png')
+    if not source.is_file():
+        raise RuntimeError('Missing authored texture: ' + str(source))
+    task = unreal.AssetImportTask()
+    task.set_editor_property('filename', str(source))
+    task.set_editor_property('destination_path', '/Game/MVP/Textures')
+    task.set_editor_property('destination_name', asset_name)
+    task.set_editor_property('automated', True)
+    task.set_editor_property('replace_existing', True)
+    task.set_editor_property('save', True)
+    asset_tools.import_asset_tasks([task])
+    texture = unreal.load_asset('/Game/MVP/Textures/' + asset_name)
+    if not isinstance(texture, unreal.Texture2D):
+        raise RuntimeError('Failed authored texture import: ' + asset_name)
+    texture.set_editor_property('srgb', True)
+    # Generated sources need not be powers of two (currently 1254 square).
+    # Stretch at texture build time, NOT pad: padding would introduce UV seams.
+    texture.set_editor_property('power_of_two_mode', unreal.TexturePowerOfTwoSetting.STRETCH_TO_POWER_OF_TWO)
+    texture.set_editor_property('mip_gen_settings', unreal.TextureMipGenSettings.TMGS_SIMPLE_AVERAGE)
+    texture.set_editor_property('filter', unreal.TextureFilter.TF_TRILINEAR)
+    texture.set_editor_property('address_x', unreal.TextureAddress.TA_WRAP)
+    texture.set_editor_property('address_y', unreal.TextureAddress.TA_WRAP)
+    # Small fixed atlas pair stays resident. No runtime density/streaming guesswork.
+    texture.set_editor_property('never_stream', True)
+    if not unreal.EditorAssetLibrary.save_loaded_asset(texture, only_if_is_dirty=False):
+        raise RuntimeError('Failed saving texture: ' + asset_name)
+    textures[source_name] = texture
+    texture_paths.append('/Game/MVP/Textures/' + asset_name)
+paths = [build('M_Surface', False), build('M_VFX', True),
+         build('M_Courtyard', False, textures['courtyard_stone'])] + texture_paths
 # Original source WAVs are imported ahead of cooking; no shipping WAV parser.
 audio_paths = []
 required_cues = {'palm', 'sword', 'thunder', 'hit', 'pickup', 'dash', 'upgrade', 'boss', 'win', 'loss'}

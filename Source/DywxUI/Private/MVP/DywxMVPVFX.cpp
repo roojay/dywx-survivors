@@ -124,7 +124,15 @@ void ADywxMVPWorld::RenderVFX(const Snapshot& S,bool& NewPalm,bool& NewThunder,u
                 const float B=FMath::DegreesToRadians(Facing-Angle*.5f+Angle*(J+1)/Segments);
                 const FVector P=At+FVector(FMath::Cos(A),FMath::Sin(A),0)*Radius*100;
                 const FVector Q=At+FVector(FMath::Cos(B),FMath::Sin(B),0)*Radius*100;
-                Emit(Beam,(P+Q)*.5f,FVector((Q-P).Size()/100,E.hostile?.09f:(.025f+.04f*FMath::Sin(PI*(J+.5f)/Segments)),.025),(Q-P).Rotation().Yaw);
+                const float Crest=FMath::Sin(PI*(J+.5f)/Segments);
+                Emit(Beam,(P+Q)*.5f,FVector((Q-P).Size()/100,E.hostile?.09f:(.045f+.075f*Crest),E.hostile?.025f:.07f),(Q-P).Rotation().Yaw);
+                // Raised, broken inner strokes sell a palm flame, without adding
+                // another full-screen circle. Hostile bounds remain exact above.
+                if(!E.hostile && E.element==Element::Fire && (J%2)==0) {
+                    const FVector Inner=At+((P+Q)*.5f-At)*.84f+FVector(0,0,18+22*Crest);
+                    Emit(TEXT("FireBeam"),Inner,FVector((Q-P).Size()/135,.035,.09),(Q-P).Rotation().Yaw-14);
+                    Emit(TEXT("BurnEmbers"),Inner+FVector(0,0,24),FVector(.35,.35,.5),Facing+J*17);
+                }
             }
         } else {
             // Exact hostile outer boundary, at a higher ground layer than friendly marks.

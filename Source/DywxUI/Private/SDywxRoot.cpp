@@ -24,6 +24,8 @@
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SToolTip.h"
+#include "Widgets/SLeafWidget.h"
+#include "Rendering/DrawElements.h"
 #include "Widgets/Notifications/SProgressBar.h"
 #include "Widgets/Text/STextBlock.h"
 
@@ -37,6 +39,32 @@ const TCHAR* Names[] = {TEXT("断岳行者"), TEXT("巡星羽客"), TEXT("灵契
 FString CN(std::string_view S) { return FString(UTF8_TO_TCHAR(std::string(S).c_str())); }
 using namespace dywx::mvp;
 }
+
+// Geometry-only trim: fine bronze bevels and diamond clasps, never a world-obscuring panel.
+class SCombatOrnament : public SLeafWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SCombatOrnament) {} SLATE_END_ARGS()
+    void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
+    virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D(400,32); }
+    virtual int32 OnPaint(const FPaintArgs&, const FGeometry& G, const FSlateRect&, FSlateWindowElementList& Out,
+        int32 Layer, const FWidgetStyle&, bool) const override
+    {
+        const FVector2f S(G.GetLocalSize());
+        auto Line=[&](TArray<FVector2f> Points,FLinearColor Color,float Width) {
+            FSlateDrawElement::MakeLines(Out,Layer,G.ToPaintGeometry(),Points,ESlateDrawEffect::None,Color,true,Width);
+        };
+        Line({{16,4},{S.X-16,4},{S.X-4,S.Y/2},{S.X-16,S.Y-4},{16,S.Y-4},{4,S.Y/2},{16,4}},FLinearColor(.05f,.045f,.035f,1),5);
+        Line({{16,4},{S.X-16,4},{S.X-4,S.Y/2},{S.X-16,S.Y-4},{16,S.Y-4},{4,S.Y/2},{16,4}},FLinearColor(.48f,.40f,.27f,1),1);
+        Line({{24,8},{S.X-24,8}},FLinearColor(.72f,.62f,.43f,.8f),1);
+        for(int32 End=0;End<2;++End) {
+            const float X=End?S.X-16.f:16.f;
+            Line({{X,6},{X+10,S.Y/2},{X,S.Y-6},{X-10,S.Y/2},{X,6}},FLinearColor(.62f,.53f,.36f,1),1);
+            Line({{X,12},{X+4,S.Y/2},{X,S.Y-12},{X-4,S.Y/2},{X,12}},FLinearColor(.85f,.71f,.44f,1),1);
+        }
+        return Layer;
+    }
+};
 
 void SDywxRoot::Construct(const FArguments& Args)
 {
@@ -112,6 +140,38 @@ const FSlateBrush* SDywxRoot::Portrait(int32 Index)
     Brushes.Add(Key, MoveTemp(Brush));
     return Result;
 }
+const FSlateBrush* SDywxRoot::CombatIcon(int32 Spell)
+{
+    int32 Cell=4; // Quiet silver seal for an unoccupied slot.
+    if(Spell>=0 && Spell<int32(SpellId::Count)) {
+        const auto Config=GetSpellConfig(SpellId(Spell));
+        switch(Config.form) {
+        case Form::Sword: Cell=1;break;
+        case Form::Array: Cell=2;break;
+        case Form::Talisman: Cell=3;break;
+        case Form::Beast: Cell=4;break;
+        default: Cell=Config.element==Element::Fire?0:5;break;
+        }
+    }
+    const FString Key=FString::Printf(TEXT("combat-medallion-%d"),Cell);
+    if(auto* Existing=Brushes.Find(Key))return Existing->Get();
+    const FString Atlas=FPaths::ProjectContentDir()/TEXT("UI/Images/hud-skills.png");
+    auto Brush=MakeUnique<FSlateBrush>();
+    const FSlateBrush* AtlasBrush=IFileManager::Get().FileExists(*Atlas)?Art(TEXT("hud-skills.png")):nullptr;
+    if(AtlasBrush && AtlasBrush->GetResourceObject()) {
+        *Brush=*AtlasBrush;
+        const float X=float(Cell%3)/3.f,Y=float(Cell/3)/2.f;
+        // Half-texel inset prevents bilinear sampling of a neighboring medallion.
+        const float U=.5f/AtlasBrush->ImageSize.X,V=.5f/AtlasBrush->ImageSize.Y;
+        Brush->SetUVRegion(FBox2f(FVector2f(X+U,Y+V),FVector2f(X+1.f/3.f-U,Y+.5f-V)));
+    } else {
+        // Checked-in painted glyphs keep slots legible if an optional atlas is absent.
+        const TCHAR* Fallback[]={TEXT("icon-slash.png"),TEXT("icon-arrow.png"),TEXT("icon-orbit.png"),TEXT("icon-stone.png"),TEXT("icon-dash.png"),TEXT("icon-mirror.png")};
+        *Brush=*Art(Fallback[Cell]);
+    }
+    Brush->ImageSize=FVector2D(80,80);
+    const FSlateBrush* Result=Brush.Get();Brushes.Add(Key,MoveTemp(Brush));return Result;
+}
 TSharedRef<SWidget> SDywxRoot::Label(const FString& Text, int32 Size, FLinearColor Color, bool bTitle) const
 {
     return SNew(STextBlock).Text(FText::FromString(Text)).Font(Font(Size, bTitle))
@@ -169,6 +229,13 @@ TSharedRef<SWidget> SDywxRoot::Button(const FString& Text, TFunction<FReply()> A
                 .AutoWrapText(false).Justification(ETextJustify::Center)
                 .ColorAndOpacity(bEnabled ? Paper : Muted)
                 .ShadowColorAndOpacity(FLinearColor(0,0,0,0.8f)).ShadowOffset(FVector2D(1,2))]];
+}
+TSharedRef<SWidget> SDywxRoot::CombatButton(const FString& Text, TFunction<FReply()> Action)
+{
+    return SNew(SButton).ButtonStyle(&NormalButton).ContentPadding(FMargin(5,2))
+        .HAlign(HAlign_Center).VAlign(VAlign_Center)
+        .OnClicked_Lambda([this,Epoch=UIEpoch,Fn=MoveTemp(Action)]() mutable {return Epoch==UIEpoch?Fn():FReply::Handled();})
+        [Label(Text,16,Paper)];
 }
 void SDywxRoot::At(float X, float Y, float W, float H, TSharedRef<SWidget> Widget)
 {
@@ -277,18 +344,25 @@ void SDywxRoot::BattleScreen()
         int Direction=FMath::Abs(BeastOffset.x)>FMath::Abs(BeastOffset.y)?(BeastOffset.x<0?0:1):(BeastOffset.y>0?2:3);
         return I==Direction?Arrow+FString::Printf(TEXT(" 灵兽 %.0f格"),FMath::Sqrt(BeastOffset.x*BeastOffset.x+BeastOffset.y*BeastOffset.y)):FString();
     },24,Gold));
-    At(30,25,500,100,Panel(SNew(SVerticalBox)
-        +SVerticalBox::Slot().AutoHeight()[LiveText([this]{return FString::Printf(TEXT("气血 %.0f / %.0f   护盾 %.0f"),HUD.Health,HUD.MaxHealth,Run.player.shield);},24,Paper)]
-        +SVerticalBox::Slot().FillHeight(1).Padding(0,12,0,0)[SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.85f,.12f,.035f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Health,HUD.MaxHealth));})],Ink,12));
-    At(580,25,750,90,Panel(LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("机缘 · 大妖    第 %d 波    %02d:%02d"),Run.wave,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60);return FString::Printf(TEXT("第 %d / %d 波    %02d:%02d    斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},26,Paper),Ink,15));
-    At(1640,35,230,65,Button(TEXT("暂停  Esc"),[this]{return Pause();}));
-    At(35,140,1100,45,LiveText([this]{const auto& R=Run.progression.build.resonance;return FString::Printf(TEXT("道象 火%d 雷%d 金%d 木%d 水%d 土%d · 体%d 剑%d 阵%d 兽%d 符%d"),R.fire,R.thunder,R.metal,R.wood,R.water,R.earth,R.body,R.sword,R.array,R.beast,R.talisman);},22,Gold));
-    At(35,185,800,40,Label(TEXT("同道象达到 2 / 4 点共鸣 · 破境继承道象 · C 打开道典"),18,Muted));
-    At(35,230,900,40,LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    击败后继续整理"),Run.statistics.damageDealt,Run.statistics.damageTaken);return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    妖潮余时 %.0f 秒"),Run.statistics.damageDealt,Run.statistics.damageTaken,FMath::Max(0.f,Run.waveDuration-Run.waveElapsed));},20,Paper));
+    auto Details=SNew(SVerticalBox);
+    Details->AddSlot().AutoHeight()[LiveText([this]{return FString::Printf(TEXT("气血 %.0f / %.0f   护盾 %.0f"),HUD.Health,HUD.MaxHealth,Run.player.shield);},20,Paper)];
+    Details->AddSlot().AutoHeight().Padding(0,8)[LiveText([this]{const auto& R=Run.progression.build.resonance;return FString::Printf(TEXT("道象 火%d 雷%d 金%d 木%d 水%d 土%d\n体%d 剑%d 阵%d 兽%d 符%d"),R.fire,R.thunder,R.metal,R.wood,R.water,R.earth,R.body,R.sword,R.array,R.beast,R.talisman);},18,Gold)];
+    Details->AddSlot().AutoHeight()[Paragraph(TEXT("同道象达到 2 / 4 点共鸣 · 破境继承道象 · C 打开道典"),600,18,Muted)];
+    Details->AddSlot().AutoHeight().Padding(0,8)[LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    击败后继续整理"),Run.statistics.damageDealt,Run.statistics.damageTaken);return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    妖潮余时 %.0f 秒"),Run.statistics.damageDealt,Run.statistics.damageTaken,FMath::Max(0.f,Run.waveDuration-Run.waveElapsed));},18,Paper)];
+    for(int32 I=0;I<4;++I)Details->AddSlot().AutoHeight()[LiveText([this,I]{const auto& P=Run.progression.build.passives;return I<int(P.size())?CN(PassiveCatalog()[int(P[I])].name):FString::Printf(TEXT("心法槽 %d · 空"),I+1);},18,Gold)];
+    Details->AddSlot().AutoHeight().Padding(0,8)[LiveText([this]{return FString::Printf(TEXT("修为 %.0f / %.0f   境界 %d\nWASD / 方向键移动 · 空格遁术 · 1 / 2 / 3 顿悟"),HUD.Experience,HUD.ExperienceToNext,Run.progression.level);},18,Paper)];
+    At(24,20,400,32,SNew(SBox).ToolTip(SNew(SToolTip)[Details])[
+        SNew(SOverlay)
+        +SOverlay::Slot().Padding(26,10)[SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.72f,.055f,.025f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Health,HUD.MaxHealth));})]
+        +SOverlay::Slot()[SNew(SCombatOrnament)]]);
+    At(50,57,348,3,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.48f,.62f,.57f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Experience,HUD.ExperienceToNext));}));
+    At(800,24,520,34,LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("机缘 · 大妖    第 %d 波    %02d:%02d"),Run.wave,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60);return FString::Printf(TEXT("第 %d / %d 波   ·   %02d:%02d   ·   斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},16,Paper));
+    At(1770,22,120,40,CombatButton(TEXT("暂停 Esc"),[this]{return Pause();}));
+    At(1640,22,110,40,CombatButton(TEXT("道典 C"),[this]{return OpenModal(dywx::Modal::Codex);}));
     if(Run.phase==RunPhase::Boss)
     {
-        At(580,700,750,45,SNew(SBox).ToolTip(SNew(SToolTip)[Paragraph(Owner.IsValid()&&Owner->Simulation()?CN(Owner->Simulation()->DescribeBossMechanics()):TEXT(""),570,20,Paper)])[LiveText([this]{auto* S=Owner.IsValid()?Owner->Simulation():nullptr;const FString Name=S?CN(CaveCatalog()[int(S->GetArena().cave)].bossName):TEXT("洞主");return (Run.statistics.elapsed<BossChangeUntil?FString(TEXT("洞主破相！ ")):FString())+FString::Printf(TEXT("%s · 第 %d 相   %.0f / %.0f"),*Name,Run.bossPhase,BossHP,BossMaxHP);},22,Gold)]);
-        At(580,755,750,18,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.7f,.12f,.6f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(BossHP,BossMaxHP));}));
+        At(635,72,650,40,SNew(SBox).ToolTip(SNew(SToolTip)[Paragraph(Owner.IsValid()&&Owner->Simulation()?CN(Owner->Simulation()->DescribeBossMechanics()):TEXT(""),570,20,Paper)])[LiveText([this]{auto* S=Owner.IsValid()?Owner->Simulation():nullptr;const FString Name=S?CN(CaveCatalog()[int(S->GetArena().cave)].bossName):TEXT("洞主");return (Run.statistics.elapsed<BossChangeUntil?FString(TEXT("洞主破相！ ")):FString())+FString::Printf(TEXT("%s · 第 %d 相   %.0f / %.0f"),*Name,Run.bossPhase,BossHP,BossMaxHP);},17,Gold)]);
+        At(635,112,650,6,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.7f,.12f,.6f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(BossHP,BossMaxHP));}));
     }
     auto AnomalyText=[this]() -> FString {
         auto* S=Owner.IsValid()?Owner->Simulation():nullptr;if(!S)return FString();
@@ -306,21 +380,23 @@ void SDywxRoot::BattleScreen()
         }
         return FString::Printf(TEXT("【%s】%s · 剩余%.0f秒 · 悬停查看完整规律\n"),Icons[int(A.id)],*CN(AnomalyName(A.id)),A.remaining)+Key;
     };
-    At(35,285,990,100,SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-        .BorderBackgroundColor(FLinearColor(0.015f,0.026f,0.045f,.45f)).Padding(8)
+    At(28,80,400,36,SNew(SBox)
         .Visibility_Lambda([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return S&&S->GetAnomalies().State().active&&(Run.phase==RunPhase::Wave||Run.phase==RunPhase::Boss)?EVisibility::Visible:EVisibility::Collapsed;})
-        .ToolTip(SNew(SToolTip)[SNew(STextBlock).Font(Font(20)).ColorAndOpacity(Paper).WrapTextAt(570).Text_Lambda([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return FText::FromString(S?CN(DescribeAnomaly(S->GetAnomalies().State().id,S->GetAnomalies().Config())):FString());})])
-        [SNew(STextBlock).Font(Font(18)).ColorAndOpacity(Gold).WrapTextAt(970).Text_Lambda([AnomalyText]{return FText::FromString(AnomalyText());})]);
-    for(int32 I=0;I<6;++I)
-        At(30+I*235,845,225,100,Panel(LiveText([this,I]{const auto& S=Run.progression.build.spells;if(I>=int(S.size()))return FString::Printf(TEXT("术法槽 %d · 空"),I+1);return CN(GetSpellConfig(S[I].id,S[I].rank).name)+FString::Printf(TEXT("\n%d重 · %.1f秒"),S[I].rank,Run.spellCooldowns[int(S[I].id)]);},18,Paper),Ink,10));
-    for(int32 I=0;I<4;++I)
-        At(30+I*300,950,290,52,Panel(LiveText([this,I]{const auto& P=Run.progression.build.passives;return I<int(P.size())?CN(PassiveCatalog()[int(P[I])].name):FString::Printf(TEXT("心法槽 %d · 空"),I+1);},20,Gold),Ink,8));
-    At(1450,855,400,55,LiveText([this]{return HUD.DashCooldownRemaining>0?FString::Printf(TEXT("遁术冷却 %.1f 秒"),HUD.DashCooldownRemaining):FString(TEXT("遁术就绪 · 空格"));},24,Gold));
-    At(1450,920,400,65,Button(TEXT("遁术  Space"),[this]{return Dash();}));
-    At(30,1020,1350,14,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.1f,.5f,.9f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Experience,HUD.ExperienceToNext));}));
-    At(30,1045,1350,30,LiveText([this]{return FString::Printf(TEXT("修为 %.0f / %.0f   境界 %d   WASD / 方向键移动 · 空格遁术 · 1 / 2 / 3 顿悟"),HUD.Experience,HUD.ExperienceToNext,Run.progression.level);},18,Paper));
+        .ToolTip(SNew(SToolTip)[SNew(STextBlock).Font(Font(18)).ColorAndOpacity(Paper).WrapTextAt(600).Text_Lambda([this,AnomalyText]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return FText::FromString(AnomalyText()+TEXT("\n")+(S?CN(DescribeAnomaly(S->GetAnomalies().State().id,S->GetAnomalies().Config())):FString()));})])
+        [LiveText([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;if(!S)return FString();const auto&A=S->GetAnomalies().State();return A.active?CN(AnomalyName(A.id))+FString::Printf(TEXT(" · %.0f秒"),A.remaining):FString();},16,Gold)]);
+    // Six compact, image-backed medallions. Full names and cooldowns stay available on hover.
+    for(int32 I=0;I<6;++I) {
+        auto Tip=SNew(SToolTip)[LiveText([this,I]{const auto& S=Run.progression.build.spells;if(I>=int(S.size()))return FString::Printf(TEXT("术法槽 %d · 空\n顿悟时选择术法填入此槽"),I+1);return CN(GetSpellConfig(S[I].id,S[I].rank).name)+FString::Printf(TEXT("\n%d重 · 冷却 %.1f秒"),S[I].rank,Run.spellCooldowns[int(S[I].id)]);},18,Paper)];
+        At(696+I*88,970,80,80,SNew(SBox).ToolTip(Tip)[SNew(SImage)
+            .Image_Lambda([this,I]{const auto&S=Run.progression.build.spells;return CombatIcon(I<int32(S.size())?int32(S[I].id):-1);})
+            .ColorAndOpacity_Lambda([this,I]{return I<int32(Run.progression.build.spells.size())?FLinearColor::White:FLinearColor(.30f,.28f,.25f,.65f);})]);
+        At(706+I*88,1050,60,24,SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Gold).Justification(ETextJustify::Center)
+            .Text_Lambda([this,I]{const auto&S=Run.progression.build.spells;if(I>=int(S.size()))return FText::FromString(TEXT("·"));return FText::FromString(FString::ChrN(FMath::Min(S[I].rank,5),TCHAR(0x2022)));}));
+    }
+    At(1250,995,155,38,CombatButton(TEXT("遁术 Space"),[this]{return Dash();}));
+    At(1250,1035,160,28,LiveText([this]{return HUD.DashCooldownRemaining>0?FString::Printf(TEXT("%.1f 秒"),HUD.DashCooldownRemaining):FString(TEXT("就绪"));},14,Gold));
     // Keep the action right of the boss bar, above the upgrade cards.
-    if (Run.phase == RunPhase::Wave || Run.phase == RunPhase::Boss || Run.phase == RunPhase::Rest)
+    if (Run.phase == RunPhase::Rest || !Run.progression.offers.empty())
     {
         auto Fusions=SNew(SScrollBox);
         for(const auto& FusionRecipe:FusionCatalog()) {

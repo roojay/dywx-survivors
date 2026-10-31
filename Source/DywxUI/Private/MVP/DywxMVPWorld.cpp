@@ -5,6 +5,7 @@
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundConcurrency.h"
@@ -49,8 +50,8 @@ ADywxMVPWorld::ADywxMVPWorld()
     Camera=CreateDefaultSubobject<UCameraComponent>(TEXT("BattleCamera"));
     Camera->SetupAttachment(RootComponent);
     Camera->ProjectionMode=ECameraProjectionMode::Orthographic;
-    Camera->OrthoWidth=3200;
-    Camera->SetRelativeRotation(FRotator(-62,-90,0));
+    Camera->OrthoWidth=2400;
+    Camera->SetRelativeRotation(FRotator(-50,-90,0));
     Camera->bConstrainAspectRatio=false;
     Camera->PostProcessSettings.bOverride_AutoExposureMethod=true;
     Camera->PostProcessSettings.AutoExposureMethod=EAutoExposureMethod::AEM_Manual;
@@ -105,7 +106,7 @@ void ADywxMVPWorld::Tick(float Dt)
     VisualTime+=VisualDt;
     Render(VisualDt);
 }
-UStaticMesh* ADywxMVPWorld::BuildMesh(FName Name,const TArray<FVector3f>& V,const TArray<int32>& I,const TArray<FVector4f>& C,const TArray<FVector3f>& VertexNormals)
+UStaticMesh* ADywxMVPWorld::BuildMesh(FName Name,const TArray<FVector3f>& V,const TArray<int32>& I,const TArray<FVector4f>& C,const TArray<FVector3f>& VertexNormals,const TArray<FVector2f>& VertexUVs)
 {
     if(V.IsEmpty() || I.Num()%3!=0) return nullptr;
     FMeshDescription D; FStaticMeshAttributes A(D); A.Register();
@@ -122,14 +123,14 @@ UStaticMesh* ADywxMVPWorld::BuildMesh(FName Name,const TArray<FVector3f>& V,cons
         if(N.IsNearlyZero()) continue;
         FVector3f Tangent=FVector3f::CrossProduct(FMath::Abs(N.Z)<.9f?FVector3f(0,0,1):FVector3f(0,1,0),N).GetSafeNormal();
         TArray<FVertexInstanceID> Corners;
-        for(int32 K=0;K<3;K++) { int32 Index=I[T+K]; auto Id=D.CreateVertexInstance(IDs[Index]); Corners.Add(Id); Normals[Id]=VertexNormals.IsValidIndex(Index)?VertexNormals[Index].GetSafeNormal():N; Tangents[Id]=Tangent; Signs[Id]=1; Colors[Id]=C.IsValidIndex(Index)?C[Index]:FVector4f(1,1,1,1); UV.Set(Id,0,FVector2f(0,0)); }
+        for(int32 K=0;K<3;K++) { int32 Index=I[T+K]; auto Id=D.CreateVertexInstance(IDs[Index]); Corners.Add(Id); Normals[Id]=VertexNormals.IsValidIndex(Index)?VertexNormals[Index].GetSafeNormal():N; Tangents[Id]=Tangent; Signs[Id]=1; Colors[Id]=C.IsValidIndex(Index)?C[Index]:FVector4f(1,1,1,1); UV.Set(Id,0,VertexUVs.IsValidIndex(Index)?VertexUVs[Index]:FVector2f(0,0)); }
         D.CreatePolygon(Group,Corners);
     }
     if(D.Triangles().Num()==0) { UE_LOG(LogDywxMVPWorld,Error,TEXT("Rejected empty/degenerate mesh: %s"),*Name.ToString()); return nullptr; }
     UStaticMesh* Mesh=NewObject<UStaticMesh>(this,Name,RF_Transient);
     FStaticMaterial Surface(nullptr,TEXT("Surface"));
-    // These vertex-colored meshes have zero UVs and no sampled textures. Fast
-    // runtime builds skip editor UV-density generation; streaming still reads it.
+    // Fast runtime builds skip editor UV-density generation; initialize metadata
+    // explicitly even for vertex-only geometry to keep the streaming path safe.
     Surface.UVChannelData=FMeshUVChannelInfo(0.f);
     Mesh->GetStaticMaterials().Add(Surface);
     UStaticMesh::FBuildMeshDescriptionsParams Params; Params.bFastBuild=true; Params.bBuildSimpleCollision=false; Params.bAllowCpuAccess=false;
@@ -145,17 +146,19 @@ void ADywxMVPWorld::LoadGeometry()
     const int64 FileBytes=IFileManager::Get().FileSize(*Path);
     if(FileBytes>0 && FileBytes<=32*1024*1024 && FFileHelper::LoadFileToString(Data,*Path) && Data.Len()<=32*1024*1024 && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Data),Root) && Root.IsValid()) {
         double Version=0;
-        TSet<FString> Allowed{TEXT("hero_body"),TEXT("hero_sword"),TEXT("enemy_swarm"),TEXT("enemy_exploder"),TEXT("enemy_charger"),TEXT("enemy_rangedbird"),TEXT("enemy_supporttotem"),TEXT("enemy_summoner"),TEXT("enemy_boss"),TEXT("enemy_spirit"),TEXT("rock"),TEXT("pillar"),TEXT("tile"),TEXT("shrine_banner"),TEXT("shrine_arch")};
+        TSet<FString> Allowed{TEXT("hero_body"),TEXT("hero_sword"),TEXT("enemy_swarm"),TEXT("enemy_exploder"),TEXT("enemy_charger"),TEXT("enemy_rangedbird"),TEXT("enemy_supporttotem"),TEXT("enemy_summoner"),TEXT("enemy_boss"),TEXT("enemy_spirit"),TEXT("rock"),TEXT("pillar"),TEXT("tile"),TEXT("shrine_banner"),TEXT("shrine_arch"),TEXT("courtyard_pillar"),TEXT("courtyard_rail"),TEXT("courtyard_brazier"),TEXT("courtyard_pine"),TEXT("courtyard_steps"),TEXT("courtyard_slab"),TEXT("courtyard_medallion")};
         for(int32 Pose=0;Pose<8;Pose++) { Allowed.Add(FString::Printf(TEXT("hero_walk_%d"),Pose)); Allowed.Add(FString::Printf(TEXT("enemy_swarm_walk_%d"),Pose)); }
         const TArray<TSharedPtr<FJsonValue>>* Entries=nullptr;
         if(Root->TryGetNumberField(TEXT("version"),Version) && Version==1 && Root->TryGetArrayField(TEXT("meshes"),Entries) && Entries->Num()<=64) for(const auto& Entry:*Entries) {
             if(!Entry.IsValid() || Entry->Type!=EJson::Object) continue;
             auto O=Entry->AsObject(); if(!O.IsValid()) continue;
-            FString Name; const TArray<TSharedPtr<FJsonValue>> *Vertices=nullptr,*Triangles=nullptr,*Colors=nullptr,*Normals=nullptr;
+            FString Name; const TArray<TSharedPtr<FJsonValue>> *Vertices=nullptr,*Triangles=nullptr,*Colors=nullptr,*Normals=nullptr,*UVs=nullptr;
             if(!O->TryGetStringField(TEXT("name"),Name) || !Allowed.Contains(Name) || Meshes.Contains(FName(*Name)) || !O->TryGetArrayField(TEXT("vertices"),Vertices) || !O->TryGetArrayField(TEXT("triangles"),Triangles) || !O->TryGetArrayField(TEXT("colors"),Colors) || Vertices->Num()==0 || Vertices->Num()>100000 || Triangles->Num()>100000 || Colors->Num()!=Vertices->Num()) continue;
             O->TryGetArrayField(TEXT("normals"),Normals);
+            O->TryGetArrayField(TEXT("uvs"),UVs);
+            if(UVs && UVs->Num()!=Vertices->Num()) continue;
             if(Normals && Normals->Num()!=Vertices->Num()) continue;
-            TArray<FVector3f> V; TArray<int32> I; TArray<FVector4f> C; TArray<FVector3f> N; bool Valid=true;
+            TArray<FVector3f> V; TArray<int32> I; TArray<FVector4f> C; TArray<FVector3f> N; TArray<FVector2f> Texcoords; bool Valid=true;
             auto Numbers=[](const TSharedPtr<FJsonValue>& Value,int32 Count,double* Out,double Min,double Max) {
                 if(!Value.IsValid() || Value->Type!=EJson::Array) return false;
                 const auto& Array=Value->AsArray(); if(Array.Num()!=Count) return false;
@@ -166,7 +169,8 @@ void ADywxMVPWorld::LoadGeometry()
             for(const auto& P:*Triangles) { double X[3]; if(!Numbers(P,3,X,0,Vertices->Num()-1) || X[0]!=std::floor(X[0]) || X[1]!=std::floor(X[1]) || X[2]!=std::floor(X[2])) {Valid=false;break;} I.Append({int32(X[0]),int32(X[2]),int32(X[1])}); }
             for(const auto& P:*Colors) { double X[4]; if(!Numbers(P,4,X,0,1)) {Valid=false;break;} C.Add(FVector4f(float(X[0]),float(X[1]),float(X[2]),float(X[3]))); }
             if(Normals) for(const auto& P:*Normals) { double X[3]; if(!Numbers(P,3,X,-1.001,1.001)) {Valid=false;break;} FVector3f Normal{float(X[0]),float(-X[1]),float(X[2])}; if(Normal.SizeSquared()<.001f) {Valid=false;break;} N.Add(Normal.GetSafeNormal()); }
-            if(Valid) BuildMesh(FName(*Name),V,I,C,N);
+            if(UVs) for(const auto& P:*UVs) { double X[2]; if(!Numbers(P,2,X,-1000,1000)) {Valid=false;break;} Texcoords.Add(FVector2f(float(X[0]),float(X[1]))); }
+            if(Valid) BuildMesh(FName(*Name),V,I,C,N,Texcoords);
             else UE_LOG(LogDywxMVPWorld,Error,TEXT("Rejected invalid geometry arrays: %s"),*Name);
         }
     }
@@ -176,7 +180,7 @@ void ADywxMVPWorld::LoadGeometry()
     TArray<int32> BI{0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,1,2,6,1,6,5,2,3,7,2,7,6,3,0,4,3,4,7}; BuildMesh(TEXT("unit_box"),Box,BI,{});
     for(int32 Ring=0;Ring<2;Ring++) {
         TArray<FVector3f> V; TArray<int32> I;
-        for(int32 J=0;J<64;J++) { const float A=2*PI*J/64; V.Add(FVector3f(FMath::Cos(A)*100,FMath::Sin(A)*100,0)); V.Add(FVector3f(FMath::Cos(A)*(Ring?90:0),FMath::Sin(A)*(Ring?90:0),0)); }
+        for(int32 J=0;J<64;J++) { const float A=2*PI*J/64; V.Add(FVector3f(FMath::Cos(A)*100,FMath::Sin(A)*100,0)); V.Add(FVector3f(FMath::Cos(A)*(Ring?96:0),FMath::Sin(A)*(Ring?96:0),0)); }
         for(int32 J=0;J<64;J++) {int32 K=(J+1)%64; I.Append({J*2,K*2,J*2+1,K*2,K*2+1,J*2+1});}
         BuildMesh(Ring?TEXT("unit_ring"):TEXT("unit_disc"),V,I,{});
     }
@@ -192,12 +196,20 @@ void ADywxMVPWorld::MakeBatch(FName Name,FName MeshName,FLinearColor Tint,bool D
     auto* Component=NewObject<UInstancedStaticMeshComponent>(this,NAME_None,RF_Transient);
     Component->SetupAttachment(RootComponent); Component->SetMobility(EComponentMobility::Movable);
     Component->SetCollisionEnabled(ECollisionEnabled::NoCollision); Component->SetGenerateOverlapEvents(false);
-    Component->SetCastShadow(false); Component->bReceivesDecals=false; Component->SetStaticMesh(Mesh);
-    const TCHAR* Path=Emissive?TEXT("/Game/MVP/M_VFX.M_VFX"):TEXT("/Game/MVP/M_Surface.M_Surface");
+    // Only opaque authored forms cast shadows; no VFX, ground overlays or UI bars.
+    const bool Casts=!Emissive && Name!=TEXT("Ground") && Name!=TEXT("Tiles") && Name!=TEXT("FloorRune") && Name!=TEXT("Shadow") && Name!=TEXT("EnemyHealthBack");
+    Component->SetCastShadow(Casts); Component->bReceivesDecals=false; Component->SetStaticMesh(Mesh);
+    const bool Textured=Name==TEXT("Tiles") || Name==TEXT("FloorRune");
+    const TCHAR* Path=Textured?TEXT("/Game/MVP/M_Courtyard.M_Courtyard"):Emissive?TEXT("/Game/MVP/M_VFX.M_VFX"):TEXT("/Game/MVP/M_Surface.M_Surface");
     UMaterialInterface* Base=LoadObject<UMaterialInterface>(nullptr,Path);
     if(!Base) { Base=UMaterial::GetDefaultMaterial(MD_Surface); UE_LOG(LogDywxMVPWorld,Error,TEXT("Required %s missing. Run scripts/bootstrap-mvp-assets.py with UnrealEditor before playing/cooking. Default material is diagnostic only."),Path); }
     auto* Material=UMaterialInstanceDynamic::Create(Base,this); Material->SetVectorParameterValue(TEXT("Tint"),Tint);
     Material->SetScalarParameterValue(TEXT("Glow"),Emissive?1.8f:0.f);
+    if(Textured) {
+        const TCHAR* TexturePath=Name==TEXT("Tiles")?TEXT("/Game/MVP/Textures/T_CourtyardStone.T_CourtyardStone"):TEXT("/Game/MVP/Textures/T_CourtyardRune.T_CourtyardRune");
+        if(auto* Texture=LoadObject<UTexture2D>(nullptr,TexturePath)) Material->SetTextureParameterValue(TEXT("SurfaceTexture"),Texture);
+        else UE_LOG(LogDywxMVPWorld,Error,TEXT("Missing authored courtyard texture %s; bootstrap required"),TexturePath);
+    }
     Component->SetMaterial(0,Material); AddInstanceComponent(Component); Component->RegisterComponent();
     OwnedMaterials.Add(Material); OwnedBatches.Add(Component);
     FBatch Batch; Batch.Component=Component; Batch.Dynamic=Dynamic; Batches.Add(Name,MoveTemp(Batch));
@@ -237,13 +249,15 @@ void ADywxMVPWorld::BuildScene()
         else UE_LOG(LogDywxMVPWorld,Error,TEXT("Missing required MVP cue %s. Run material/audio bootstrap before packaging."),*Path);
     }
     MakeBatch(TEXT("Ground"),TEXT("unit_box"),FLinearColor(.025,.04,.065),false);
-    MakeBatch(TEXT("Tiles"),TEXT("tile"),FLinearColor(.66,.65,.64),false);
+    MakeBatch(TEXT("Tiles"),TEXT("courtyard_slab"),FLinearColor(.78,.84,.92),false);
+    for(const TCHAR* Key:{TEXT("courtyard_pillar"),TEXT("courtyard_rail"),TEXT("courtyard_brazier"),TEXT("courtyard_pine"),TEXT("courtyard_steps")}) MakeBatch(FName(Key),FName(Key),FLinearColor::White,false);
     MakeBatch(TEXT("Rock"),TEXT("rock"),FLinearColor(.7,.8,1),false);
     MakeBatch(TEXT("Pillar"),TEXT("pillar"),FLinearColor(.8,.85,1),false);
     if(Meshes.Contains(TEXT("shrine_banner"))) MakeBatch(TEXT("Banner"),TEXT("shrine_banner"),FLinearColor::White,false);
     if(Meshes.Contains(TEXT("shrine_arch"))) MakeBatch(TEXT("Arch"),TEXT("shrine_arch"),FLinearColor::White,false);
-    MakeBatch(TEXT("Edge"),TEXT("unit_box"),FLinearColor(.11,.23,.35),false,true);
-    MakeBatch(TEXT("FloorRune"),TEXT("unit_ring"),FLinearColor(.06,.12,.2),false,true);
+    MakeBatch(TEXT("Edge"),TEXT("unit_box"),FLinearColor(.12,.14,.18),false);
+    MakeBatch(TEXT("BrazierFlame"),TEXT("unit_diamond"),FLinearColor(1,.23,.025),false,true);
+    MakeBatch(TEXT("FloorRune"),TEXT("courtyard_medallion"),FLinearColor(.85,.79,.67),false);
     MakeBatch(TEXT("HeroBody"),TEXT("hero_body"),FLinearColor::White);
     for(int32 Pose=0;Pose<8;Pose++) {
         const FName HeroMesh(*FString::Printf(TEXT("hero_walk_%d"),Pose));
@@ -281,7 +295,7 @@ void ADywxMVPWorld::BuildScene()
     MakeBatch(TEXT("Death"),TEXT("unit_ring"),FLinearColor(.9,.35,.1),true,true);
     MakeBatch(TEXT("Collect"),TEXT("unit_ring"),FLinearColor(.15,1,.8),true,true);
     auto* Sun=NewObject<UDirectionalLightComponent>(this,TEXT("MoonLight")); Sun->SetupAttachment(RootComponent); AddInstanceComponent(Sun);
-    Sun->SetMobility(EComponentMobility::Movable); Sun->SetRelativeRotation(FRotator(-55,-40,0)); Sun->SetIntensity(3.f); Sun->SetLightColor(FLinearColor(.63,.75,1)); Sun->SetCastShadows(false); Sun->RegisterComponent();
+    Sun->SetMobility(EComponentMobility::Movable); Sun->SetRelativeRotation(FRotator(-55,-40,0)); Sun->SetIntensity(3.5f); Sun->SetLightColor(FLinearColor(.72,.82,1)); Sun->SetCastShadows(true); Sun->DynamicShadowDistanceMovableLight=6500.f; Sun->DynamicShadowCascades=2; Sun->RegisterComponent();
     auto* Fill=NewObject<UDirectionalLightComponent>(this,TEXT("WarmRim")); Fill->SetupAttachment(RootComponent); AddInstanceComponent(Fill);
     Fill->SetMobility(EComponentMobility::Movable); Fill->SetRelativeRotation(FRotator(-25,140,0)); Fill->SetIntensity(1.5f); Fill->SetLightColor(FLinearColor(1,.68,.38)); Fill->SetCastShadows(false); Fill->RegisterComponent();
     Flush(); bSceneBuilt=true;
@@ -304,9 +318,26 @@ void ADywxMVPWorld::RebuildArena()
         if(auto* Mat=Cast<UMaterialInstanceDynamic>(Batch->Component->GetMaterial(0)))
             Mat->SetVectorParameterValue(TEXT("Tint"),Palettes[FMath::Clamp(Cave,0,2)]*(FString(Key)==TEXT("Ground")?.12f:1.f));
     Add(TEXT("Ground"),FVector(0,0,-45),FVector((X+4)*2,(Y+4)*2,.4));
-    for(int TX=int(-X+2);TX<X-1;TX+=4) for(int TY=int(-Y+2);TY<Y-1;TY+=4)
-        if(!Full || Arena.Contains({float(TX),float(TY)},1.5f)) Add(TEXT("Tiles"),World({float(TX),float(TY)},-4),FVector(4,4,1),((TX+TY)%3)*90);
-    if(Full) { for(const auto& O:Arena.obstacles) Add(TEXT("Rock"),World(O.position),FVector(O.radius),O.position.x*17); }
+    // Eight-metre atlas patches contain irregular small pavers, not giant grid cubes.
+    // Adjacent slabs meet exactly; no black seams or extra collision surfaces.
+    for(float TX=-X;TX<X;TX+=8) for(float TY=-Y;TY<Y;TY+=8) {
+        const float W=FMath::Min(8.f,X-TX),H=FMath::Min(8.f,Y-TY);
+        if(!Full || Arena.Contains({TX+W*.5f,TY+H*.5f},0))
+            Add(TEXT("Tiles"),World({TX+W*.5f,TY+H*.5f},-3),FVector(W,H,1));
+    }
+    if(Full) {
+        int32 Landmark=0;
+        for(const auto& O:Arena.obstacles) {
+            // Keep the exact existing obstacle silhouette/footprint. Ornament is
+            // embedded in that blocked rock, never on previously walkable ground.
+            Add(TEXT("Rock"),World(O.position),FVector(O.radius),O.position.x*17);
+            if((Landmark++%4)==0) Add(TEXT("courtyard_pillar"),World(O.position),FVector(O.radius*.5f),O.position.x*17);
+            else if(Landmark%4==2) {
+                Add(TEXT("courtyard_brazier"),World(O.position,35),FVector(O.radius*.6f));
+                Add(TEXT("BrazierFlame"),World(O.position,35+O.radius*125),FVector(.22,.22,.65));
+            }
+        }
+    }
     else { for(const auto& O:GetArenaObstacles()) Add(TEXT("Rock"),World(O.position),FVector(O.radius),O.position.x*17); }
     const Vec2 Corners[]={{-X+Cut,-Y},{X-Cut,-Y},{X,-Y+Cut},{X,Y-Cut},{X-Cut,Y},{-X+Cut,Y},{-X,Y-Cut},{-X,-Y+Cut}};
     for(int32 I=0;I<8;I++) {
@@ -317,10 +348,21 @@ void ADywxMVPWorld::RebuildArena()
         for(auto P:Arena.veins) { Add(TEXT("Vein"),World(P,2),FVector(1.3,1.3,1)); Add(TEXT("VeinCrystal"),World(P,12),FVector(.24)); }
         for(auto P:Arena.hazards) Add(TEXT("ArrayPlatform"),World(P,2),FVector(2.2,2.2,1));
     }
-    for(int TX=int(-X+4);TX<X;TX+=8) for(float Sign:{-1.f,1.f}) Add(TEXT("Pillar"),World({float(TX),Sign*(Y+2)}),FVector(1.1));
+    // Authored architectural rhythm outside traversable bounds, never new blockers.
+    for(float Sign:{-1.f,1.f}) {
+        for(float TX=-X+4;TX<X;TX+=8) {
+            Add(TEXT("courtyard_pillar"),World({TX,Sign*(Y+1.3f)}),FVector(.85));
+            Add(TEXT("courtyard_brazier"),World({TX+2.3f,Sign*(Y+.9f)}),FVector(.7));
+            Add(TEXT("BrazierFlame"),World({TX+2.3f,Sign*(Y+.9f)},150),FVector(.2,.2,.6));
+        }
+        for(float TX=-X+2;TX<X;TX+=4) Add(TEXT("courtyard_rail"),World({TX,Sign*(Y+.8f)}),FVector(1));
+        for(float TY=-Y+2;TY<Y;TY+=4) Add(TEXT("courtyard_rail"),World({Sign*(X+.8f),TY}),FVector(1),90);
+        Add(TEXT("courtyard_pine"),World({Sign*(X+2),Y+3}),FVector(1),Sign*35);
+    }
+    Add(TEXT("courtyard_steps"),World({0,Y+.4f},-10),FVector(1.7),180);
     Add(TEXT("Arch"),World({0,Y+3}),FVector(1.5),-90);
     for(float TX:{-12.f,12.f}) Add(TEXT("Banner"),World({TX,Y+2}),FVector(1.5),-90);
-    Add(TEXT("FloorRune"),FVector(0,0,1),FVector(8,8,1));
+    Add(TEXT("FloorRune"),FVector(0,0,0),FVector(10,10,1));
     Flush();
 }
 FName ADywxMVPWorld::ElementBatch(Element E,const TCHAR* Suffix)
@@ -347,9 +389,9 @@ void ADywxMVPWorld::Render(float Dt)
     // Aspect-adaptive ground footprint. HUD overlays do not move this authoritative view.
     int32 Width=1920,Height=1080; if(auto* PC=OwningController.Get()) PC->GetViewportSize(Width,Height);
     const float Aspect=float(FMath::Max(Width,1))/FMath::Max(Height,1);
-    Camera->OrthoWidth=FMath::Max(3200.f,1800.f*Aspect);
+    Camera->OrthoWidth=FMath::Max(2200.f,1350.f*Aspect);
     const float HalfX=FMath::Min(4990.f,Camera->OrthoWidth*.5f);
-    const float HalfY=FMath::Min(2890.f,Camera->OrthoWidth/Aspect*.5f/FMath::Sin(FMath::DegreesToRadians(62.f)));
+    const float HalfY=FMath::Min(2890.f,Camera->OrthoWidth/Aspect*.5f/FMath::Sin(FMath::DegreesToRadians(50.f)));
     // Two-metre decorative border keeps tall sprites visible at collision bounds.
     const FVector Focus(FMath::Clamp(float(Player.X),-5000+HalfX,5000-HalfX),FMath::Clamp(float(Player.Y),-2900+HalfY,2900-HalfY),0);
     Camera->SetWorldLocation(Focus-Camera->GetForwardVector()*4500);
@@ -383,7 +425,8 @@ void ADywxMVPWorld::Render(float Dt)
     TMap<uint64,FVector> CurrentEnemies,CurrentPickups;
     TMap<uint64,int32> CurrentPickupGrades;
     const float Vision=Simulation.IsCampaign()?Simulation.GetAnomalies().Modifiers(S.player.position).visionRange:1000.f;
-    if(Vision<1000.f) Add(TEXT("WaterRing"),Player+FVector(0,0,3),FVector(Vision,Vision,1));
+    // Vision remains authoritative for enemy visibility; it is not an attack
+    // and must not draw a permanent screen-sized blue diagnostic circle.
     CurrentEnemies.Reserve(int32(S.enemies.size())); CurrentPickups.Reserve(int32(S.pickups.size()));
     const TCHAR* Roles[]={TEXT("Enemy_swarm"),TEXT("Enemy_exploder"),TEXT("Enemy_charger"),TEXT("Enemy_rangedbird"),TEXT("Enemy_supporttotem"),TEXT("Enemy_summoner"),TEXT("Enemy_boss"),TEXT("Enemy_spirit")};
     for(const auto& E:S.enemies) {

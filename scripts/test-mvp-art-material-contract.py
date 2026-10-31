@@ -13,7 +13,7 @@ world = (ROOT / 'Source/DywxUI/Private/MVP/DywxMVPWorld.cpp').read_text()
 ast.parse(bootstrap)
 assert "unreal.BlendMode.BLEND_OPAQUE" in bootstrap
 assert "unreal.MaterialShadingModel.MSM_DEFAULT_LIT" in bootstrap
-assert "connect(color, 'RGB', multiply, 'A')" in bootstrap
+assert "connect(color, '', multiply, 'A')" in bootstrap
 assert "connect(tint, 'RGB', multiply, 'B')" in bootstrap
 assert "roughness.set_editor_property('r', 0.86)" in bootstrap
 assert "ambient.set_editor_property('const_b', 0.22)" in bootstrap
@@ -22,16 +22,30 @@ assert 'MP_METALLIC' not in bootstrap  # Blender metallic is NOT exported.
 assert 'Colors[Id]=C.IsValidIndex(Index)?C[Index]' in world
 assert 'float(X[3])' in world  # Loader does preserve RGBA; A remains unused.
 assert 'TEXT("MoonLight")' in world and 'TEXT("WarmRim")' in world
-assert 'Sun->SetCastShadows(false)' in world and 'Fill->SetCastShadows(false)' in world
+assert 'Sun->SetCastShadows(true)' in world and 'Fill->SetCastShadows(false)' in world
+assert 'DynamicShadowCascades=2' in world
+assert 'AutoExposureApplyPhysicalCameraExposure=false' in world
+assert 'FMeshUVChannelInfo(0.f)' in world
+assert 'STRETCH_TO_POWER_OF_TWO' in bootstrap and 'TMGS_SIMPLE_AVERAGE' in bootstrap
+assert 'TF_TRILINEAR' in bootstrap and 'TA_WRAP' in bootstrap
+assert 'SurfaceTexture' in world and 'MaterialExpressionTextureCoordinate' in bootstrap
+assert 'VertexUVs.IsValidIndex(Index)?VertexUVs[Index]' in world
+assert 'FVector(Vision,Vision,1)' not in world
+assert 'M_Courtyard' in world and "build('M_Courtyard'" in bootstrap
 
 by_name = {m['name']: m for m in scene['meshes']}
-assert scene['version'] == 1 and len(by_name) == 31
+assert scene['version'] == 1 and len(by_name) == 38
 for mesh in scene['meshes']:
-    assert set(mesh) == {'name', 'vertices', 'triangles', 'colors', 'normals'}
+    assert set(mesh) == {'name', 'vertices', 'triangles', 'colors', 'normals', 'uvs'}
     assert len(mesh['vertices']) == len(mesh['colors']) == len(mesh['normals'])
+    assert len(mesh['uvs']) == len(mesh['vertices'])
+    assert all(len(uv)==2 and all(math.isfinite(c) and abs(c)<=1000 for c in uv) for uv in mesh['uvs'])
     for color in mesh['colors']:
         assert len(color) == 4 and all(math.isfinite(c) and 0 <= c <= 1 for c in color)
         assert color[3] == 1, (mesh['name'], 'alpha is not material metadata')
+
+for key in ('courtyard_slab', 'courtyard_medallion'):
+    assert max(uv[0] for uv in by_name[key]['uvs']) - min(uv[0] for uv in by_name[key]['uvs']) > .9
 
 # Area-weighted linear base-color luminance, not screen luminance. This checks
 # exported value hierarchy independently of vertex density, lights and tonemapping.

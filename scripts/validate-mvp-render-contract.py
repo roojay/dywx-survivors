@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 scene = json.loads((ROOT/'Content/MVP/Geometry/scene.json').read_text())
-required = {'hero_body','hero_sword','enemy_swarm','enemy_exploder','enemy_charger','enemy_rangedbird','enemy_supporttotem','enemy_summoner','enemy_boss','enemy_spirit','rock','pillar','tile'}
+required = {'hero_body','hero_sword','enemy_swarm','enemy_exploder','enemy_charger','enemy_rangedbird','enemy_supporttotem','enemy_summoner','enemy_boss','enemy_spirit','rock','pillar','tile','courtyard_slab','courtyard_medallion','courtyard_pillar','courtyard_rail','courtyard_brazier','courtyard_pine','courtyard_steps'}
 assert scene['version'] == 1
 assert {m['name'] for m in scene['meshes']} >= required
 assert len({m['name'] for m in scene['meshes']}) == len(scene['meshes'])
@@ -14,6 +14,8 @@ triangles = 0
 for mesh in scene['meshes']:
     vertices = mesh['vertices']
     assert len(vertices) == len(mesh['colors']) == len(mesh['normals'])
+    assert len(mesh['uvs']) == len(vertices)
+    assert all(len(uv)==2 and all(math.isfinite(x) and abs(x)<=1000 for x in uv) for uv in mesh['uvs'])
     assert len(vertices) <= 100000 and len(mesh['triangles']) <= 100000
     assert all(len(v)==3 and all(math.isfinite(x) and abs(x)<=1000 for x in v) for v in vertices)
     assert all(len(c)==4 and all(math.isfinite(x) and 0<=x<=1 for x in c) for c in mesh['colors'])

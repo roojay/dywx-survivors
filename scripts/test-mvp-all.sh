@@ -11,6 +11,7 @@ bash scripts/test-mvp-owned-spells.sh
 bash scripts/run-mvp-acceptance.sh
 python3 scripts/test_font_layout.py
 python3 scripts/test-mvp-ui-contract.py
+python3 scripts/test-battle-hud-contract.py
 python3 scripts/test-mvp-profile-contract.py
 python3 scripts/test-mvp-focus-contract.py
 python3 scripts/validate_assets.py

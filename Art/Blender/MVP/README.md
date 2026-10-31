@@ -2,8 +2,8 @@
 
 ## Deliverables
 
-- `Content/MVP/Geometry/scene.json` (repository-relative): 31 indexed triangle meshes (15 bases + 16 authored walk poses), vertex colours and normals; no bitmap environment pretending to be a world.
-- `build_scene.py`: original deterministic Blender geometry construction and CPU preview scene generator. No downloaded scripts, external mesh assets, textures, plugins or paid API calls.
+- `Content/MVP/Geometry/scene.json` (repository-relative): 38 indexed triangle meshes (22 bases + 16 authored walk poses), vertex colours and normals; no bitmap environment pretending to be a world.
+- `build_scene.py`: original deterministic Blender geometry construction and CPU preview scene generator. No downloaded scripts, external mesh assets or plugins; optional generated textures are used on real surfaces in previews.
 - `mvp-meshes.blend`: editable source meshes, materials and laid-out contact sheet.
 - `mvp-arena-preview.blend`: playable-view staging of the same meshes; illustrative placement, not a level imported into Unreal.
 - `contact-sheet.png`, `arena-preview.png`: actual CPU renders, visually inspected after the second art pass.
@@ -22,7 +22,7 @@ Blender right-handed coordinates, Z up, +X facing forward; counter-clockwise out
 - `enemy_swarm`, `enemy_exploder`, `enemy_charger`, `enemy_rangedbird`, `enemy_supporttotem`, `enemy_summoner`, `enemy_boss`, `enemy_spirit`.
 - `rock`: approximately 1 m base radius, `pillar`: 1 m footprint and 2.83 m high, `tile`: 0.98 m square; tile top around Z=0 and thickness below ground.
 
-The parent approved relaxed geometry budgets during visual refinement: hero <5k triangles, regular enemies/props <3k, boss <10k. Current counts include hero 1996, charger 2074 and boss 2666; see validation for all 15 assets.
+Current mesh budgets and counts are documented in the reference-driven courtyard section below and validation.json.
 
 Actor origin is ground/feet. Floating bird and fiery spirit are **intentionally elevated** within their mesh bounds. Boss bounds are ~3.34 × 1.62 × 2.33 m. Exact bounds/counts are in `validation.json`.
 
@@ -36,7 +36,7 @@ python3 Art/Blender/MVP/validate_geometry.py
 python3 Art/Blender/MVP/validate_walk_runtime.py
 ```
 
-Blender 5.2.3 LTS was used. Render backend: Cycles CPU, 24 samples with denoising. Fixed geometry random seed: 73. The harmless thumbnail-cache write warning in the restricted dot environment does not affect `.blend`, `.json` or PNG outputs.
+Current render backend: Blender 4.3.2, Cycles CPU, 64 samples, no denoising (not compiled into this installation). Fixed geometry random seed: 73. The harmless thumbnail-cache write warning in the restricted dot environment does not affect `.blend`, `.json` or PNG outputs.
 
 ## Honest scope / art QA
 
@@ -71,3 +71,38 @@ Unreal compilation, runtime appearance, startup time, GPU cost and packaged perf
 ## NPR material/facet refinement
 
 See [`docs/npr-mesh-refinement.md`](../../../docs/npr-mesh-refinement.md) for the 2026-10-30 transferable mesh/vertex-color changes, fixed base envelopes, source consistency checks, and increased hard-normal vertex-split cost. All mesh alpha values remain 1. Current previews were regenerated from the refined source; they remain Blender CPU demonstrations, not UE runtime evidence.
+
+## 2026-10-31 reference-driven courtyard pass
+
+The two user screenshots were inspected directly: the desired direction is a dimensional, cool-stone Chinese-mythology courtyard with carved architecture, warm braziers, a windswept pine and readable ivory cloth—not a flat grid/background or pixel/chibi reinterpretation.
+
+The generator now exports **38 mesh keys** (22 bases and 16 poses). Additive decorative assets:
+
+| Key | Placement contract | Triangles |
+| --- | --- | ---: |
+| `courtyard_pillar` | 1.4 m square stepped base; 5.55 m tall; recessed panels and scroll relief | 2556 |
+| `courtyard_rail` | 4 m along X; open balustrade, 1.37 m high | 1680 |
+| `courtyard_brazier` | Bronze bowl, three claw feet, curled handles, modeled flame | 1618 |
+| `courtyard_pine` | Swept trunk, nine branching limbs, layered needle clusters; decorative only | 4600 |
+| `courtyard_steps` | Four beveled steps; 4 m wide along X | 432 |
+| `courtyard_slab` | Unit square; top Z=0, pale texture carrier | 108 |
+| `courtyard_medallion` | Unit diameter disk; top Z=.006 | 380 |
+
+Existing named mesh envelopes remain unchanged, including hero, enemies and blocking props. Added decorative meshes must not introduce simulation collision. The hero gains layered lapels/hem tailoring; beasts have denser swept manes, the boss has pale ivory locks, and swarm demons have pale shoulder manes. Mesh-pose animation remains as previously described; this is not a skeletal-rig deliverable.
+
+The optional `uvs: [[u,v], ...]` array has one pair per exported vertex. UVs are deterministic local XY + (0.5,0.5); unit slab/medallion surfaces therefore span 0..1. Runtime textures are layered onto actual mesh surfaces, never a flat battle-background substitute. Other meshes primarily use authored vertex colors, not fully unwrapped production texture sets.
+
+Current offline environment: `/usr/bin/blender`, Blender 4.3.2, Cycles CPU, 64 samples. Denoising is disabled because this installation lacks OpenImageDenoise. Commands:
+
+```sh
+/usr/bin/blender -b -t 8 --python Art/Blender/MVP/build_scene.py
+python3 Art/Blender/MVP/validate_geometry.py
+python3 Art/Blender/MVP/validate_walk_runtime.py
+/usr/bin/blender -b --python Art/Blender/MVP/validate_walk_bases.py
+```
+
+The updated triangle limits are hero <5000, boss <10000, pine <6000, other meshes <3500. Positive signed volume is an aggregate contract, not a watertightness claim. Preview PNGs are **offline Blender render evidence, not Unreal gameplay screenshots**. The source mesh kit is a stronger procedural stylized foundation, not a claim of matching the reference's sculpt/material fidelity or packaged runtime performance.
+
+Generated surface integration: `Content/MVP/TextureSource/courtyard_stone.png` and `courtyard_rune.png` are the actual image-generation outputs used by the offline preview (1254×1254 RGB). `MVP_STONE_TEXTURE` / `MVP_RUNE_TEXTURE` may override the source paths. These images are packed in the preview `.blend`; exported mesh data remains texture-independent. Stone bitmap edges have not been certified seamless; inspect tiling in Unreal. A very light preview-only bump is derived from image luminance, not a separate authored normal map.
+
+Reproducibility was strengthened in this pass: Blender object-join order, primitive face indices, and parallel smooth-normal accumulation are not assumed stable. Export uses an explicitly ordered merge, geometry-derived facet variation, stable normal summation, and canonical vertices/triangles. `reference-determinism-check.json` records exact byte equality between two independent runs. `reference-envelope-check.json` records all 15 original base envelopes against commit `6a71cd5`.

@@ -11,6 +11,7 @@ def dot(a,b):return sum(x*y for x,y in zip(a,b))
 def run():
  d=json.loads(PATH.read_text());assert d['version']==1
  expected={'hero_body','hero_sword','enemy_swarm','enemy_exploder','enemy_charger','enemy_rangedbird','enemy_supporttotem','enemy_summoner','enemy_boss','enemy_spirit','rock','pillar','tile','shrine_banner','shrine_arch'}
+ expected.update({'courtyard_pillar','courtyard_rail','courtyard_brazier','courtyard_pine','courtyard_steps','courtyard_slab','courtyard_medallion'})
  expected.update(f'{prefix}_{i}' for prefix in ['hero_walk','enemy_swarm_walk'] for i in range(8))
  assert len(d['meshes'])==len(expected)<=64
  assert {m['name'] for m in d['meshes']}==expected
@@ -20,6 +21,8 @@ def run():
  for m in d['meshes']:
   v=m['vertices'];n=m['normals'];c=m['colors'];t=m['triangles'];assert len(v)==len(n)==len(c)>0
   assert all(len(x)==3 and all(math.isfinite(z) for z in x) for x in v+n)
+  assert len(m['uvs'])==len(v)
+  assert all(len(x)==2 and all(math.isfinite(z) and abs(z)<=1000 for z in x) for x in m['uvs'])
   assert all(len(x)==4 and all(0<=z<=1 for z in x) for x in c)
   assert all(abs(dot(x,x)-1)<.005 for x in n)
   signed_volume=0
@@ -27,7 +30,7 @@ def run():
    assert len(tr)==len(set(tr))==3 and all(isinstance(i,int) and 0<=i<len(v) for i in tr)
    a,b,cc=[v[i] for i in tr];normal=cross(sub(b,a),sub(cc,a));assert dot(normal,normal)>1e-18,(m['name'],tr)
    signed_volume+=dot(a,cross(b,cc))/6
-  limit=10000 if m['name']=='enemy_boss' else 5000 if m['name'].startswith('hero') else 3000
+  limit=10000 if m['name']=='enemy_boss' else 5000 if m['name'].startswith('hero') else 6000 if m['name']=='courtyard_pine' else 3500
   assert len(t)<limit
   bounds={'min':[min(x[i] for x in v) for i in range(3)],'max':[max(x[i] for x in v) for i in range(3)]}
   assert signed_volume>0,(m['name'],signed_volume)

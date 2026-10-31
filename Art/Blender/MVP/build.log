@@ -1,15 +1,200 @@
-Failed to create secure directory (/home/agent/.local/run/pulse): Read-only file system
-socket(): Operation not permitted
-/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/build_scene.py:13: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
-  m=bpy.data.materials.new(k); m.diffuse_color=c; m.use_nodes=True
-00:02.174  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_7_6fa56323a1c6b55d214df87175d1d6d8.png.png"
-00:16.238  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/contact-sheet.png'
-00:16.323  image.write      | ERROR OpenImageIO write failed: Could not open file "/home/agent/.cache/thumbnails/large/blender_7_153a28712b4d6868d6f82645a9c01b01.png.png"
-00:39.013  render           | Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/arena-preview.png'
-Warning: No mesh data to join
-Info: Saved as "mvp-meshes.blend"
-Info: Saved as "mvp-arena-preview.blend"
-EXPORTED [('hero_body', 1656, 2116), ('hero_sword', 142, 164), ('enemy_swarm', 1066, 1664), ('enemy_exploder', 481, 874), ('enemy_charger', 1398, 2432), ('enemy_boss', 1910, 3024), ('enemy_rangedbird', 905, 624), ('enemy_supporttotem', 185, 330), ('enemy_summoner', 542, 744), ('enemy_spirit', 271, 486), ('rock', 234, 80), ('pillar', 1080, 756), ('tile', 186, 74), ('shrine_banner', 1058, 680), ('shrine_arch', 1960, 1392)]
-Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:35:05)
+Blender 4.3.2
+Fra:1 Mem:45.58M (Peak 45.58M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hero_body_display
+Fra:1 Mem:45.58M (Peak 45.58M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text
+Fra:1 Mem:45.80M (Peak 45.80M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hero_sword_display
+Fra:1 Mem:45.82M (Peak 45.82M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.001
+Fra:1 Mem:45.89M (Peak 45.89M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_swarm_display
+Fra:1 Mem:45.89M (Peak 45.89M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.002
+Fra:1 Mem:46.05M (Peak 46.05M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_exploder_display
+Fra:1 Mem:46.05M (Peak 46.05M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.003
+Fra:1 Mem:46.17M (Peak 46.17M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_charger_display
+Fra:1 Mem:46.17M (Peak 46.17M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.004
+Fra:1 Mem:46.44M (Peak 46.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_boss_display
+Fra:1 Mem:46.44M (Peak 46.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.005
+Fra:1 Mem:46.76M (Peak 46.76M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_rangedbird_display
+Fra:1 Mem:46.75M (Peak 46.76M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.006
+Fra:1 Mem:46.92M (Peak 46.92M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_supporttotem_display
+Fra:1 Mem:46.92M (Peak 46.92M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.007
+Fra:1 Mem:47.06M (Peak 47.06M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_summoner_display
+Fra:1 Mem:47.08M (Peak 47.08M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.008
+Fra:1 Mem:47.19M (Peak 47.19M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_spirit_display
+Fra:1 Mem:47.19M (Peak 47.19M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.009
+Fra:1 Mem:47.27M (Peak 47.27M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | rock_display
+Fra:1 Mem:47.27M (Peak 47.27M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.010
+Fra:1 Mem:47.30M (Peak 47.30M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | pillar_display
+Fra:1 Mem:47.30M (Peak 47.30M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.011
+Fra:1 Mem:47.41M (Peak 47.41M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | tile_display
+Fra:1 Mem:47.42M (Peak 47.42M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.012
+Fra:1 Mem:47.45M (Peak 47.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shrine_banner_display
+Fra:1 Mem:47.47M (Peak 47.47M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.013
+Fra:1 Mem:47.61M (Peak 47.61M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shrine_arch_display
+Fra:1 Mem:47.61M (Peak 47.61M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.014
+Fra:1 Mem:47.86M (Peak 47.86M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_pillar_display
+Fra:1 Mem:47.95M (Peak 47.95M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.015
+Fra:1 Mem:48.17M (Peak 48.17M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_rail_display
+Fra:1 Mem:48.19M (Peak 48.19M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.016
+Fra:1 Mem:48.36M (Peak 48.36M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_brazier_display
+Fra:1 Mem:48.38M (Peak 48.38M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.017
+Fra:1 Mem:48.60M (Peak 48.60M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_pine_display
+Fra:1 Mem:48.60M (Peak 48.60M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.018
+Fra:1 Mem:49.03M (Peak 49.03M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_steps_display
+Fra:1 Mem:49.03M (Peak 49.03M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.019
+Fra:1 Mem:49.24M (Peak 49.24M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_slab_display
+Fra:1 Mem:49.25M (Peak 49.25M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.020
+Fra:1 Mem:49.38M (Peak 49.38M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_medallion_display
+Fra:1 Mem:49.39M (Peak 49.39M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Text.021
+Fra:1 Mem:49.56M (Peak 49.56M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Cube
+Fra:1 Mem:49.57M (Peak 49.57M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Initializing
+Fra:1 Mem:44.94M (Peak 49.57M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Images | Loading courtyard_stone.png
+Fra:1 Mem:44.94M (Peak 49.57M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Images | Loading courtyard_rune.png
+Fra:1 Mem:53.04M (Peak 80.95M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Waiting for render to start
+Fra:1 Mem:53.04M (Peak 80.95M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Loading render kernels (may take a few minutes the first time)
+Fra:1 Mem:53.04M (Peak 80.95M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Updating Scene
+Fra:1 Mem:53.04M (Peak 80.95M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Updating Shaders
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Procedurals
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Background
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Camera
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Meshes Flags
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Objects
+Fra:1 Mem:53.17M (Peak 80.95M) | Time:00:00.06 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Objects | Copying Transformations to device
+Fra:1 Mem:53.18M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Objects | Applying Static Transformations
+Fra:1 Mem:53.18M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Particle Systems
+Fra:1 Mem:53.18M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Particle Systems | Copying Particles to device
+Fra:1 Mem:53.18M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Meshes
+Fra:1 Mem:53.89M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Mesh | Computing attributes
+Fra:1 Mem:54.31M (Peak 80.95M) | Time:00:00.06 | Mem:12.05M, Peak:12.05M | Scene, ViewLayer | Updating Mesh | Copying Attributes to device
+Fra:1 Mem:54.30M (Peak 80.95M) | Time:00:00.06 | Mem:12.46M, Peak:12.46M | Scene, ViewLayer | Updating Scene BVH | Building
+Fra:1 Mem:54.30M (Peak 80.95M) | Time:00:00.06 | Mem:12.46M, Peak:12.46M | Scene, ViewLayer | Updating Scene BVH | Building BVH
+Fra:1 Mem:54.30M (Peak 80.95M) | Time:00:00.06 | Mem:13.89M, Peak:13.89M | Scene, ViewLayer | Updating Scene BVH | Building BVH 0%
+Fra:1 Mem:54.30M (Peak 80.95M) | Time:00:00.06 | Mem:15.60M, Peak:17.03M | Scene, ViewLayer | Updating Scene BVH | Copying BVH to device
+Fra:1 Mem:54.30M (Peak 80.95M) | Time:00:00.06 | Mem:15.60M, Peak:17.03M | Scene, ViewLayer | Updating Mesh | Computing normals
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:15.60M, Peak:17.03M | Scene, ViewLayer | Updating Mesh | Copying Mesh to device
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.54M | Scene, ViewLayer | Updating Objects Flags
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.54M | Scene, ViewLayer | Updating Primitive Offsets
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.54M | Scene, ViewLayer | Updating Images
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.54M | Scene, ViewLayer | Updating Camera Volume
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.54M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.62M, Peak:17.62M | Scene, ViewLayer | Updating Lights
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.62M, Peak:17.62M | Scene, ViewLayer | Updating Lights | Computing tree
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.62M, Peak:17.62M | Scene, ViewLayer | Updating Integrator
+Fra:1 Mem:56.24M (Peak 80.95M) | Time:00:00.06 | Mem:17.62M, Peak:17.62M | Scene, ViewLayer | Updating Film
+Fra:1 Mem:56.25M (Peak 80.95M) | Time:00:00.06 | Mem:17.54M, Peak:17.62M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:56.25M (Peak 80.95M) | Time:00:00.06 | Mem:17.63M, Peak:17.63M | Scene, ViewLayer | Updating Baking
+Fra:1 Mem:56.25M (Peak 80.95M) | Time:00:00.06 | Mem:17.63M, Peak:17.63M | Scene, ViewLayer | Updating Device | Writing constant memory
+Fra:1 Mem:56.25M (Peak 80.95M) | Time:00:00.06 | Mem:17.63M, Peak:17.63M | Scene, ViewLayer | Sample 0/64
+Fra:1 Mem:109.67M (Peak 109.67M) | Time:00:00.40 | Remaining:00:21.47 | Mem:71.03M, Peak:71.03M | Scene, ViewLayer | Sample 1/64
+Fra:1 Mem:133.40M (Peak 180.86M) | Time:00:16.50 | Mem:71.03M, Peak:71.03M | Scene, ViewLayer | Sample 64/64
+Fra:1 Mem:133.40M (Peak 180.86M) | Time:00:16.50 | Mem:71.03M, Peak:71.03M | Scene, ViewLayer | Finished
+Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/contact-sheet.png'
+Time: 00:16.83 (Saving: 00:00.32)
+
+Fra:1 Mem:47.55M (Peak 47.55M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_slab_display.001
+Fra:1 Mem:47.56M (Peak 47.56M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_pillar_display.001
+Fra:1 Mem:47.56M (Peak 47.56M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shrine_banner_display.001
+Fra:1 Mem:47.70M (Peak 47.70M) | Time:00:00.00 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | shrine_arch_display.001
+Fra:1 Mem:47.70M (Peak 47.70M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_rail_display.001
+Fra:1 Mem:47.89M (Peak 47.89M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_brazier_display.001
+Fra:1 Mem:47.94M (Peak 47.94M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_pine_display.001
+Fra:1 Mem:47.94M (Peak 47.94M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_steps_display.001
+Fra:1 Mem:48.14M (Peak 48.14M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | courtyard_medallion_display.001
+Fra:1 Mem:48.14M (Peak 48.14M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Torus.006
+Fra:1 Mem:48.19M (Peak 48.19M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | Torus.008
+Fra:1 Mem:48.21M (Peak 48.21M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted
+Fra:1 Mem:48.21M (Peak 48.21M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.001
+Fra:1 Mem:48.34M (Peak 48.34M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.002
+Fra:1 Mem:48.30M (Peak 48.34M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.003
+Fra:1 Mem:48.35M (Peak 48.35M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.004
+Fra:1 Mem:48.40M (Peak 48.40M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.005
+Fra:1 Mem:48.42M (Peak 48.42M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.006
+Fra:1 Mem:48.42M (Peak 48.42M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.007
+Fra:1 Mem:48.43M (Peak 48.43M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.008
+Fra:1 Mem:48.44M (Peak 48.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.009
+Fra:1 Mem:48.44M (Peak 48.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.010
+Fra:1 Mem:48.44M (Peak 48.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.011
+Fra:1 Mem:48.44M (Peak 48.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.012
+Fra:1 Mem:48.44M (Peak 48.44M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.013
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.014
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.015
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.016
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.017
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.018
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.019
+Fra:1 Mem:48.45M (Peak 48.45M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.020
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.021
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.022
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.023
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.026
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.027
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.028
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.029
+Fra:1 Mem:48.46M (Peak 48.46M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.030
+Fra:1 Mem:48.47M (Peak 48.47M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | sculpted.031
+Fra:1 Mem:48.47M (Peak 48.47M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | rock_display.001
+Fra:1 Mem:48.47M (Peak 48.47M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hero_body_display.001
+Fra:1 Mem:48.55M (Peak 48.55M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | hero_sword_display.001
+Fra:1 Mem:48.57M (Peak 48.57M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_swarm_display.001
+Fra:1 Mem:48.66M (Peak 48.66M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_boss_display.001
+Fra:1 Mem:48.75M (Peak 48.75M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_charger_display.001
+Fra:1 Mem:48.91M (Peak 48.91M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_rangedbird_display.001
+Fra:1 Mem:48.96M (Peak 48.96M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_summoner_display.001
+Fra:1 Mem:49.05M (Peak 49.05M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_supporttotem_display.001
+Fra:1 Mem:49.07M (Peak 49.07M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_spirit_display.001
+Fra:1 Mem:49.02M (Peak 49.07M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Synchronizing object | enemy_exploder_display.001
+Fra:1 Mem:49.07M (Peak 49.07M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Initializing
+Fra:1 Mem:48.59M (Peak 49.07M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Images | Loading courtyard_rune.png
+Fra:1 Mem:48.59M (Peak 49.07M) | Time:00:00.01 | Mem:0.00M, Peak:0.00M | Scene, ViewLayer | Updating Images | Loading courtyard_stone.png
+Fra:1 Mem:55.33M (Peak 84.61M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Waiting for render to start
+Fra:1 Mem:55.33M (Peak 84.61M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Loading render kernels (may take a few minutes the first time)
+Fra:1 Mem:55.33M (Peak 84.61M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Updating Scene
+Fra:1 Mem:55.33M (Peak 84.61M) | Time:00:00.05 | Mem:12.00M, Peak:12.00M | Scene, ViewLayer | Updating Shaders
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Procedurals
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Background
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Camera
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Meshes Flags
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Objects
+Fra:1 Mem:55.45M (Peak 84.61M) | Time:00:00.05 | Mem:12.04M, Peak:12.04M | Scene, ViewLayer | Updating Objects | Copying Transformations to device
+Fra:1 Mem:55.48M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Objects | Applying Static Transformations
+Fra:1 Mem:55.48M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Particle Systems
+Fra:1 Mem:55.48M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Particle Systems | Copying Particles to device
+Fra:1 Mem:55.48M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Meshes
+Fra:1 Mem:55.97M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Mesh | Computing attributes
+Fra:1 Mem:56.21M (Peak 84.61M) | Time:00:00.05 | Mem:12.07M, Peak:12.07M | Scene, ViewLayer | Updating Mesh | Copying Attributes to device
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.29M, Peak:12.29M | Scene, ViewLayer | Updating Geometry BVH enemy_rangedbird 9/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.29M, Peak:12.29M | Scene, ViewLayer | Updating Geometry BVH courtyard_slab 1/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.31M, Peak:12.31M | Scene, ViewLayer | Updating Geometry BVH courtyard_rail 4/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.38M, Peak:12.38M | Scene, ViewLayer | Updating Geometry BVH courtyard_rail 4/9 | Building BVH 0%
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.38M, Peak:12.38M | Scene, ViewLayer | Updating Geometry BVH courtyard_rail 4/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.38M, Peak:12.38M | Scene, ViewLayer | Updating Geometry BVH rock 6/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.47M, Peak:12.48M | Scene, ViewLayer | Updating Geometry BVH enemy_swarm 7/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.05 | Mem:12.48M, Peak:12.48M | Scene, ViewLayer | Updating Geometry BVH enemy_charger 8/9 | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.06 | Mem:13.10M, Peak:13.20M | Scene, ViewLayer | Updating Scene BVH | Building
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.06 | Mem:13.10M, Peak:13.20M | Scene, ViewLayer | Updating Scene BVH | Building BVH
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.06 | Mem:14.32M, Peak:14.92M | Scene, ViewLayer | Updating Scene BVH | Copying BVH to device
+Fra:1 Mem:56.19M (Peak 84.61M) | Time:00:00.06 | Mem:14.32M, Peak:14.92M | Scene, ViewLayer | Updating Mesh | Computing normals
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:14.32M, Peak:14.92M | Scene, ViewLayer | Updating Mesh | Copying Mesh to device
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.48M, Peak:15.48M | Scene, ViewLayer | Updating Objects Flags
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.48M, Peak:15.48M | Scene, ViewLayer | Updating Primitive Offsets
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.48M, Peak:15.48M | Scene, ViewLayer | Updating Images
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.48M, Peak:15.48M | Scene, ViewLayer | Updating Camera Volume
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.48M, Peak:15.48M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.56M, Peak:15.56M | Scene, ViewLayer | Updating Lights
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Updating Lights | Computing tree
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Updating Integrator
+Fra:1 Mem:57.36M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Updating Film
+Fra:1 Mem:57.37M (Peak 84.61M) | Time:00:00.06 | Mem:15.49M, Peak:15.57M | Scene, ViewLayer | Updating Lookup Tables
+Fra:1 Mem:57.37M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Updating Baking
+Fra:1 Mem:57.37M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Updating Device | Writing constant memory
+Fra:1 Mem:57.37M (Peak 84.61M) | Time:00:00.06 | Mem:15.57M, Peak:15.57M | Scene, ViewLayer | Sample 0/64
+Fra:1 Mem:117.82M (Peak 117.82M) | Time:00:00.78 | Remaining:00:45.18 | Mem:76.01M, Peak:76.01M | Scene, ViewLayer | Sample 1/64
+Fra:1 Mem:117.82M (Peak 117.82M) | Time:00:21.18 | Remaining:00:19.83 | Mem:76.01M, Peak:76.01M | Scene, ViewLayer | Sample 33/64
+Fra:1 Mem:144.68M (Peak 198.39M) | Time:00:42.29 | Mem:76.01M, Peak:76.01M | Scene, ViewLayer | Sample 64/64
+Fra:1 Mem:144.68M (Peak 198.39M) | Time:00:42.29 | Mem:76.01M, Peak:76.01M | Scene, ViewLayer | Finished
+Saved: '/workspace/scratch/9912d8cfa0ac/dywx-survivors/Art/Blender/MVP/arena-preview.png'
+Time: 00:42.50 (Saving: 00:00.20)
+
+Info: Saved "mvp-walk-poses.blend"
+Info: Saved "mvp-meshes.blend"
+Info: Saved "mvp-arena-preview.blend"
+EXPORTED [('hero_body', 5276, 2284), ('hero_sword', 386, 158), ('enemy_swarm', 4221, 1768), ('enemy_exploder', 944, 818), ('enemy_charger', 7450, 3082), ('enemy_boss', 10284, 3674), ('enemy_rangedbird', 1368, 624), ('enemy_supporttotem', 616, 330), ('enemy_summoner', 1456, 744), ('enemy_spirit', 1328, 462), ('rock', 234, 80), ('pillar', 2700, 1172), ('tile', 354, 138), ('shrine_banner', 1844, 744), ('shrine_arch', 5644, 2400), ('courtyard_pillar', 6700, 2556), ('courtyard_rail', 4092, 1680), ('courtyard_brazier', 4078, 1618), ('courtyard_pine', 13798, 4600), ('courtyard_steps', 1056, 432), ('courtyard_slab', 264, 108), ('courtyard_medallion', 576, 380), ('hero_walk_0', 5276, 2284), ('hero_walk_1', 5310, 2284), ('hero_walk_2', 5334, 2284), ('hero_walk_3', 5310, 2284), ('hero_walk_4', 5276, 2284), ('hero_walk_5', 5320, 2284), ('hero_walk_6', 5332, 2284), ('hero_walk_7', 5320, 2284), ('enemy_swarm_walk_0', 4223, 1768), ('enemy_swarm_walk_1', 4273, 1768), ('enemy_swarm_walk_2', 4273, 1768), ('enemy_swarm_walk_3', 4273, 1768), ('enemy_swarm_walk_4', 4223, 1768), ('enemy_swarm_walk_5', 4273, 1768), ('enemy_swarm_walk_6', 4273, 1768), ('enemy_swarm_walk_7', 4273, 1768)]
 
 Blender quit

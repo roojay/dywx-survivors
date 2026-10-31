@@ -9,7 +9,7 @@ BASE_BOUNDS={'hero_body': [[-0.65, -0.45361, 0.0], [0.499751, 0.45361, 1.793]], 
 random.seed(73)
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
 # Linear-light palette; subdued stone and ivory, saturated accents restricted to details.
-P={'ivory':(.72,.69,.59,1),'white':(.9,.88,.79,1),'cloth':(.27,.30,.33,1),'ink':(.018,.024,.032,1),'skin':(.56,.32,.20,1),'gold':(.36,.22,.075,1),'brightgold':(.64,.37,.105,1),'blue':(.10,.42,.65,1),'stone':(.060,.068,.078,1),'edge':(.12,.135,.15,1),'demon':(.068,.060,.069,1),'bone':(.25,.25,.23,1),'mane':(.34,.32,.27,1),'red':(.31,.035,.022,1),'fire':(.83,.105,.025,1),'purple':(.23,.085,.32,1),'eye':(.85,.63,.21,1)}
+P={'ivory':(.72,.69,.59,1),'white':(.9,.88,.79,1),'cloth':(.27,.30,.33,1),'ink':(.018,.024,.032,1),'skin':(.56,.32,.20,1),'gold':(.36,.22,.075,1),'brightgold':(.64,.37,.105,1),'blue':(.10,.42,.65,1),'stone':(.060,.068,.078,1),'edge':(.12,.135,.15,1),'demon':(.068,.060,.069,1),'bone':(.25,.25,.23,1),'mane':(.65,.61,.52,1),'red':(.31,.035,.022,1),'fire':(.83,.105,.025,1),'purple':(.23,.085,.32,1),'eye':(.85,.63,.21,1)}
 M={}
 for k,c in P.items():
  m=bpy.data.materials.new(k); m.diffuse_color=c; m.use_nodes=True
@@ -31,8 +31,8 @@ def ell(pos,scale,mat,seg=10,rings=6):
  if mat in {'stone','demon','ink'} and min(scale)>.055:
   for v in o.data.vertices:
    v.co=Vector(tuple(math.copysign(abs(c)**.72,c) for c in v.co))
-  return finish(o,mat,False)
- return finish(o,mat,mat in {'skin','fire','eye'})
+  return finish(o,mat,mat=='demon')
+ return finish(o,mat,mat in {'skin','fire','eye','mane'})
 def rod(a,b,r1,r2,mat,n=8):
  d=Vector(b)-Vector(a); bpy.ops.mesh.primitive_cone_add(vertices=n,radius1=r1,radius2=r2,depth=d.length,location=(Vector(a)+Vector(b))/2)
  o=bpy.context.object; o.rotation_euler=d.to_track_quat('Z','Y').to_euler(); return finish(o,mat,mat in {'skin','fire'})
@@ -40,7 +40,7 @@ def box(pos,scale,mat,bevel=.04):
  bpy.ops.mesh.primitive_cube_add(size=2,location=pos);o=bpy.context.object;o.scale=scale
  bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
  if bevel:
-  mod=o.modifiers.new('soft chisel','BEVEL');mod.width=bevel;mod.segments=1
+  mod=o.modifiers.new('soft chisel','BEVEL');mod.width=bevel;mod.segments=2
   bpy.context.view_layer.objects.active=o;bpy.ops.object.modifier_apply(modifier=mod.name)
  return finish(o,mat,False)
 def mesh(v,f,mat):
@@ -74,13 +74,26 @@ def tag_since(start,name):
  for o in parts[start:]:
   g=o.vertex_groups.new(name=name);g.add(list(range(len(o.data.vertices))),1.0,'REPLACE')
 def end(name):
- bpy.ops.object.select_all(action='DESELECT')
- for o in parts:o.select_set(True)
- bpy.context.view_layer.objects.active=parts[0];bpy.ops.object.join();o=bpy.context.object;o.name=name
- bpy.ops.object.transform_apply(location=False,rotation=True,scale=True)
- # Bake world transform into vertices, then pivot at feet/world origin.
- for v in o.data.vertices:v.co=o.matrix_world@v.co
- o.matrix_world.identity()
+ bpy.context.view_layer.update()
+ # Deterministic explicit merge: bpy.ops.object.join orders by internal allocation.
+ vertices=[];faces=[];materials=[];face_mats=[];smooth=[];groups={}
+ for src in parts:
+  offset=len(vertices);vertices.extend([src.matrix_world@v.co for v in src.data.vertices])
+  slots=[]
+  for mat in src.data.materials:
+   if mat not in materials:materials.append(mat)
+   slots.append(materials.index(mat))
+  for poly in src.data.polygons:
+   faces.append(tuple(offset+i for i in poly.vertices));face_mats.append(slots[poly.material_index]);smooth.append(poly.use_smooth)
+  for group in src.vertex_groups:
+   groups.setdefault(group.name,[]).extend(offset+v.index for v in src.data.vertices if any(g.group==group.index for g in v.groups))
+ d=bpy.data.meshes.new(name);d.from_pydata(vertices,[],faces);d.update()
+ o=bpy.data.objects.new(name,d);bpy.context.collection.objects.link(o)
+ for mat in materials:d.materials.append(mat)
+ for poly,mat,sm in zip(d.polygons,face_mats,smooth):poly.material_index=mat;poly.use_smooth=sm
+ for key,ids in groups.items():o.vertex_groups.new(name=key).add(ids,1.0,'REPLACE')
+ for src in parts:bpy.data.objects.remove(src,do_unlink=True)
+ bpy.context.view_layer.objects.active=o
  # Keep original world-axis envelopes exactly; no simulation/collision changes.
  if name in BASE_BOUNDS:
   old_min,old_max=BASE_BOUNDS[name]
@@ -99,7 +112,7 @@ def end(name):
   normal=face.normal
   level=2 if normal.z>.55 else 0 if normal.z<-.25 else 1
   # Sparse edge wear, not random per-vertex noise.
-  if base.name in {'stone','edge','demon','bone'} and face.index%17==0:level=min(2,level+1)
+  if base.name in {'stone','edge','demon','bone'} and int(sum(abs(c)*997 for c in face.center))%17==0:level=min(2,level+1)
   key=(base.name,level)
   if key not in tone_slots:
    shade=bpy.data.materials.get(base.name+'_facet_'+str(level))
@@ -163,6 +176,13 @@ for side in [-1,1]:
 rod((0,0,.96),(0,0,1.025),.18,.18,'ink',16)
 box((.169,0,.99),(.018,.052,.031),'gold',.01)
 leaf((.16,0,.97),(.17,-.08,.51),.047,'red',.006)
+# Layered tailoring: ivory lapels, fluted shoulder cloth and embroidered hem.
+for side in [-1,1]:
+ for k in range(5):
+  leaf((-.05,side*(.12+k*.013),1.31),(-.29-k*.028,side*(.17+k*.024),.42+k*.025),.017,'white',.006)
+ horn([(.145,side*.06,1.36),(.17,side*.09,1.17),(.17,side*.025,1.03)],.013,'brightgold',6)
+ for k in range(4):
+  leaf((-.12-k*.07,side*.18,.49),(-.19-k*.07,side*.20,.42),.016,'gold',.004)
 end('hero_body')
 # Floating jian, clearly a separate rigid mesh; centre at blade guard, +X blade direction.
 leaf((0,0,.10),(1.18,0,.10),.11,'white',.035)
@@ -195,6 +215,10 @@ for side in [-1,1]:
  rod((.23,side*.045,.90),(.18,side*.12,.925),.022,.028,'bone',6)
  rod((.32,side*.07,.775),(.34,side*.07,.70),.017,0,'bone',5)
  for k in range(3):leaf((-.16-k*.07,side*.15,.87),(-.39-k*.04,side*.28,.94),.035,'bone',.014)
+# Ragged pale mane marks the hunched shoulder line at tactical camera distance.
+for side in [-1,1]:
+ for k in range(5):
+  horn([(.04-k*.055,side*.12,.96),(-.07-k*.06,side*.20,1.02),(-.21-k*.045,side*.25,.89)],.034,'mane',5)
 end('enemy_swarm')
 # Volatile spirit: broken charcoal shell around a hot core with upward licking flares.
 ell((0,0,.52),(.25,.25,.33),'fire',10,7)
@@ -232,6 +256,12 @@ def beast(boss=False):
    for s in [-1,1]:
     ell((-.36+i*.17,s*.13,.94),(.12,.115,.075),'stone',8,5)
     leaf((-.40+i*.16,s*.23,.92),(-.3+i*.16,s*.31,.69),.025,'purple',.013)
+ # Dense overlapping swept mane locks, grown from the shoulder ridge rather than a bead halo.
+ for side in [-1,1]:
+  for row in range(3):
+   for k in range(6):
+    x=.43-k*.12; y=side*(.18+row*.045); z=.92-row*.10
+    horn([(x,y,z),(x-.10,y+side*.08,z+.09),(x-.29,y+side*.11,z+.03),(x-.43,y+side*.07,z-.04)],.044 if row else .058,'mane' if boss else 'brightgold',5)
  name='enemy_boss' if boss else 'enemy_charger';o=end(name)
  for v in o.data.vertices:v.co*=scale
 beast();beast(True)
@@ -352,6 +382,78 @@ for y in [-1.6,-1.2,-.8,-.4,0,.4,.8,1.2,1.6]:rod((-.40,y,4.06),(.40,y,4.06),.075
 box((.39,0,3.70),(.026,.56,.12),'ink',.01)
 for k in range(3):rod((.423,-.35+k*.35,3.64),(.423,-.25+k*.35,3.78),.024,.024,'gold',5)
 end('shrine_arch')
+
+# Reference-driven courtyard kit. Decorative silhouettes do not replace collision meshes.
+# Tall carved stele, double mouldings, recessed panels and repeated cloud-scroll relief.
+for z,sz,mat in [(.10,(.70,.70,.10),'stone'),(.26,(.62,.62,.07),'edge'),(.42,(.55,.55,.09),'stone'),(2.53,(.39,.39,2.02),'stone'),(4.62,(.49,.49,.09),'edge'),(4.82,(.58,.58,.10),'stone'),(5.02,(.48,.48,.08),'edge')]:box((0,0,z),sz,mat,.035)
+for axis in range(2):
+ for side in [-1,1]:
+  def facept(u,z,depth=.405):return (side*depth,u,z) if axis==0 else (u,side*depth,z)
+  o=box(facept(0,2.54),(.012,.285,1.77) if axis==0 else (.285,.012,1.77),'ink',.012)
+  for u in [-.29,.29]:rod(facept(u,.78,.43),facept(u,4.30,.43),.025,.025,'edge',6)
+  for j in range(7):
+   z=.93+j*.47
+   pts=[facept(-.19,z,.44),facept(.07,z+.08,.445),facept(.17,z+.24,.445),facept(-.01,z+.31,.44),facept(-.13,z+.19,.44)]
+   horn(pts,.023,'gold',5)
+  for z in [.66,4.42]:rod(facept(-.30,z,.43),facept(.30,z,.43),.035,.035,'edge',6)
+for side in [-1,1]:
+ horn([(side*.29,0,5.1),(side*.46,0,5.35),(side*.35,0,5.55)],.13,'stone',7)
+rod((0,0,5.02),(0,0,5.48),.20,.11,'edge',8)
+end('courtyard_pillar')
+# Low Chinese stone balustrade; rail length 4m along X, open spaces stay truly open.
+box((0,0,.10),(2,.25,.10),'stone',.025)
+for x in [-1.85,0,1.85]:
+ box((x,0,.64),(.13,.17,.52),'stone',.025)
+ box((x,0,1.15),(.19,.21,.06),'edge',.02)
+ rod((x,0,1.2),(x,0,1.37),.105,.065,'stone',6)
+for z in [.42,.94]:box((0,0,z),(1.88,.11,.075),'edge',.02)
+for x in [-1.4,-.9,-.45,.45,.9,1.4]:
+ box((x,0,.66),(.045,.07,.24),'stone',.012)
+end('courtyard_rail')
+# Ritual bronze brazier: three claw feet, hammered belly, rolled lip, curled handles.
+for i in range(3):
+ a=i*math.tau/3
+ horn([(.32*math.cos(a),.32*math.sin(a),.64),(.48*math.cos(a),.48*math.sin(a),.30),(.56*math.cos(a),.56*math.sin(a),.06)],.085,'gold',7)
+ell((0,0,.88),(.55,.55,.44),'gold',20,10)
+rod((0,0,1.03),(0,0,1.19),.52,.61,'gold',20)
+ring((0,0,1.20),.59,.045,'brightgold',24)
+rod((0,0,1.20),(0,0,1.23),.52,.52,'ink',20)
+for i in range(12):
+ a=i*math.tau/12
+ ell((.515*math.cos(a),.515*math.sin(a),.91),(.045,.045,.10),'brightgold',6,4)
+for side in [-1,1]:
+ horn([(0,side*.48,.95),(0,side*.76,1.05),(0,side*.78,1.37),(0,side*.61,1.45),(0,side*.55,1.28)],.062,'gold',8)
+for i in range(7):
+ a=i*2.399;r=.30 if i else 0
+ horn([(r*math.cos(a),r*math.sin(a),1.22),(r*math.cos(a)+.08,r*math.sin(a),1.48),(r*math.cos(a)-.1,r*math.sin(a)+.04,1.72),(r*.6,r*.4,2.0+(i%3)*.09)],.10,'fire' if i%2 else 'eye',7)
+end('courtyard_brazier')
+# Windswept old pine. Branching swept trunk and clustered pointed needles, not spheres.
+P['bark']=(.075,.047,.03,1);P['pine']=(.025,.075,.055,1)
+for key in ['bark','pine']:
+ m=M['stone'].copy();m.name=key;m.diffuse_color=P[key];m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'].default_value=P[key];M[key]=m
+horn([(0,0,0),(.12,.05,1.0),(-.30,0,2.1),(-.04,.12,3.1),(-.58,.18,4.1),(-.72,.30,5.15)],.37,'bark',10)
+for i in range(9):
+ a=i*2.399;z=2.35+i*.30;reach=2.5-(i%3)*.30
+ base=Vector((-.2,0,z));tip=Vector((math.cos(a)*reach,math.sin(a)*reach,z+.5))
+ horn([base,base.lerp(tip,.40)+Vector((0,0,-.18)),base.lerp(tip,.8),tip],.15-i*.008,'bark',7)
+ for j in range(4):
+  center=base.lerp(tip,.48+j*.17);center.z+=.22
+  for k in range(11):
+   aa=k*2.399+j;radius=.36+(k%3)*.13
+   start=center+Vector((math.cos(aa)*radius*.15,math.sin(aa)*radius*.15,0))
+   endp=center+Vector((math.cos(aa)*radius,math.sin(aa)*radius,.12+(k%4)*.065))
+   leaf(start,endp,.105,'pine',.045)
+for i in range(7):
+ a=i*math.tau/7;horn([(0,0,.3),(.45*math.cos(a),.45*math.sin(a),.09),(.9*math.cos(a),.9*math.sin(a),.01)],.13,'bark',7)
+end('courtyard_pine')
+for j in range(4):box((0,j*.46,.08+j*.15),(2,.29,.08+j*.15),'stone',.025)
+end('courtyard_steps')
+# UV carrier assets for generated surface maps; intentionally no baked battle artwork.
+box((0,0,-.045),(.50,.50,.045),'white',.008)
+end('courtyard_slab')
+rod((0,0,-.012),(0,0,.006),.5,.5,'white',96)
+end('courtyard_medallion')
+
 # Eight baked authored mesh poses, not skeletal animation. Base meshes remain untouched.
 # Part groups keep boots, cuffs and claws coherent; small rotations leave the silhouette intact.
 base_names=list(assets)
@@ -386,28 +488,67 @@ for base,prefix in [('hero_body','hero_walk'),('enemy_swarm','enemy_swarm_walk')
 # Export indexed triangles and linear palette; smooth skin and hard authored facets.
 result={'version':1,'coordinateSystem':'RH_Z_UP_X_FORWARD','winding':'CCW_OUTWARD','units':'metres','ueConversion':'(x,-y,z)*100; reverse triangle indices 1 and 2','meshes':[]}
 for name,o in assets.items():
- d=o.data;d.calc_loop_triangles();vs=[];ns=[];cs=[];ts=[];dedup={}
+ d=o.data;d.calc_loop_triangles();vs=[];ns=[];cs=[];ts=[];uvs=[];dedup={}
+ # Stable double-precision triangle normals and sorted sums avoid parallel float drift.
+ import numpy as np
+ coords=[tuple(round(x,6) for x in v.co) for v in d.vertices];smooth_sums={};tri_normals=[]
+ for tr in d.loop_triangles:
+  aa,bb,cc=[np.array(coords[i],dtype=float) for i in tr.vertices];nn=np.cross(bb-aa,cc-aa);length=np.linalg.norm(nn)
+  nn=nn/length if length>1e-12 else np.array([0.,0.,1.]);tri_normals.append(tuple(nn))
+  for vi in tr.vertices:smooth_sums.setdefault(vi,[]).append(tuple(nn))
+ smooth_normals={}
+ for vi,values in smooth_sums.items():
+  nn=np.array([math.fsum(v[j] for v in sorted(values)) for j in range(3)]);length=np.linalg.norm(nn);smooth_normals[vi]=nn/length if length>1e-12 else np.array([0.,0.,1.])
  for t in d.loop_triangles:
   a,b,c=[d.vertices[i].co for i in t.vertices]
   if (b-a).cross(c-a).length<1e-9:continue
   inds=[]
   for vi in t.vertices:
-   v=d.vertices[vi];normal=v.normal if d.polygons[t.polygon_index].use_smooth else t.normal
+   v=d.vertices[vi];normal=smooth_normals[vi] if d.polygons[t.polygon_index].use_smooth else tri_normals[t.index]
    color=tuple(d.materials[t.material_index].diffuse_color)
-   key=(vi,tuple(round(n,6) for n in normal),color)
+   key=(coords[vi],tuple(round(n,6) for n in normal),color)
    if key not in dedup:
-    dedup[key]=len(vs);vs.append([round(x,6) for x in v.co]);ns.append([round(x,6) for x in normal]);cs.append([round(x,6) for x in color])
+    dedup[key]=len(vs);vs.append([round(x,6) for x in v.co]);ns.append([round(x,6) for x in normal]);cs.append([round(x,6) for x in color]);uvs.append([round(v.co.x+.5,6),round(v.co.y+.5,6)])
    inds.append(dedup[key])
   ts.append(inds)
- result['meshes'].append({'name':name,'vertices':vs,'triangles':ts,'colors':cs,'normals':ns})
+ # Canonical ordering makes byte output independent of Blender join allocation order.
+ order=sorted(range(len(vs)),key=lambda i:(vs[i],ns[i],cs[i],uvs[i]))
+ remap={old:new for new,old in enumerate(order)}
+ vs=[vs[i] for i in order];ns=[ns[i] for i in order];cs=[cs[i] for i in order];uvs=[uvs[i] for i in order]
+ canonical=[]
+ for tr in ts:
+  tr=[remap[i] for i in tr];pivot=tr.index(min(tr));canonical.append(tr[pivot:]+tr[:pivot])
+ ts=sorted(canonical)
+ result['meshes'].append({'name':name,'vertices':vs,'triangles':ts,'colors':cs,'normals':ns,'uvs':uvs})
 OUT.mkdir(parents=True,exist_ok=True);(OUT/'scene.json').write_text(json.dumps(result,separators=(',',':')))
-bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'mvp-walk-poses.blend'))
+bpy.ops.wm.save_as_mainfile(compress=True,filepath=str(HERE/'mvp-walk-poses.blend'))
 if os.environ.get('MVP_EXPORT_ONLY')=='1':raise SystemExit(0)
+# Optional generated surface images are bound to real UV meshes in offline evidence.
+# Environment variables may override repository paths without changing exported geometry.
+def bind_surface(name,envvar,default):
+ path=Path(os.environ.get(envvar,str(ROOT/default)))
+ if not path.exists():return False
+ o=assets[name];d=o.data
+ uv=d.uv_layers.new(name='UVMap')
+ for poly in d.polygons:
+  for li in poly.loop_indices:
+   v=d.vertices[d.loops[li].vertex_index].co;uv.data[li].uv=(v.x+.5,v.y+.5)
+ m=bpy.data.materials.new(name+'_generated_surface');m.use_nodes=True
+ nodes=m.node_tree.nodes;bs=nodes.get('Principled BSDF');bs.inputs['Roughness'].default_value=.91
+ tx=nodes.new('ShaderNodeTexImage');tx.image=bpy.data.images.load(str(path));tx.image.pack()
+ m.node_tree.links.new(tx.outputs['Color'],bs.inputs['Base Color'])
+ bump=nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.16;bump.inputs['Distance'].default_value=.025
+ m.node_tree.links.new(tx.outputs['Color'],bump.inputs['Height']);m.node_tree.links.new(bump.outputs['Normal'],bs.inputs['Normal'])
+ d.materials.clear();d.materials.append(m)
+ for poly in d.polygons:poly.material_index=0
+ return True
+bind_surface('courtyard_slab','MVP_STONE_TEXTURE','Content/MVP/TextureSource/courtyard_stone.png')
+has_rune=bind_surface('courtyard_medallion','MVP_RUNE_TEXTURE','Content/MVP/TextureSource/courtyard_rune.png')
 # Preview scenes use actual exported-source meshes. No matte paintings or concept backgrounds.
 def instance(name,pos=(0,0,0),rot=0,scale=1):
  src=assets[name];o=bpy.data.objects.new(name+'_display',src.data);bpy.context.collection.objects.link(o);o.location=pos;o.rotation_euler.z=rot;o.scale=(scale,)*3;return o
-scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=24;scene.cycles.use_denoising=True
-scene.world.color=(.012,.02,.045);scene.view_settings.view_transform='AgX'
+scene=bpy.context.scene;scene.render.engine='CYCLES';scene.cycles.device='CPU';scene.cycles.samples=64;scene.cycles.use_denoising=False
+scene.world.color=(.012,.02,.045);scene.world.use_nodes=True;scene.world.node_tree.nodes['Background'].inputs['Color'].default_value=(.012,.02,.045,1);scene.world.node_tree.nodes['Background'].inputs['Strength'].default_value=.35;scene.view_settings.view_transform='AgX'
 scene.render.resolution_x=1440;scene.render.resolution_y=1080;scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'
 def camera(pos,target,ortho):
@@ -418,20 +559,34 @@ for pos,power,size,color in [((1,-4,9),550,8,(.56,.68,1)),((-5,3,7),1200,7,(.34,
 # Contact sheet laid out in world with consistent scale, bonus larger hero for visual inspection.
 displays=[]
 for i,name in enumerate(base_names):
- x=(i%5)*3.1-6.2;y=(i//5)*3.4-3.4
+ x=(i%6)*4.5-11.25;y=(i//6)*5-7.5
  displays.append(instance(name,(x,y,0),-.6))
  # restrained label geometry, not part of exported assets
  bpy.ops.object.text_add(location=(x-.9,y-.9,.005));txt=bpy.context.object;txt.data.body=name.replace('enemy_','');txt.data.size=.21;txt.data.extrude=0;txt.data.materials.append(M['ivory']);displays.append(txt)
-box((0,0,-.17),(9,6,.12),'ink',.1);ground=parts.pop();displays.append(ground)
-c=camera((11,-18,23),(0,0,0),20);scene.render.filepath=str(HERE/'contact-sheet.png');bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'mvp-meshes.blend'));bpy.ops.render.render(write_still=True)
+box((0,0,-.17),(15,13,.12),'ink',.1);ground=parts.pop();displays.append(ground)
+c=camera((11,-18,23),(0,0,1),39);scene.render.filepath=str(HERE/'contact-sheet.png');bpy.ops.wm.save_as_mainfile(compress=True,filepath=str(HERE/'mvp-meshes.blend'));bpy.ops.render.render(write_still=True)
 for o in displays:o.hide_render=True
 # Arena staging: tessellated dark stone, shrine boundary, mobile threats.
-for x in range(-8,9):
- for y in range(-6,7):instance('tile',(x,y,0),0)
+for x in [-6,-2,2,6]:
+ for y in [-4,0,4]:instance('courtyard_slab',(x,y,0),0,4)
 for x in [-7,7]:
- for y in [-5,0,5]:instance('pillar',(x,y,0))
+ for y in [-5,0,5]:instance('courtyard_pillar',(x,y,0),0,.85)
  for y in [-3,3]:instance('shrine_banner',(x,y,0),math.pi/2)
 instance('shrine_arch',(0,5.7,0),math.pi/2)
+for x in [-6,-2,2,6]:
+ instance('courtyard_rail',(x,6.2,0));instance('courtyard_rail',(x,-6.2,0))
+for x in [-8,8]:
+ for y in [-4,0,4]:instance('courtyard_rail',(x,y,0),math.pi/2)
+for p in [(-6,-4,0),(6,4,0),(-6,4,0),(6,-4,0)]:instance('courtyard_brazier',p)
+instance('courtyard_pine',(-7,4,0),0,1.15)
+instance('courtyard_steps',(0,-7.5,-.55))
+if has_rune:instance('courtyard_medallion',(0,0,.015),0,5.1)
+# Concentric stone relief rings, actual raised geometry.
+for radius in [1.8,2.0,2.45,2.55]:ring((0,0,.02),radius,.018,'gold',96)
+for i in range(32):
+ a=i*math.tau/32
+ leaf((2.1*math.cos(a),2.1*math.sin(a),.02),(2.32*math.cos(a),2.32*math.sin(a),.02),.016,'gold',.006)
+
 for p in [(-6,-3,0),(6,3,0),(-5,5,0)]:instance('rock',p,random.random()*6,.7)
 instance('hero_body',(0,0,0),.2,1.2);instance('hero_sword',(.7,.6,1),.5)
 for i in range(22):
@@ -440,7 +595,7 @@ for name,p,r in [('enemy_boss',(4,3,0),3.4),('enemy_charger',(-4,1,0),0),('enemy
 for x in [-7,7]:
  for y in [-5,0,5]:
   bpy.ops.object.light_add(type='POINT',location=(x,y,2.65));bpy.context.object.data.energy=55;bpy.context.object.data.color=(1,.28,.055);bpy.context.object.data.shadow_soft_size=.6
-c.location=(12,-17,20);c.rotation_euler=(Vector((0,0,0))-c.location).to_track_quat('-Z','Y').to_euler();c.data.ortho_scale=19
+c.location=(12,-17,17);c.rotation_euler=(Vector((0,0,0))-c.location).to_track_quat('-Z','Y').to_euler();c.data.ortho_scale=19
 scene.render.resolution_x=1600;scene.render.resolution_y=1100;scene.render.filepath=str(HERE/'arena-preview.png')
-bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'mvp-arena-preview.blend'));bpy.ops.render.render(write_still=True)
+bpy.ops.wm.save_as_mainfile(compress=True,filepath=str(HERE/'mvp-arena-preview.blend'));bpy.ops.render.render(write_still=True)
 print('EXPORTED',[(m['name'],len(m['vertices']),len(m['triangles'])) for m in result['meshes']])

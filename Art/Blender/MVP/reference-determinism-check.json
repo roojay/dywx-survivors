@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "method": "Two independent Blender 4.3.2 CPU processes, identical generator, exact byte comparison of scene.json",
+  "sha256": "b1ebc67c1667ba554f3ad0c0350dd6846ee03e664a9d315865cc89e9c63a1f0d",
+  "rawBytes": 16550621,
+  "note": "Canonical vertex/index order, geometry-derived facet variation, explicit ordered mesh merge, stable smooth normal summation."
+}

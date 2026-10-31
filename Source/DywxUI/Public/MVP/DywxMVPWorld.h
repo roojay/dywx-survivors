@@ -63,5 +63,5 @@ private:
     void Add(FName Batch, const FVector& Position, const FVector& Scale=FVector::OneVector, float Yaw=0);
     void Flush();
     void MakeBatch(FName Name, FName MeshName, FLinearColor Tint, bool bDynamic=true, bool bEmissive=false);
-    UStaticMesh* BuildMesh(FName Name, const TArray<FVector3f>& Vertices, const TArray<int32>& Indices, const TArray<FVector4f>& Colors, const TArray<FVector3f>& VertexNormals = {});
+    UStaticMesh* BuildMesh(FName Name, const TArray<FVector3f>& Vertices, const TArray<int32>& Indices, const TArray<FVector4f>& Colors, const TArray<FVector3f>& VertexNormals = {}, const TArray<FVector2f>& VertexUVs = {});
 };
