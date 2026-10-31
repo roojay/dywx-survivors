@@ -104,16 +104,16 @@ void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, i
     OnRunRequested.Broadcast(CharacterIndex, MapIndex, ModeIndex);
 }
 void ADywxUIPlayerController::RequestDash() { bDashQueued = true; OnDashRequested.Broadcast(); }
+void ADywxUIPlayerController::ClearGameplayInput()
+{
+    bDashQueued = false;
+    if (PlayerInput) PlayerInput->FlushPressedKeys();
+    if (MVPWorld) MVPWorld->SetInput({});
+}
 void ADywxUIPlayerController::SetUIPaused(bool bPaused)
 {
-    if (bPaused)
-    {
-        // Pause entry is an event (including the one-shot focus-loss request),
-        // not a per-frame flush. UIOnly may never deliver held-key releases.
-        bDashQueued = false;
-        if (PlayerInput) PlayerInput->FlushPressedKeys();
-        if (MVPWorld) MVPWorld->SetInput({});
-    }
+    // Also clear immediately for focus-loss requests, before the input mode changes.
+    if (bPaused) ClearGameplayInput();
     if (Simulation()) Simulation()->Pause(bPaused);
     OnPauseChanged.Broadcast(bPaused);
 }
@@ -126,6 +126,9 @@ void ADywxUIPlayerController::ApplyUIInput(bool bLive, bool bModalOpen)
     bShowMouseCursor = true; // Upgrade cards remain clickable while combat continues.
     if (!bLive || bModalOpen)
     {
+        // Economy is UIOnly without pausing the Rest simulation. Clear on mode
+        // entry too: key releases while UIOnly may never reach PlayerInput.
+        ClearGameplayInput();
         FInputModeUIOnly Input;
         if (RootWidget.IsValid()) Input.SetWidgetToFocus(RootWidget);
         Input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);

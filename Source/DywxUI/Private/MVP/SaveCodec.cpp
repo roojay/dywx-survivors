@@ -185,7 +185,7 @@ bool SaveCodec::ValidateCheckpoint(const RunCheckpoint& c){
   SaveArchive outerArena,innerArena;auto outer=c.arena;auto inner=c.anomalies.layout_;outerArena(outer);innerArena(inner);
   if(outerArena.bytes!=innerArena.bytes)return false;
   Economy check;if(!check.RestoreState(c.economy.ExportState(),c.progression))return false;
-  auto es=c.economy.ExportState();if(es.layer2!=(c.campaign.tier>=2)||es.layer3!=(c.campaign.tier>=3)||c.progression.state_.systemLayer!=int(c.campaign.tier)||es.active||es.quick||es.pendingXp||es.reforge||es.treasure||!es.undo.empty())return false;
+  auto es=c.economy.ExportState();if(c.restSerial!=es.restId||c.restSerial==std::numeric_limits<std::uint64_t>::max()||es.layer2!=(c.campaign.tier>=2)||es.layer3!=(c.campaign.tier>=3)||c.progression.state_.systemLayer!=int(c.campaign.tier)||es.active||es.quick||es.pendingXp||es.reforge||es.treasure||!es.undo.empty())return false;
   SaveArchive a;auto copy=c;AnomalyFields(a,copy.anomalies);return a.ok;
 }
 bool SaveCodec::EncodeCheckpoint(const RunCheckpoint& input,std::string& out){

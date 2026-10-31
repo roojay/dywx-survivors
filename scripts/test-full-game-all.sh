@@ -17,5 +17,7 @@ bash scripts/test-mvp-economy.sh
 bash scripts/test-mvp-arena.sh
 bash scripts/test-full-game-integration.sh
 bash scripts/test-mvp-save.sh
+bash scripts/test-combat-boundaries.sh
+bash scripts/test-save-economy-boundaries.sh
 sha256sum --status -c "$SOURCE_MANIFEST" || { echo 'Sources changed during this run; this is intermediate evidence, not a final full pass.' >&2; exit 2; }
 printf '\nFull-design offline gates passed; UE compile/cook/runtime/performance remain NOT_RUN.\n'

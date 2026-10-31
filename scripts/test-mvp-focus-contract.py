@@ -18,10 +18,12 @@ budget = body(w, 'void ADywxMVPWorld::RefreshRunBudget')
 tick = body(w, 'void ADywxMVPWorld::Tick')
 stop = body(w, 'void ADywxMVPWorld::StopRun')
 pause = body(c, 'void ADywxUIPlayerController::SetUIPaused')
-pause_entry = body(pause, 'if (bPaused)')
+clear = body(c, 'void ADywxUIPlayerController::ClearGameplayInput')
+ui_only = body(body(c, 'void ADywxUIPlayerController::ApplyUIInput'), 'if (!bLive || bModalOpen)')
 checks = {
-    'pause entry clears queued dash and stale held keys': all(s in pause_entry for s in ['bDashQueued = false', 'if (PlayerInput) PlayerInput->FlushPressedKeys()', 'MVPWorld->SetInput({})']) and '#include \"GameFramework/PlayerInput.h\"' in c,
-    'flush only at pause entry, not each tick or upgrade': c.count('PlayerInput->FlushPressedKeys()') == 1 and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade'),
+    'pause entry clears queued dash and stale held keys': 'if (bPaused) ClearGameplayInput()' in pause and all(s in clear for s in ['bDashQueued = false', 'if (PlayerInput) PlayerInput->FlushPressedKeys()', 'MVPWorld->SetInput({})']) and '#include \"GameFramework/PlayerInput.h\"' in c,
+    'UIOnly entry clears keys even for non-pausing economy': ui_only.index('ClearGameplayInput()') < ui_only.index('SetInputMode(Input)'),
+    'flush only at transition entry, not each tick or upgrade': c.count('PlayerInput->FlushPressedKeys()') == 1 and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'FlushPressedKeys' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade') and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::PlayerTick') and 'ClearGameplayInput' not in body(c, 'void ADywxUIPlayerController::ChooseUpgrade'),
     'one live tick owner; no live ticker/delegate': 'AddTicker' not in w and 'AddUObject' not in w,
     'focus checked before simulation step': tick.index('RefreshRunBudget()') < tick.index('Simulation.Step'),
     'native minimized/foreground and Slate active': all(s in budget for s in ['IsMinimized()', 'IsForegroundWindow()', 'IsActive()']),

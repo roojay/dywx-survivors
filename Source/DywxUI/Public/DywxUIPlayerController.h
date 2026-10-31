@@ -51,6 +51,7 @@ public:
 private:
     TSharedPtr<SDywxRoot> RootWidget;
     UPROPERTY() TObjectPtr<ADywxMVPWorld> MVPWorld;
+    void ClearGameplayInput();
     bool bDashQueued = false;
     float HUDRefreshElapsed = 0.f;
     int32 LastHero = 0, LastMap = 0, LastMode = 0;

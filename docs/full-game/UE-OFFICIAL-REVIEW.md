@@ -62,3 +62,11 @@
 3. 新局→波间选择/换装/交易→失焦→显式继续→保存离开→重启续接→终局结算；同修士旧档新局策略、坏档及写入失败。
 4. 同一进程三洞天/三角色多次重开，观察旧静态实例无残留、GC无失效brush、窗口输入恢复、长列表可达。
 5. 1080p/720p/超宽、大字号截图，正常/峰值负载CPU/GPU/FPS采样。以上均未在此执行。
+
+## 2026-10-31 补充：非暂停 UIOnly 入口
+
+- 源码证实：Economy 弹层在 Rest 中使用 `FInputModeUIOnly`，但不调用 `SetUIPaused(true)`，此前仅暂停入口清理 `PlayerInput` 和 queued dash。因此存在进入弹层前按住移动键、在弹层内松开后残留输入的风险；**实际 UE 键盘残留未复现，不作为实机已确认故障**。
+- Controller 现在共用 `ClearGameplayInput`：暂停请求立即清理，UIOnly 模式入口也清理。不会放到 `PlayerTick`、升级选择或 HUD 轮询中。Economy 关闭仍恢复 GameAndUI 而不额外解除暂停；FocusLoss 仍替换为显式 Pause，必须明确继续。
+- 本次离线通过：focus source-contract（新增非暂停 UIOnly 清理及禁止逐帧调用）、UI source-contract、navigation、preview-budget policy、70 项 100%/110% 字号字体度量、资源与 31-mesh/43,066-triangle render/material source-contract、bootstrap Python/shell 语法、diff whitespace。
+- 未改动 world/VFX/cook 配置：动态材质/音效位于 AlwaysCook `/Game/MVP`；字体/图片与几何 JSON 由 NonUFS 声明覆盖。预算源码仍在模拟步前检查焦点、后台/最小化使用共享 cap 策略、停止时仅恢复自己仍持有的 cap；这些声明不是已生成 package 或 FPS/GPU 数据。
+- 仍需实机验证：按住 W/Space→进入洞府→在弹层松开→返回→迎战；暂停/失焦/恢复同链路；720p/1080p/大字号/超宽截图。暂停时 `Render(0)` 仍遍历并上传 dynamic ISM transforms，属于可量测优化候选；本轮未凭静态分析宣称 GPU 超标，也未未经测量重构渲染刷新。

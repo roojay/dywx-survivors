@@ -36,13 +36,14 @@ void Economy::Reset(std::uint32_t seed,bool quick,bool l2,bool l3,EconomyConfig 
 }
 bool Economy::Rest(const Progression& p) const {return active_&&p.IsResting();}
 bool Economy::BeginRest(Progression& p,std::uint64_t id,bool cave,bool freeRefresh) {
-  if(!p.IsResting()||active_||id<=restId_)return false;
+  if(!p.IsResting()||active_||id<=restId_||
+     (layer2_&&(quick_||cave)&&token_>std::numeric_limits<std::uint64_t>::max()-unsigned(quick_?3:config_.traditionalGoods)))return false;
   active_=true;restId_=id;cave_=!quick_&&cave;freeRefresh_=freeRefresh&&cave_;shop_.clear();
   if(layer2_&&(quick_||cave_))GenerateShop(p);
   return true;
 }
 bool Economy::EnterCave(Progression& p,bool freeRefresh) {
-  if(!Rest(p)||quick_||cave_)return false;
+  if(!Rest(p)||quick_||cave_||(layer2_&&token_>std::numeric_limits<std::uint64_t>::max()-unsigned(config_.traditionalGoods)))return false;
   cave_=true;freeRefresh_=freeRefresh;
   if(layer2_)GenerateShop(p);
   return true;
@@ -96,7 +97,7 @@ bool Economy::Buy(Progression& p,std::uint64_t token) {
   stones_-=it->price;it->sold=true;ReceiveRelic(p,it->relic,true);return true;
 }
 bool Economy::Refresh(Progression& p) {
-  if(!Rest(p)||!layer2_||quick_||!cave_)return false;
+  if(!Rest(p)||!layer2_||quick_||!cave_||token_>std::numeric_limits<std::uint64_t>::max()-unsigned(config_.traditionalGoods))return false;
   if(freeRefresh_)freeRefresh_=false;
   else {if(stones_<config_.refreshPrice)return false;stones_-=config_.refreshPrice;}
   GenerateShop(p);return true;
@@ -213,7 +214,9 @@ EconomyState Economy::ExportState() const {
 bool Economy::RestoreState(const EconomyState& s,const Progression& p) {
   if(s.version!=1||s.stones<0||s.pendingXp<0||s.paidTreasure<0||s.paidTreasure>5||
      (s.layer3&&!s.layer2)||(s.active&&!p.IsResting())||(s.quick&&s.cave)||
-     (s.freeRefresh&&!s.cave)||(!s.layer2&&s.stones!=0)||s.rng.size()>20000)return false;
+     (s.freeRefresh&&!s.cave)||(!s.layer2&&s.stones!=0)||
+     (!s.active&&(!s.shop.empty()||!s.undo.empty()||s.reforge||s.treasure||s.pendingXp))||
+     (s.active&&s.restId==0)||s.rng.size()>20000)return false;
   auto positive=[](int x){return x>0&&x<=1000000;};
   auto nonnegative=[](int x){return x>=0&&x<=1000000;};
   const auto& c=s.config;
@@ -227,7 +230,7 @@ bool Economy::RestoreState(const EconomyState& s,const Progression& p) {
   if(!std::isfinite(c.rarityWeight)||c.rarityWeight<1||c.rarityWeight>10)return false;
   for(auto w:c.treasureWeights)if(!std::isfinite(w)||w<=0||w>1000000)return false;
   auto affixValid=[](const Affix& a){return int(a.kind)>=0&&int(a.kind)<int(AffixKind::Count)&&std::isfinite(a.value);};
-  auto relicValid=[&](const Relic& r){return r.id>0&&r.id<std::numeric_limits<EntityId>::max()&&int(r.rarity)>=0&&int(r.rarity)<4&&
+  auto relicValid=[&](const Relic& r){return r.id>0&&r.id<p.nextRelic_&&r.id<std::numeric_limits<EntityId>::max()&&int(r.rarity)>=0&&int(r.rarity)<4&&
     r.catalogId>=0&&r.catalogId<int(RelicCatalog().size())&&r.affixes.size()<=64&&std::all_of(r.affixes.begin(),r.affixes.end(),affixValid);};
   if(s.shop.size()>5||s.undo.size()>100000||s.hidden.size()>1000000)return false;
   std::set<std::uint64_t> tokens;std::set<EntityId> stock;
@@ -239,9 +242,15 @@ bool Economy::RestoreState(const EconomyState& s,const Progression& p) {
   if(s.treasure&&(owned.count(s.treasure->id)||stock.count(s.treasure->id)))return false;
   std::int64_t xp=0;
   for(const auto& u:s.undo) {
-    if(u.amount<0||(u.reward!=RefineReward::Experience&&u.reward!=RefineReward::Stones)||u.relics.empty())return false;
-    for(const auto& r:u.relics)if(!relicValid(r)||!owned.insert(r.id).second||
-      (s.treasure&&r.id==s.treasure->id))return false;
+    if(u.amount<0||(u.reward!=RefineReward::Experience&&u.reward!=RefineReward::Stones)||u.relics.empty()||
+       (u.reward==RefineReward::Stones&&!s.layer2))return false;
+    std::int64_t expected=0;
+    for(const auto& r:u.relics) {
+      if(!relicValid(r)||r.locked||!owned.insert(r.id).second||
+         (s.treasure&&r.id==s.treasure->id))return false;
+      expected+=u.reward==RefineReward::Stones?c.refineStones[int(r.rarity)]:RefineValue(r.rarity);
+    }
+    if(expected!=u.amount)return false;
     if(u.reward==RefineReward::Experience)xp+=u.amount;
   }
   if(xp!=s.pendingXp)return false;

@@ -60,7 +60,9 @@ void Simulation::Start(std::uint64_t seed, HeroId hero,
   nextId_ = 1;
   hero_ = hero;
   config_ = config;
-  config_.fixedStep = std::clamp(config_.fixedStep, 1.f / 240, 1.f / 20);
+  config_.fixedStep = std::isfinite(config_.fixedStep)
+      ? std::clamp(config_.fixedStep, 1.f / 240, 1.f / 20)
+      : RunConfig{}.fixedStep;
   config_.maxEnemies = std::clamp<std::size_t>(config_.maxEnemies, 1, 512);
   config_.maxProjectiles =
       std::clamp<std::size_t>(config_.maxProjectiles, 1, 2048);
@@ -1529,10 +1531,6 @@ void Simulation::UpdateProjectiles(float dt) {
     if (p.life <= 0)
       continue;
     currentSource_ = p.source;
-    if(!p.hostile && p.element==Element::Water) {
-      for(auto &fire:state_.effects) if(fire.hostile && fire.kind==EffectKind::Burn &&
-          SegmentDistance(fire.position,p.previous,p.position)<=fire.radius+p.radius) fire.life=0;
-    }
     p.previous = p.position;
     if (p.orbitRemaining > 0) {
       Down(p.orbitRemaining, dt);
@@ -1551,6 +1549,10 @@ void Simulation::UpdateProjectiles(float dt) {
       }
     }
     p.position = p.position + p.velocity * dt;
+    if(!p.hostile && p.element==Element::Water) {
+      for(auto &fire:state_.effects) if(fire.hostile && fire.kind==EffectKind::Burn &&
+          SegmentDistance(fire.position,p.previous,p.position)<=fire.radius+p.radius) fire.life=0;
+    }
     p.life -= dt;
     if (p.pathBurn) {
       p.pathTick -= dt;
@@ -1601,14 +1603,17 @@ void Simulation::UpdateProjectiles(float dt) {
           if (p.chains)
             Chain(e.id, p.chains, p.damage, p.chainScale, 3, p.form);
           if (--p.pierce <= 0) {
-            if (!p.returning || p.returned)
-              p.life = 0;
+            // Exhausting penetration ends the outbound leg too; the return
+            // branch below resets its hit list and penetration budget.
+            p.life = 0;
             break;
           }
         }
       }
       if (p.life <= 0 && p.returning && !p.returned) {
         p.returned = true;
+        // Do not steer a returning sword back toward its outbound target.
+        p.homing = false;
         p.hit.clear();
         p.pierce = 6;
         p.velocity = Unit(state_.player.position - p.position) * p.speed;
@@ -1903,7 +1908,8 @@ void Simulation::BossPhaseTwo(EnemyState &e) {
   fx.life = .4f;
   AddEffect(fx);
   if(fullGame_ && arena_.cave!=CaveId::ThunderMarsh) {
-    for(int k=0;k<6;++k) {
+    // ResolveDeaths temporarily removed the boss; reserve its reinsertion slot.
+    for(int k=0;k<6 && state_.enemies.size()+1<std::min<std::size_t>(80,config_.maxEnemies);++k) {
       EnemyRole role=arena_.cave==CaveId::EmberMountain ? (k<4?EnemyRole::Exploder:EnemyRole::Ranged) :
           (k==0?EnemyRole::Support:k==1?EnemyRole::Summoner:EnemyRole::Swarm);
       Spawn(role,Edge(),EnemyTier::Variant);

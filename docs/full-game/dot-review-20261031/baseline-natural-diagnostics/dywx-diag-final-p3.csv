@@ -1,0 +1,3 @@
+seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build
+73,0,2,2,veteran_unlocks_zero_stats,3,1200,dead,328.88,3,0,81,3,100,0,2,0,0,0,0,0,1,3,-1,0,0,3,0,0,2,"26:3;P5;"
+11,0,0,0,fresh_tier1_no_unlocks,3,1200,dead,215.791,2,0,426,8,65,0,0,0,0,0,0,0,1,2,-1,0,0,2,0,0,1,"0:4;4:1;2:1;1:1;7:1;P0;"
