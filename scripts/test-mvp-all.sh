@@ -3,6 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 bash scripts/test-ui-state.sh
+bash scripts/test-ui-layout-policy.sh
 bash scripts/test-preview-budget.sh
 bash scripts/test-mvp-progression.sh
 bash scripts/test-mvp-discovery.sh
@@ -12,6 +13,8 @@ bash scripts/run-mvp-acceptance.sh
 python3 scripts/test_font_layout.py
 python3 scripts/test-mvp-ui-contract.py
 python3 scripts/test-battle-hud-contract.py
+python3 scripts/test-concept-assets.py
+python3 scripts/test-concept-ui-contract.py
 python3 scripts/test-mvp-profile-contract.py
 python3 scripts/test-mvp-focus-contract.py
 python3 scripts/validate_assets.py

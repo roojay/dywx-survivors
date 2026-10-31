@@ -144,7 +144,7 @@ void ADywxUIPlayerController::ApplyUIInput(bool bLive, bool bModalOpen)
     bLive = bLive || (Session() && Session()->IsRunActive());
     bGameplayInputAllowed = bLive && !bModalOpen;
     StartPreviewBudget();
-    bShowMouseCursor = true; // Upgrade cards remain clickable while combat continues.
+    bShowMouseCursor = true; // Upgrade choices remain clickable while the core freezes combat.
     if (!bLive || bModalOpen)
     {
         // Economy is UIOnly without pausing the Rest simulation. Clear on mode
@@ -288,9 +288,9 @@ const dywx::mvp::Simulation* ADywxUIPlayerController::Simulation() const { retur
 void ADywxUIPlayerController::RefreshRunUI() { if (Session() && RootWidget.IsValid()) RootWidget->SetSnapshot(Session()->GetSnapshot()); }
 void ADywxUIPlayerController::RetryRun() { RequestRun(LastHero,LastMap,LastMode,LastRisk); }
 void ADywxUIPlayerController::ChooseUpgrade(int32 Index) { if (Simulation() && !Simulation()->GetSnapshot().paused) { Session()->ChooseUpgrade(Index); RefreshRunUI(); } }
-void ADywxUIPlayerController::UpgradeOne() { ChooseUpgrade(0); }
-void ADywxUIPlayerController::UpgradeTwo() { ChooseUpgrade(1); }
-void ADywxUIPlayerController::UpgradeThree() { ChooseUpgrade(2); }
+void ADywxUIPlayerController::UpgradeOne() { if(RootWidget.IsValid()) RootWidget->HandleUpgradeSelection(0); }
+void ADywxUIPlayerController::UpgradeTwo() { if(RootWidget.IsValid()) RootWidget->HandleUpgradeSelection(1); }
+void ADywxUIPlayerController::UpgradeThree() { if(RootWidget.IsValid()) RootWidget->HandleUpgradeSelection(2); }
 void ADywxUIPlayerController::PrepareSimulationTick()
 {
     RefreshPreviewBudget();

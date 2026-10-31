@@ -1,0 +1,42 @@
+{
+  "tool": "builtin image_gen",
+  "assets": [
+    {
+      "realm": "thunder",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-6465ed72-b0ec-4ec6-acbd-08503297e1f6.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-thunder-bg.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "bytes": 2705575,
+      "sha256": "e83f43181038b31512e155caee1cb7099c29cab8f81d693afd5cf898a46bc431"
+    },
+    {
+      "realm": "ember",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-e7beec44-f0f4-4f0c-a488-288cb0e209b1.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-ember-bg.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "bytes": 2505653,
+      "sha256": "0f877684c7042b60500189075c5a203b083f85c99167c7b2442364bb95b36cc2"
+    },
+    {
+      "realm": "mist",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-7a00088c-36b0-493d-b832-8caaa2b9f56a.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-mist-bg.png",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "bytes": 2775599,
+      "sha256": "466c6fc67559af380ccecd3a5e4c8fa0a2e0a13b0606d5d837eb333bfe4073e5"
+    }
+  ],
+  "review": "Visually inspected tool outputs. All UI/text removed, stable gate camera, distinct palettes. Slight generative detail drift possible; ember temple more intact than ruined; mist is silver-green rather than saturated jade. No resizing performed."
+}

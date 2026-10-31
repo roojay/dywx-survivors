@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-31",
+  "original": "generated_images/exec-b36ea630-523e-47b4-b239-d3cecfa2ec3d.png",
+  "destination": "dywx-survivors/Content/UI/Images/concept-portrait-medallions.png",
+  "dimensions": [
+    2172,
+    724
+  ],
+  "mode": "RGBA",
+  "alphaExtrema": [
+    0,
+    255
+  ],
+  "fullyTransparentPixels": 458515,
+  "allFourCornerAlpha": 0,
+  "qa": "Inspected: three circular bronze-rim tightly cropped face medallions, Body/Sword/Beast left-to-right, no lettering. True alpha confirmed by read-only pixel inspection. Gutters are narrower than prompt's requested 16% total per cell but circles are separate, complete and inside their cells; transparent corners preserved. One generation only, copied unchanged.",
+  "reference": "dywx-survivors/Content/UI/Images/concept-portraits.png",
+  "notes": "Original retained. No code/manifest/test changes. Read-only Python metadata inspection; no image editing."
+}

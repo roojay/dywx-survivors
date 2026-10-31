@@ -1,0 +1,17 @@
+[
+  [
+    "main",
+    "01-main-menu",
+    "Use case: precise-object-edit. Asset type: production game menu background painting, not a screenshot or UI mockup. Edit the supplied image to remove ALL overlaid text, Chinese calligraphy, title logo, subtitles, buttons, panels, borders, icons, currencies, counters, labels, and footer watermark. Reconstruct natural scene behind them. Preserve cinematic original Chinese fantasy environment, giant stone moon gate, distant mountain temples and sunset mist, adult Chinese male cultivator on right with long black hair and ivory robes, antique bronze armor, jade accents and flowing silk. Preserve composition and polished realistic concept art. Left 30 percent must be dark, quiet natural architectural shadow and low-detail breathing space for separately rendered menu controls; NOT a rectangular panel. Hero remains right, gate center-right, warm flame against cool stone. The only shapes are actual scenery, clothing, sword, architecture. No legible writing, no logo, no interface, no decorative frame, no watermark. Original asset, no franchise branding. Wide 16:9 output, ideally 2048x1152. Preserve image proportions without stretching."
+  ],
+  [
+    "sword",
+    "02-character-selection",
+    "Use case: precise-object-edit. Asset type: production character-selection background painting, not UI. Edit supplied image, removing EVERY text glyph, all panels, top progress bar, all selection portraits, labels, stats, icons, buttons, borders and footer watermark. Reconstruct natural scenery behind them. Keep same adult Chinese male sword cultivator identity, long black hair, ivory silk robes, bronze gold armor details and jade accents. Full body including boots visible at x65 percent, elegant heroic stance, sword angled down to right. Keep monumental moon gate, distant mountain temples, warm sunset and fires on cool stone courtyard. Preserve polished realistic original Chinese fantasy concept-art style. Left 30 percent is unobstructed, subdued dark architectural shadow with low detail for separate controls; no panel. Hero full body and face remain detailed. No writing, labels, logos, HUD, interface framing, icons or watermark anywhere. Not another game's asset. Wide 16:9 output, ideally 2048x1152. Do not stretch anatomy or architecture."
+  ],
+  [
+    "upgrade",
+    "05-paused-upgrade",
+    "Use case: precise-object-edit. Asset type: clean production background for paused upgrade screen, no baked-in UI. Edit supplied reference removing ALL text, calligraphy, logo, upgrade cards, panels, buttons, icon circles, borders, health bars, counters, labels, footer and watermarks. Fill with softly blurred dark ancient Chinese stone courtyard. Preserve same adult Chinese male cultivator, long black hair, ivory silk and bronze ornament, sitting in meditation on RIGHT side. Preserve luminous golden flying sword and restrained swirling gold energy on RIGHT beside meditator. Preserve warm flames and cool stone painterly cinematic realism. Left 60 percent must be quiet very dark blurred courtyard with smooth natural shadow gradient, no prominent shapes or golden bright effects; make room for separately rendered controls. Right-side composition fits meditator and flying sword fully. Remove any letterlike inscriptions from magical ring: pure abstract circular energy, no glyphs, no writing. No UI, text, logo, panels, frames, icons, bars, watermarks. Original Chinese fantasy scene, not franchise assets. Wide 16:9 output, ideally 2048x1152, no manual stretch."
+  ]
+]

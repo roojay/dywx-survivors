@@ -7,7 +7,7 @@ R=Path(__file__).resolve().parents[1]
 u=(R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text()
 c=(R/'Source/DywxUI/Private/DywxUIPlayerController.cpp').read_text()
 for label,condition in {
- 'new run clears transient old-run display':all(x in u for x in ['Run=dywx::mvp::Snapshot{}; BossChangeUntil=0;', 'bBeastVisible=false; BeastOffset={}; SelectedBag=0; SelectedSlot=0;', 'bRefinePreview=false; RunNotice.Empty();']),
+ 'new run clears transient old-run display':all(x in u for x in ['Run=dywx::mvp::Snapshot{}; BossChangeUntil=0;', 'bBeastVisible=false; BeastOffset={}; SelectedBag=0; SelectedSlot=0;', 'bRefinePreview=false; SelectedUpgrade=-1; bFusionOpen=false; RunNotice.Empty();']),
  'death result consumes authoritative damage facts':all(x in u for x in ['Run.lastDamage=State.lastDamage', 'Run.phase==RunPhase::Dead && Run.lastDamage.lethal', 'dywx::DamageLabel(Run.lastDamage)', 'Run.lastDamage.hpLost, Run.lastDamage.shieldLost', 'dywx::DamageAdvice(Run.lastDamage)']),
  'failed retry retains current result':'if (!Session()->IsRunActive()) RootWidget->ReturnToMenu();' in c and 'Paragraph(RunNotice,800,19,Gold)' in u,
  'full game transactions':all(x in u for x in ['Sim.BuyGood','Sim.RefreshShop','Sim.BeginReforge','Sim.ResolveReforge','Sim.IdentifyRelic','Sim.RevealTreasure','ChooseOpportunity','SealUpgrade','SkipUpgrade','Owner->SaveRun','Owner->ResumeRun','Owner->PurchaseLegacy','Owner->PurchasePermanent']),
@@ -34,7 +34,7 @@ for label,condition in {
  'inventory controls':all(x in u for x in ['PreviewRefine','UndoRefine','PreviewEquip','SetLocked','SortBag','FilterBag','PendingRefineXp']),
  'stale widget guard':'Epoch == UIEpoch ? Fn()' in u,
  'snapshot copy excludes entity arrays':'Run.enemies=State.enemies' not in u,
- 'movement and immediate choices':all(x in c for x in ['EKeys::W','EKeys::D','EKeys::Up','EKeys::Right','UpgradeOne','UpgradeThree']),
+ 'movement and upgrade selection routing':all(x in c for x in ['EKeys::W','EKeys::D','EKeys::Up','EKeys::Right','UpgradeOne','UpgradeThree']),
  'bounded HUD refresh':'HUDRefreshElapsed >= .05f' in c,
  'playable fusion action':all(x in u for x in ['Sim->CanFuse(Fusion)', 'Commands->Fuse(Fusion)', 'Now.generation != Generation || Now.paused', 'Run.phase == RunPhase::Rest || !Run.progression.offers.empty()', 'Now.phase != RunPhase::Wave && Now.phase != RunPhase::Boss && Now.phase != RunPhase::Rest', 'At(1360,120,510,100,Fusions)']),
  'codex saved view without world spawn':all(x in u for x in ['FDywxMVPProfile Codex;', 'Codex.Load();', 'Codex.Observe(', 'Codex.GetKnown()']) and 'Codex.Save()' not in u,

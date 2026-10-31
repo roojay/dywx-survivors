@@ -1,0 +1,89 @@
+{
+  "method": "Built-in image_gen only; all PNGs copied unchanged; PIL used only for inspection, no image editing.",
+  "assets": [
+    {
+      "name": "concept-logo.png",
+      "source": "generated_images/exec-f55d0bae-8e05-4297-8dba-43d25bef2ccc.png",
+      "prompt": "Use case: background-extraction. Edit the supplied main-menu concept into ONLY its isolated title logo asset. Keep the top-left Chinese gold brush calligraphy '道衍万象' (exactly these four Chinese characters, original large expressive strokes), and original subtle gold brush dragon / crescent swirl flourish around the title. Remove EVERYTHING else including scenery, person, controls, all subtitle words, all small text, rule lines, and black backing. Output a pristine isolated premium Chinese xianxia game title on real transparent alpha, with generous clean transparent margins. Wide landscape canvas approx 2.5:1. Preserve reference's warm antique pale gold textured brushwork and title design; no new text, no frame, no black glow or panel.",
+      "dimensions": [
+        1983,
+        793
+      ],
+      "alpha_bbox": [
+        15,
+        19,
+        1983,
+        793
+      ],
+      "visible_bbox_alpha8": [
+        31,
+        112,
+        1967,
+        712
+      ],
+      "recommended_crop": [
+        24,
+        104,
+        1975,
+        720
+      ],
+      "notes": "Exact four title characters present, no subtitle. Gold brush flourish and heavier bevel/halo than original. Sub-alpha8 trace speckles outside visible bounds; preserved native alpha. Draw as image, not 9-slice."
+    },
+    {
+      "name": "concept-primary-button.png",
+      "source": "generated_images/exec-417595bc-2330-4077-8a1a-5ef436eee320.png",
+      "prompt": "Use case: precise-object-edit. Transform reference screenshot into ONE isolated UI button asset based exactly on its first highlighted green main-menu button. Remove all other screenshot content. Remove all letters/words entirely. No text whatsoever. Front-on perfectly horizontal, straight rectangular button body, aged pale-gold thin double-rule border and restrained ornate Chinese cloud filigree corner caps with small pointed side ornaments, very dark jade-teal translucent-looking but opaque interior with delicate cloud carving near ends and clear empty center. Retain reference fidelity, subtle controlled teal edge light, not oversized fantasy jewelry. REQUIRED GEOMETRY: canvas wide 3:1, actual button body 6:1 centered horizontally and vertically, button spans 90% canvas width and 45% canvas height, ample fully transparent upper/lower gutters and small transparent side margins. True transparent alpha everywhere outside button. No text, no backdrop, no drop shadow extending far outside frame, no scenery, no people. Production game UI raster element.",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        2172,
+        724
+      ],
+      "visible_bbox_alpha8": [
+        6,
+        208,
+        2166,
+        513
+      ],
+      "recommended_crop": [
+        0,
+        200,
+        2172,
+        520
+      ],
+      "notes": "No text. Main rectangular body approximately x142..2029,y209..512, ratio 6.23:1. Extended side ornaments increase visible ratio to 7.08:1. Fine rule approx 12-20px; preserve 210px side caps on each side if 9-slicing. Crop uses full width to avoid clipping pointed ends. Recommended UV crop [0,0.2762431]..[1,0.7182320]. Native alpha has extremely faint <8 residual pixels in gutters; no color keying. Opaque jade body alpha253 at center."
+    },
+    {
+      "name": "concept-panel-frame.png",
+      "source": "generated_images/exec-363bef63-128f-4b81-b464-05f1db92865e.png",
+      "prompt": "Use case: background-extraction. Extract/reconstruct ONLY the outer rectangular thin bronze-gold left sidebar border from the supplied character selection screenshot, as a production game UI border-overlay PNG. Preserve its elegant restrained thin straight bronze double rule and subtle Chinese geometric / cloud filigree at four corners, not a thick ornate picture frame. REMOVE all lettering, images, people, portraits, panels, icons, dividers, and scenery. BOTH interior and exterior must be truly empty alpha-transparent; NO colored fill, NO black rectangle, NO glass, NO shadow pane. Portrait canvas about 0.6 width to height, frame occupies 90% width and 92% height with clean transparent margins. Frame vertical sides perfectly straight and parallel, horizontal sides perfectly level, no perspective, fine aged bronze metallic highlights matching screenshot. Only a single complete thin rectangular border with 4 corner ornaments is visible; empty transparent center everywhere inside it.",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "alpha_bbox": [
+        21,
+        48,
+        1007,
+        1484
+      ],
+      "visible_bbox_alpha8": [
+        28,
+        58,
+        996,
+        1477
+      ],
+      "recommended_crop": [
+        21,
+        48,
+        1007,
+        1484
+      ],
+      "notes": "Transparent interior/exterior; central70% alpha max1/255, center0. 93.46% pixels fully transparent. Thin vertical rules alpha>8 at x32..45 and978..990 (approx14px), horizontal rules approx10px. Corners extend approx100px inward horizontally and120px vertically. Native frame at 0.667 aspect versus requested approximate0.6; safe modest horizontal compression to0.6 or Slate9slice. For full source normalized FMargin(0.13,0.12,0.13,0.12) conservatively preserves corner ornaments; use Border draw type for transparent center or image overlay when retaining aspect. Full source has margin~30px horizontally,60px vertically; overlay positioning must include gutters. Visible renderer preview may show hidden gold RGB background, but true alpha verified empty; do not flatten."
+    }
+  ]
+}

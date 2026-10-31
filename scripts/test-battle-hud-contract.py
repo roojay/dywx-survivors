@@ -6,8 +6,8 @@ R=Path(__file__).resolve().parents[1]
 s=(R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text()
 battle=s.split('void SDywxRoot::BattleScreen()')[1].split('FReply SDywxRoot::RunCommand')[0]
 checks={
-    'slender framed health and experience': all(x in battle for x in ['At(24,20,400,32,','SNew(SCombatOrnament)','At(50,57,348,3,']),
-    'six centered compact image slots': 'I<6' in battle and 'At(696+I*88,970,80,80,' in battle and '.Image_Lambda' in battle,
+    'slender framed health and experience': all(x in battle for x in ['At(24,48,480,32,','SNew(SCombatOrnament)','At(50,85,290,3,']),
+    'six centered compact image slots': 'I<6' in battle and 'At(672+I*120,SpellY,88,88,' in battle and '.Image_Lambda' in battle,
     'numeric details not discarded': all(x in battle for x in ['Details->AddSlot()', 'Run.player.shield', 'R.fire,R.thunder', 'Run.statistics.damageTaken', 'I<4', 'HUD.ExperienceToNext', 'Run.spellCooldowns', '.ToolTip(Tip)']),
     'anomaly tooltip retains complete rules': 'AnomalyText()+TEXT("\\n")' in battle and 'DescribeAnomaly(' in battle,
     'fusion only during actionable phases': 'if (Run.phase == RunPhase::Rest || !Run.progression.offers.empty())' in battle and 'Now.generation != Generation || Now.paused' in battle,

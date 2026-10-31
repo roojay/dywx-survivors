@@ -1,0 +1,33 @@
+{
+  "baseline_commit": "3c71b20705e212954cd8e0c27ada2a06a62fa325",
+  "state": "uncommitted working tree",
+  "files": {
+    "Art/UIConcepts/README.md": "d14c1924b896651df2eeabd3b0a91188d39a42ba0e54e1bcab4c38f3365687ad",
+    "Art/UIConcepts/assets.json": "9df3fb9802204df7844a109ade9e3b4fddf38545b25af2e49546cede83be1c30",
+    "Art/UIConcepts/hud-portraits/metadata.json": "fe7f92f6ea926ee815ba1129caa15f094e38024e3dc09c52ab7dae781e069184",
+    "Art/UIConcepts/hud-portraits/prompt.txt": "adfe5edca3af30ec1caabdc965f4519266f1801458e7894f35099db62aa32e5c",
+    "Art/UIConcepts/refinement/metadata.json": "f86221f4a9780070023e26bb598e0541548256d1767b6edc7d5780d21fd30b90",
+    "Art/UIConcepts/refinement/prompts.json": "4334455a28f6abacdfa057162fd87a468610f36e4f1e2c0cb9940f6002fde4be",
+    "Art/UIConcepts/upgrade-variants/metadata.json": "b744455c58f714614a2f60d5a3d4b7382d0c97aa261660f6487c0b75e7d19177",
+    "Art/UIConcepts/upgrade-variants/prompts.json": "4c530fd19757bd760f485fd13552f69314fe99355edbbf7b15cf8e74477e5f73",
+    "Content/UI/Images/concept-portrait-medallions.png": "43b258fe282864acb65512d7403c225c2541bdfc4053071e676d090724401c56",
+    "Content/UI/Images/concept-realm-thumbs.png": "1f3763eb3ec17aea64c98ca7d847243077633835d03f33dca43b4769a1c220b2",
+    "Content/UI/Images/concept-upgrade-beast-bg.png": "28b7d0c3298cf381274a43db2ee40f3ff19d6469f7748341d009d3fa46b8347e",
+    "Content/UI/Images/concept-upgrade-body-bg.png": "76ff5ddbf719790d08c0c2b6a418b3f3e2e734dffe13a95b20c64451e66e9e92",
+    "Content/UI/Images/concept-upgrade-icons.png": "b6dc8b62a86a03d3eea84cc763080807349505365e9183d0ade1b8a1e34ded99",
+    "Content/UI/Images/concept-upgrade-title.png": "d3def96b53bf0e1418b50e6f4405a1640544a902eaf1072a15fdcf7bd580447c",
+    "Source/DywxUI/Private/DywxUIPlayerController.cpp": "9dab3d9ec907434d1005e6fecd42c8e15fe0f85243b91224857e382d7517f28e",
+    "Source/DywxUI/Private/SDywxRoot.cpp": "4ab34b667d0e06cd4dab27c70167ba58a86919e31ad2f4a535487916e7d14fa5",
+    "Source/DywxUI/Private/SDywxRoot.h": "e23fabdec0c8497bc5878d81458dcf5b17c580ce654a586353a0c2363d5bd9c1",
+    "Source/DywxUI/Public/DywxUILayoutPolicy.h": "b4fe7fb74378fba754833bce8ea3f918aa3632de9ccdabcb045d66ee77d76765",
+    "docs/design/aow4-inspired-20261031/RESOLUTION-POLICY.md": "a388b34c9c5e5136fdfca3068737f3dc2ff169597b159facec12669bc792d17f",
+    "scripts/test-battle-hud-contract.py": "55345c1a99b872d1d14f3e39b30839f71e268cb580a6dbd70eaa553e059f2d68",
+    "scripts/test-concept-assets.py": "d2bd01c42809913c14354b0ea7ad9f54c7114857bf276cf1252875dac713b1a9",
+    "scripts/test-concept-ui-contract.py": "83cc4adb403390070098473629f3044140b7c6d2675cc05c90c8e23e56d993ab",
+    "scripts/test-mvp-all.sh": "b66ee4061586673ee3d87433f6d1e4a4d8083e9db1188f2339f99553e1122143",
+    "scripts/test-mvp-ui-contract.py": "aabe6d0c89f97a6683e61001751ed39960df0cf664e6643c388c2e3c7925db4b",
+    "scripts/test-ui-layout-policy.sh": "8421f5818ccf362ac5378be00c33d439a1ee24716a15ea811a97def56cddd63c",
+    "scripts/test_font_layout.py": "3ef3e998381b2aa52d8e2d770fd003a04fa89c40a20ce4d20ee2c7f34ec2e513",
+    "tests/ui_layout_policy_test.cpp": "c28d82e2b242d8fcbe241268e12035851d2061389456fb789a18a8c4a24f95e1"
+  }
+}

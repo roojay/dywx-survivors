@@ -1,0 +1,189 @@
+{
+  "tool": "builtin image_gen; unchanged originals copied",
+  "assets": [
+    {
+      "name": "concept-realm-thumbs.png",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-effacea3-2ba5-43bd-b262-d118254937f7.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-realm-thumbs.png",
+      "native_dimensions": [
+        2172,
+        724
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bbox": [
+        0,
+        0,
+        2172,
+        724
+      ],
+      "alpha_gt128_bbox": [
+        1,
+        2,
+        2170,
+        711
+      ],
+      "transparent_pixels": 501879,
+      "opaque_pixels": 795,
+      "partial_alpha_pixels": 1069854,
+      "sha256": "1f3763eb3ec17aea64c98ca7d847243077633835d03f33dca43b4769a1c220b2",
+      "crop_applied": false,
+      "exact_3_to_1": true,
+      "cells": [
+        {
+          "box": [
+            0,
+            0,
+            724,
+            724
+          ],
+          "alpha_bbox_local": [
+            0,
+            0,
+            724,
+            724
+          ]
+        },
+        {
+          "box": [
+            724,
+            0,
+            1448,
+            724
+          ],
+          "alpha_bbox_local": [
+            0,
+            0,
+            724,
+            724
+          ]
+        },
+        {
+          "box": [
+            1448,
+            0,
+            2172,
+            724
+          ],
+          "alpha_bbox_local": [
+            0,
+            0,
+            724,
+            715
+          ]
+        }
+      ]
+    },
+    {
+      "name": "concept-upgrade-title.png",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-08cd07a9-cf7e-49d0-8a8e-44e21389c419.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-upgrade-title.png",
+      "native_dimensions": [
+        2060,
+        763
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bbox": [
+        13,
+        27,
+        2044,
+        751
+      ],
+      "alpha_gt128_bbox": [
+        25,
+        88,
+        2036,
+        676
+      ],
+      "transparent_pixels": 964462,
+      "opaque_pixels": 736,
+      "partial_alpha_pixels": 606582,
+      "sha256": "d3def96b53bf0e1418b50e6f4405a1640544a902eaf1072a15fdcf7bd580447c",
+      "crop_applied": false
+    },
+    {
+      "name": "concept-upgrade-icons.png",
+      "source": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-43d25f1c-15a8-442f-841f-d18ab0cacb72.png",
+      "destination": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-upgrade-icons.png",
+      "native_dimensions": [
+        2172,
+        724
+      ],
+      "mode": "RGBA",
+      "alpha_extrema": [
+        0,
+        255
+      ],
+      "alpha_bbox": [
+        17,
+        6,
+        2156,
+        708
+      ],
+      "alpha_gt128_bbox": [
+        21,
+        11,
+        2153,
+        695
+      ],
+      "transparent_pixels": 677595,
+      "opaque_pixels": 892,
+      "partial_alpha_pixels": 894041,
+      "sha256": "b6dc8b62a86a03d3eea84cc763080807349505365e9183d0ade1b8a1e34ded99",
+      "crop_applied": false,
+      "exact_3_to_1": true,
+      "cells": [
+        {
+          "box": [
+            0,
+            0,
+            724,
+            724
+          ],
+          "alpha_bbox_local": [
+            17,
+            7,
+            724,
+            704
+          ]
+        },
+        {
+          "box": [
+            724,
+            0,
+            1448,
+            724
+          ],
+          "alpha_bbox_local": [
+            0,
+            7,
+            724,
+            708
+          ]
+        },
+        {
+          "box": [
+            1448,
+            0,
+            2172,
+            724
+          ],
+          "alpha_bbox_local": [
+            1,
+            6,
+            708,
+            702
+          ]
+        }
+      ]
+    }
+  ],
+  "review": "Title contains thin warm/red and olive fringe pixels despite targeted cleanup; no code color-keying used. Medallion atlases have very tight outermost decorative tips. Content/labels visually correct; actual runtime 64px render not tested."
+}

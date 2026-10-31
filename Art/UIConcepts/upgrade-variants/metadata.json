@@ -1,0 +1,18 @@
+{
+  "mode": "built-in image_gen",
+  "date": "2026-10-31",
+  "referenceLayout": "dywx-survivors/Content/UI/Images/concept-upgrade-bg.png",
+  "assets": [
+    {
+      "file": "dywx-survivors/Content/UI/Images/concept-upgrade-body-bg.png",
+      "original": "generated_images/exec-e47deb42-5a99-42d6-b88d-74accdb75cad.png",
+      "qa": "Visually inspected: original dark blurred temple and right meditating pose preserved; bearded rugged adult Chinese martial cultivator identity with ivory/charcoal robe, bronze bracers, fire above palms; floating sword removed. No UI/text. Left control region remains empty. Golden halo retained."
+    },
+    {
+      "file": "dywx-survivors/Content/UI/Images/concept-upgrade-beast-bg.png",
+      "original": "generated_images/exec-392d3533-c47d-40bc-a897-37d63059aaa3.png",
+      "qa": "Visually inspected: original dark blurred temple and right meditating pose preserved; silver-haired Chinese jade/ivory cultivator identity, jade wolf spirit behind far-right shoulder; floating sword removed. No UI/text or creature in left control region. Golden halo retained."
+    }
+  ],
+  "notes": "Copied unchanged native generated files. No code/manifest/test edits. Original generated files retained. Identity-only variants, not new layout designs."
+}

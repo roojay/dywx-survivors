@@ -1,0 +1,41 @@
+[
+  {
+    "asset": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-main-bg.png",
+    "original": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-a3da28d3-be91-4af8-bce5-610d3006878a.png",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "mode": "RGB",
+    "sha256": "ee7c1cbd38ad604566208f604396cd206ce7924220a75d6480a7cd0ced9c5438",
+    "tool": "built-in image_gen",
+    "resized_or_stretched": false,
+    "visual_qa": "No visible residual UI, labels, logo or readable text. Scene detail and abstract architectural/energy motifs remain."
+  },
+  {
+    "asset": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-sword-bg.png",
+    "original": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-3d19e436-4bc5-465e-9e01-9f34d8d106e1.png",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "mode": "RGB",
+    "sha256": "4d94a506708bc82d5654daa03f6966b95e5e7545e40f3ef5c1a5ee89e08af121",
+    "tool": "built-in image_gen",
+    "resized_or_stretched": false,
+    "visual_qa": "No visible residual UI, labels, logo or readable text. Scene detail and abstract architectural/energy motifs remain."
+  },
+  {
+    "asset": "/workspace/scratch/9912d8cfa0ac/dywx-survivors/Content/UI/Images/concept-upgrade-bg.png",
+    "original": "/workspace/scratch/9912d8cfa0ac/generated_images/exec-e165eed1-1ea2-4594-b7ea-55581dc85696.png",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "mode": "RGB",
+    "sha256": "8ba9902423ee41d05b2c788e4552ec41e77296635200de6fa704dbc8c8f78005",
+    "tool": "built-in image_gen",
+    "resized_or_stretched": false,
+    "visual_qa": "No visible residual UI, labels, logo or readable text. Scene detail and abstract architectural/energy motifs remain."
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "mode": "built-in image_gen",
+  "date": "2026-10-31",
+  "assets": [
+    {
+      "file": "Content/UI/Images/concept-body-bg.png",
+      "original": "generated_images/exec-bff3d516-3724-4b67-a13a-b24dca50c4b3.png",
+      "width": 1672,
+      "height": 941,
+      "qa": "Inspected output: full-body adult Chinese bearded martial cultivator, two natural closed fists with subtle ember glow; no UI/text, dark left side and moon gate, detailed robes."
+    },
+    {
+      "file": "Content/UI/Images/concept-beast-bg.png",
+      "original": "generated_images/exec-9b6e524c-c383-49e6-8395-f71bbf99e4d7.png",
+      "width": 1672,
+      "height": 941,
+      "qa": "Inspected output: full-body silver-haired adult Chinese cultivator and wolf at right, no UI/text, dark left side, jade/ivory robes, natural human ears."
+    },
+    {
+      "file": "Content/UI/Images/concept-portraits.png",
+      "original": "generated_images/exec-ea2bbd6a-8225-4693-9f57-5f78eb71c8a5.png",
+      "qa": "Inspected output: equal-width three-column portraits, Body/Sword/Beast left-to-right, clean faces and no labels. Native generated size differs from requested 1536x512; no post-generation image processing performed."
+    }
+  ],
+  "references": [
+    "design-previews/aow4-inspired-20261031/02-character-selection.png",
+    "design-previews/aow4-inspired-20261031/01-main-menu.png"
+  ],
+  "notes": "Original generated files retained. Art assets only, no code edits or implementation claims."
+}

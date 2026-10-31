@@ -1,0 +1,27 @@
+{
+  "finished_utc": "2026-10-31T15:10:12.572131+00:00",
+  "baseline_commit": "3c71b20705e212954cd8e0c27ada2a06a62fa325",
+  "aggregate_command": "bash scripts/test-mvp-all.sh",
+  "aggregate_exit_code": 0,
+  "supplemental_commands": [
+    "python3 scripts/test-architecture-contract.py",
+    "bash scripts/test-upgrade-pause.sh",
+    "python3 scripts/test_font_layout.py --json docs/design/aow4-inspired-20261031/verification-20261031/font-three-res.json",
+    "git diff --check"
+  ],
+  "supplemental_exit_code": 0,
+  "font_checks": 354,
+  "mvp_acceptance_checks": 607446,
+  "input_files_verified": 27,
+  "input_changes_during_tests": [],
+  "not_run": [
+    "Unreal UHT/UBT compilation",
+    "cook/package/launch",
+    "native Slate interaction and rendering",
+    "OS/application DPI matrix",
+    "GPU/performance/human-play acceptance",
+    "sanitizer variant"
+  ],
+  "windows_used": false,
+  "commit_or_push_performed": false
+}

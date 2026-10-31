@@ -1,4 +1,5 @@
 #include "SDywxRoot.h"
+#include "DywxUILayoutPolicy.h"
 #include "DywxUIPlayerController.h"
 #include "MVP/Simulation.h"
 #include "MVP/DywxRunSession.h"
@@ -69,6 +70,7 @@ public:
 void SDywxRoot::Construct(const FArguments& Args)
 {
     Owner = Args._Owner;
+    if(Owner.IsValid()) { int32 Width=0,Height=0;Owner->GetViewportSize(Width,Height);ResolutionScale=dywx::ReferenceScale(Width,Height); }
     NormalButton = FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("Button");
     NormalButton.SetNormal(FSlateColorBrush(FLinearColor(0.01f, 0.02f, 0.035f, 0.32f)));
     NormalButton.SetHovered(FSlateColorBrush(FLinearColor(0.16f, 0.12f, 0.065f, 0.95f)));
@@ -77,10 +79,15 @@ void SDywxRoot::Construct(const FArguments& Args)
     NormalButton.SetNormalPadding(FMargin(16, 4));
     NormalButton.SetPressedPadding(FMargin(16, 5, 16, 3));
     PrimaryButton = NormalButton;
-    PrimaryButton.SetNormal(FSlateColorBrush(FLinearColor(0.10f, 0.065f, 0.025f, 0.90f)));
+    PrimaryButton.SetNormal(FSlateColorBrush(FLinearColor(0.025f, 0.16f, 0.14f, 0.90f)));
+    // Custom picture rows provide their own content padding; do not add the
+    // generic button's style padding again around a tightly sized portrait.
+    RowNormalButton=NormalButton;RowPrimaryButton=PrimaryButton;
+    RowNormalButton.SetNormalPadding(FMargin(0));RowNormalButton.SetPressedPadding(FMargin(0));
+    RowPrimaryButton.SetNormalPadding(FMargin(0));RowPrimaryButton.SetPressedPadding(FMargin(0));
     FramedButton = PrimaryButton;
-    FSlateBrush Frame = *Art(TEXT("button-gold.png"));
-    Frame.SetUVRegion(FBox2f(FVector2f(0,0.21f),FVector2f(1,0.77f)));
+    FSlateBrush Frame = *Art(TEXT("concept-primary-button.png"));
+    Frame.SetUVRegion(FBox2f(FVector2f(0,0.2762431f),FVector2f(1,0.7182320f)));
     // This asset contains a complete frame plus transparent top/bottom gutters,
     // not a nine-slice texture. Image draws the cropped frame across the full slot;
     // Box slicing used texture-space borders and compressed the centre/text area.
@@ -99,11 +106,24 @@ void SDywxRoot::Construct(const FArguments& Args)
     ProgressStyle.SetFillImage(FSlateColorBrush(FLinearColor::White));
     Rebuild();
 }
+void SDywxRoot::Tick(const FGeometry& Geometry,const double CurrentTime,const float DeltaTime)
+{
+    SCompoundWidget::Tick(Geometry,CurrentTime,DeltaTime);
+    if(!Owner.IsValid())return;
+    int32 Width=0,Height=0;Owner->GetViewportSize(Width,Height);
+    if(Width<=0 || Height<=0)return; // Minimized / not yet created: retain presentation.
+    const double NextScale=dywx::ReferenceScale(Width,Height);
+    const bool FontChanged=dywx::FontPoints(1,NextScale,UIScale)!=dywx::FontPoints(1,ResolutionScale,UIScale);
+    const bool LayoutChanged=(NextScale<1.0)!=(ResolutionScale<1.0);
+    ResolutionScale=NextScale;
+    // Presentation only: no session commands, pause changes or selection resets.
+    if(FontChanged || LayoutChanged)Rebuild();
+}
 FSlateFontInfo SDywxRoot::Font(int32 Size, bool bTitle) const
 {
     const FString File = FPaths::ProjectContentDir() / TEXT("UI/Fonts") /
         (bTitle ? TEXT("SarasaUiSC-Bold.ttf") : TEXT("SarasaUiSC-Regular.ttf"));
-    return FSlateFontInfo(File, FMath::RoundToInt(Size * UIScale), EFontHinting::Default, FFontOutlineSettings());
+    return FSlateFontInfo(File, dywx::FontPoints(Size,ResolutionScale,UIScale), EFontHinting::Default, FFontOutlineSettings());
 }
 const FSlateBrush* SDywxRoot::Art(const FString& Filename)
 {
@@ -133,15 +153,55 @@ const FSlateBrush* SDywxRoot::Portrait(int32 Index)
 {
     const FString Key = FString::Printf(TEXT("portrait-%d"), Index);
     if (auto* Existing = Brushes.Find(Key)) return Existing->Get();
-    auto Brush = MakeUnique<FSlateBrush>(*Art(TEXT("character-portraits.png")));
-    Brush->SetUVRegion(FBox2f(FVector2f(Index * 0.25f, 0), FVector2f((Index + 1) * 0.25f, 1)));
-    Brush->ImageSize = FVector2D(443.5f, 887.0f);
+    auto Brush = MakeUnique<FSlateBrush>(*Art(TEXT("concept-portraits.png")));
+    Brush->SetUVRegion(FBox2f(FVector2f(Index / 3.0f, 0), FVector2f((Index + 1) / 3.0f, 1)));
+    Brush->ImageSize = FVector2D(724, 724);
     const FSlateBrush* Result = Brush.Get();
     Brushes.Add(Key, MoveTemp(Brush));
     return Result;
 }
+const FSlateBrush* SDywxRoot::ConceptCell(const FString& Filename,int32 Index)
+{
+    const FString Key=Filename+FString::Printf(TEXT("-cell-%d"),Index);
+    if(auto* Existing=Brushes.Find(Key))return Existing->Get();
+    const FSlateBrush* Atlas=Art(Filename);
+    auto Brush=MakeUnique<FSlateBrush>(*Atlas);
+    const float U=.5f/FMath::Max(1.f,float(Atlas->ImageSize.X));
+    const float V=.5f/FMath::Max(1.f,float(Atlas->ImageSize.Y));
+    Brush->SetUVRegion(FBox2f(FVector2f(Index/3.f+U,V),FVector2f((Index+1)/3.f-U,1-V)));
+    Brush->ImageSize=FVector2D(Atlas->ImageSize.X/3,Atlas->ImageSize.Y);
+    const FSlateBrush* Result=Brush.Get();Brushes.Add(Key,MoveTemp(Brush));return Result;
+}
+const FSlateBrush* SDywxRoot::FacePortrait(int32 Index)
+{
+    const FString Key=FString::Printf(TEXT("face-portrait-%d"),Index);
+    if(auto* Existing=Brushes.Find(Key))return Existing->Get();
+    auto Brush=MakeUnique<FSlateBrush>(*Art(TEXT("concept-portraits.png")));
+    // Inspectable face crop inside each distinct Body / Sword / Beast cell.
+    Brush->SetUVRegion(FBox2f(FVector2f((Index+.20f)/3.f,.14f),FVector2f((Index+.84f)/3.f,.54f)));
+    Brush->ImageSize=FVector2D(160,100);
+    const FSlateBrush* Result=Brush.Get();Brushes.Add(Key,MoveTemp(Brush));return Result;
+}
+TSharedRef<SWidget> SDywxRoot::Framed(TSharedRef<SWidget> Content,bool bSelected)
+{
+    const FString Key=TEXT("compact-ornament-frame");
+    if(!Brushes.Contains(Key)) {
+        auto Frame=MakeUnique<FSlateBrush>(*Art(TEXT("concept-panel-frame.png")));
+        Frame->DrawAs=ESlateBrushDrawType::Border;
+        Frame->Margin=FMargin(.13f,.12f,.13f,.12f);
+        Frame->ImageSize=FVector2D(120,180); // Small corner caps, not 184px source-space borders.
+        Brushes.Add(Key,MoveTemp(Frame));
+    }
+    return SNew(SOverlay)+SOverlay::Slot()[Content]
+        +SOverlay::Slot()[SNew(SImage).Image(Brushes[Key].Get())
+            .ColorAndOpacity(bSelected?FLinearColor(1.2f,1.12f,.8f,1):FLinearColor(.72f,.66f,.53f,.9f))
+            .Visibility(EVisibility::HitTestInvisible)];
+}
 const FSlateBrush* SDywxRoot::CombatIcon(int32 Spell)
 {
+    // Exact illustrated cases; other spells retain honest form-based glyphs.
+    if(Spell==int32(SpellId::FlameSword))return ConceptCell(TEXT("concept-upgrade-icons.png"),0);
+    if(Spell==int32(SpellId::ThunderFist))return ConceptCell(TEXT("concept-upgrade-icons.png"),1);
     int32 Cell=4; // Quiet silver seal for an unoccupied slot.
     if(Spell>=0 && Spell<int32(SpellId::Count)) {
         const auto Config=GetSpellConfig(SpellId(Spell));
@@ -232,7 +292,7 @@ TSharedRef<SWidget> SDywxRoot::Button(const FString& Text, TFunction<FReply()> A
 }
 TSharedRef<SWidget> SDywxRoot::CombatButton(const FString& Text, TFunction<FReply()> Action)
 {
-    return SNew(SButton).ButtonStyle(&NormalButton).ContentPadding(FMargin(5,2))
+    return SNew(SButton).ButtonStyle(&RowNormalButton).ContentPadding(FMargin(5,2))
         .HAlign(HAlign_Center).VAlign(VAlign_Center)
         .OnClicked_Lambda([this,Epoch=UIEpoch,Fn=MoveTemp(Action)]() mutable {return Epoch==UIEpoch?Fn():FReply::Handled();})
         [Label(Text,16,Paper)];
@@ -251,11 +311,13 @@ void SDywxRoot::Rebuild()
         for(int I=0;I<3;++I) { Nav.heroes[I]=IsHeroUnlocked(Profile,I); Nav.realms[I]=IsRealmUnlocked(Profile,I); Nav.savedRuns[I]=Owner->HasSavedRun(I); }
     }
     SAssignNew(Canvas, SConstraintCanvas);
-    const TCHAR* Background = TEXT("main-background.png");
-    if (Nav.screen == dywx::Screen::Character) Background = TEXT("character-background.png");
-    if (Nav.screen == dywx::Screen::Map) Background = TEXT("map-background.png");
-    if (Nav.screen == dywx::Screen::Battle) Background = TEXT("battle-background.png");
-    if (!(Nav.screen == dywx::Screen::Battle && Nav.liveBattle))
+    // Clean illustrated scenes only. Battle always exposes the real 3D viewport.
+    const TCHAR* Heroes[]={TEXT("concept-body-bg.png"),TEXT("concept-sword-bg.png"),TEXT("concept-beast-bg.png")};
+    const TCHAR* Realms[]={TEXT("concept-thunder-bg.png"),TEXT("concept-ember-bg.png"),TEXT("concept-mist-bg.png")};
+    const TCHAR* Background=TEXT("concept-main-bg.png");
+    if(Nav.screen==dywx::Screen::Character) Background=Heroes[FMath::Clamp(Nav.character,0,2)];
+    if(Nav.screen==dywx::Screen::Map) Background=Realms[FMath::Clamp(Nav.map,0,2)];
+    if(Nav.screen!=dywx::Screen::Battle)
         At(0,0,1920,1080,SNew(SImage).Image(Art(Background)).Visibility(EVisibility::HitTestInvisible));
     switch (Nav.screen) {
     case dywx::Screen::Main: MainScreen(); break;
@@ -263,8 +325,8 @@ void SDywxRoot::Rebuild()
     case dywx::Screen::Map: MapScreen(); break;
     case dywx::Screen::Battle: BattleScreen(); break;
     }
-    if (Nav.screen != dywx::Screen::Battle)
-        At(1450,1020,420,35, Label(TEXT("道衍万象 · 初入洞天"),18,Muted));
+    if (Nav.screen == dywx::Screen::Main)
+        At(1450,1020,420,44, Label(TEXT("道衍万象 · 初入洞天"),18,Muted));
     if (Nav.screen == dywx::Screen::Character || Nav.screen == dywx::Screen::Map)
         At(60,1005,190,60,Button(TEXT("Esc  返回"),[this]{ return Back(); }));
     auto Overlay = SNew(SOverlay)
@@ -278,52 +340,126 @@ void SDywxRoot::Rebuild()
         [SNew(SBox).WidthOverride(1920).HeightOverride(1080)[Overlay]]];
     if (FSlateApplication::IsInitialized()) FSlateApplication::Get().SetKeyboardFocus(SharedThis(this), EFocusCause::SetDirectly);
 }
+void SDywxRoot::SceneSidebar()
+{
+    At(50,78,540,900,Panel(SNew(SBox),FLinearColor(.006f,.015f,.018f,.86f),0));
+    const FString Key=TEXT("concept-sidebar-frame");
+    if(!Brushes.Contains(Key)) {
+        auto Frame=MakeUnique<FSlateBrush>(*Art(TEXT("concept-panel-frame.png")));
+        Frame->DrawAs=ESlateBrushDrawType::Border;
+        Frame->Margin=FMargin(.13f,.12f,.13f,.12f);
+        Brushes.Add(Key,MoveTemp(Frame));
+    }
+    At(40,65,560,930,SNew(SImage).Image(Brushes[Key].Get()).Visibility(EVisibility::HitTestInvisible));
+    auto Steps=SNew(SHorizontalBox);
+    const TCHAR* StepNames[]={TEXT("修士"),TEXT("洞天"),TEXT("启程")};
+    const int ActiveStep=Nav.screen==dywx::Screen::Character?0:1;
+    for(int I=0;I<3;++I) {
+        const bool Active=I==ActiveStep;
+        Steps->AddSlot().FillWidth(1)[Panel(SNew(SBox).HAlign(HAlign_Center).VAlign(VAlign_Center)
+            [Label(FString(Active?TEXT("◇  "):TEXT(""))+StepNames[I],24,Active?FLinearColor(.60f,1,.90f):Muted,true)],Active?FLinearColor(.01f,.18f,.16f,.9f):FLinearColor(0,0,0,.5f),4)];
+        if(I<2)Steps->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(8,0)[Label(TEXT("›"),22,Gold)];
+    }
+    At(650,20,700,58,Framed(Steps));
+}
 void SDywxRoot::MainScreen()
 {
-    At(750,800,1100,85,Paragraph(RunNotice,1050,22,Gold));
-    At(60,90,660,870,Panel(SNew(SBox),FLinearColor(0.01f,0.02f,0.035f,0.22f),0));
-    At(110,155,610,155,Label(TEXT("道衍万象"),82,Paper,true));
-    At(125,320,530,55,Label(TEXT("洞天有序 · 万象待解"),24,Gold,true));
-    At(120,455,490,90,Button(TEXT("开始修行"),[this]{ return Primary(); },true,true,TEXT(""),true));
-    At(145,580,440,70,Button(TEXT("道典"),[this]{ return OpenModal(dywx::Modal::Codex); }));
-    At(145,685,440,70,Button(TEXT("传承"),[this]{ return OpenModal(dywx::Modal::Legacy); }));
-    At(750,900,440,70,Button(TEXT("设置"),[this]{ return OpenModal(dywx::Modal::Settings); }));
-    At(145,790,440,70,Button(TEXT("退出游戏"),[this]{ return OpenModal(dywx::Modal::Quit); }));
-    At(80,1020,950,40,Label(TEXT("Enter 确认   ·   Tab 切换焦点   ·   Esc 返回"),20,Muted));
+    // The logo is decorative; all six actions below are independent native widgets.
+    const FString Key=TEXT("concept-title-crop");
+    if(!Brushes.Contains(Key)) {
+        auto Logo=MakeUnique<FSlateBrush>(*Art(TEXT("concept-logo.png")));
+        Logo->SetUVRegion(FBox2f(FVector2f(24.f/1983.f,104.f/793.f),FVector2f(1975.f/1983.f,720.f/793.f)));
+        Brushes.Add(Key,MoveTemp(Logo));
+    }
+    At(70,105,540,175,SNew(SImage).Image(Brushes[Key].Get()).Visibility(EVisibility::HitTestInvisible));
+    At(125,300,500,48,Label(TEXT("神话为表 · 探索为引"),24,Gold,true));
+    At(120,375,440,80,Button(TEXT("开始修行"),[this]{return Primary();},true,true,TEXT(""),true));
+    const bool HasSave=Nav.savedRuns[0]||Nav.savedRuns[1]||Nav.savedRuns[2];
+    At(120,475,440,70,Framed(Button(TEXT("续接存档"),[this]{Nav.Start();for(int I=0;I<3;++I)if(Nav.savedRuns[I]){Nav.character=I;break;}Rebuild();return FReply::Handled();},false,HasSave,TEXT("选择修士并续接其真实存档；不会覆盖现有修行。"))));
+    At(120,565,440,70,Framed(Button(TEXT("传承"),[this]{return OpenModal(dywx::Modal::Legacy);})));
+    At(120,655,440,70,Framed(Button(TEXT("道典"),[this]{return OpenModal(dywx::Modal::Codex);})));
+    At(120,745,440,70,Framed(Button(TEXT("设置"),[this]{return OpenModal(dywx::Modal::Settings);})));
+    At(120,835,440,70,Framed(Button(TEXT("退出"),[this]{return OpenModal(dywx::Modal::Quit);})));
+    At(1510,30,370,55,LiveText([this]{return Owner.IsValid()?FString::Printf(TEXT("道韵 %llu"),static_cast<unsigned long long>(Owner->CampaignProfile().daoYun)):FString();},26,Paper));
+    At(70,950,1100,55,Paragraph(RunNotice,1050,20,Gold));
+    At(70,1020,950,44,Label(TEXT("Enter 确认   ·   Tab 切换焦点   ·   Esc 返回"),20,Muted));
 }
 void SDywxRoot::CharacterScreen()
 {
-    At(55,45,800,100,Label(TEXT("选择修士"),50,Paper,true));
-    const TCHAR* Descriptions[]={TEXT("法体近战 · 焚心掌与炼体真诀"),TEXT("飞剑远攻 · 赤焰飞剑与御剑诀"),TEXT("御兽随行 · 灵兽自主寻敌")};
+    SceneSidebar();
+    At(95,105,450,80,Label(TEXT("选择修士"),42,Paper,true));
+    const TCHAR* Styles[]={TEXT("法体近战"),TEXT("飞剑远攻"),TEXT("御兽随行")};
     for(int I=0;I<3;++I) {
-        // Existing atlas art is reused as a concept portrait, not a new character asset.
-        At(80+I*600,190,540,470,Panel(SNew(SScaleBox).Stretch(EStretch::ScaleToFit)[SNew(SImage).Image(Portrait(I))],Ink,8));
-        At(80+I*600,680,540,75,Button(FString(Names[I])+(Nav.heroes[I]?TEXT(""):TEXT(" · 未解锁")),[this,I]{Nav.SelectCharacter(I);Rebuild();return FReply::Handled();},Nav.character==I,Nav.heroes[I],TEXT("以道韵在传承中解锁修士。")));
-        At(80+I*600,770,540,50,Label(Descriptions[I],22,Gold));
-        At(80+I*600,830,540,60,Button(TEXT("续接此修士存档"),[this,I]{if(Owner.IsValid()&&!Owner->ResumeRun(I)){RunNotice=TEXT("读档失败：存档未消费，请检查存档有效性。");Rebuild();}return FReply::Handled();},false,Owner.IsValid()&&Owner->HasSavedRun(I),TEXT("成功恢复后消费存档；回到保存的待迎战波开头。")));
+        At(80,200+I*125,470,110,Framed(SNew(SButton).ButtonStyle(Nav.character==I?&RowPrimaryButton:&RowNormalButton)
+            .ContentPadding(FMargin(10,6)).HAlign(HAlign_Fill).IsEnabled(Nav.heroes[I])
+            .ToolTipText(FText::FromString(Nav.heroes[I]?Styles[I]:TEXT("以道韵在传承中解锁修士。")))
+            .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectCharacter(I);Rebuild();}return FReply::Handled();})
+            [SNew(SHorizontalBox)
+                +SHorizontalBox::Slot().AutoWidth()[SNew(SBox).WidthOverride(152).HeightOverride(94)[SNew(SImage).Image(FacePortrait(I))]]
+                +SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(20,0)[SNew(SVerticalBox)
+                    +SVerticalBox::Slot().AutoHeight()[Label(Names[I],24,Nav.heroes[I]?Paper:Muted,true)]
+                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.heroes[I]?Styles[I]:TEXT("传承解锁"),20,Muted)]]],Nav.character==I));
     }
-    At(600,920,500,75,Button(Nav.savedRuns[Nav.character]?TEXT("存档待续 · 请先续接"):TEXT("选择洞天"),[this]{return Primary();},true,!Nav.savedRuns[Nav.character],TEXT("同一修士有进行中存档时不可新开；请先续接，或选择其他修士。")));
-    At(1150,920,500,75,Button(TEXT("传承"),[this]{return OpenModal(dywx::Modal::Legacy);}));
-    At(70,150,1500,40,Label(TEXT("立绘沿用概念图集 · 起手路线以术法说明为准"),20,Muted));
-    At(350,1020,1400,40,Label(RunNotice,20,Gold));
+    // Use the same core initializer as a new run, not duplicated fictional loadouts.
+    Progression Preview;Preview.Reset(1,HeroId(Nav.character));
+    const auto& Build=Preview.GetState().build;
+    At(95,580,450,2,Panel(SNew(SBox),Gold,0));
+    At(95,595,450,65,Label(FString(TEXT("◇  "))+Names[Nav.character],32,Gold,true));
+    At(95,660,450,45,Label(Styles[Nav.character],22,Paper));
+    const auto Spell=Build.spells.front();
+    At(95,725,72,72,SNew(SImage).Image(CombatIcon(int(Spell.id))));
+    At(185,725,350,85,Paragraph(TEXT("起手术法\n")+CN(GetSpellConfig(Spell.id,Spell.rank).name),340,22,Gold));
+    const auto& Passive=PassiveCatalog()[int(Build.passives.front())];
+    At(95,820,64,64,SNew(SImage).Image(Art(TEXT("icon-mirror.png"))));
+    At(180,820,355,45,Label(TEXT("专属心法 · ")+CN(Passive.name),20,Gold));
+    At(95,875,440,95,SNew(SScrollBox)+SScrollBox::Slot()[Paragraph(CN(Passive.description),410,20,Paper)]);
+    At(650,880,450,70,Button(TEXT("续接此修士存档"),[this]{if(Owner.IsValid()&&!Owner->ResumeRun(Nav.character)){RunNotice=TEXT("读档失败：存档未消费，请检查存档有效性。");Rebuild();}return FReply::Handled();},false,Nav.savedRuns[Nav.character],TEXT("成功恢复后消费存档；回到保存的待迎战波开头。")));
+    At(1440,950,420,80,Button(Nav.savedRuns[Nav.character]?TEXT("请先续接存档"):TEXT("选择洞天  ›"),[this]{return Primary();},true,!Nav.savedRuns[Nav.character],TEXT("同一修士有进行中存档时不可新开；请先续接，或选择其他修士。"),true));
+    At(650,950,300,65,Button(TEXT("传承"),[this]{return OpenModal(dywx::Modal::Legacy);}));
+    At(650,790,1150,70,Paragraph(RunNotice,1100,20,Gold));
 }
 void SDywxRoot::MapScreen()
 {
-    At(55,55,800,100,Label(TEXT("选择洞天与劫数"),50,Paper,true));
+    SceneSidebar();
+    At(95,105,450,80,Label(TEXT("选择洞天"),42,Paper,true));
     for(int I=0;I<3;++I) {
         const auto& C=CaveCatalog()[I];
-        At(60+I*620,190,580,80,Button(CN(C.name)+(Nav.realms[I]?TEXT(""):TEXT(" · 未解锁")),[this,I]{Nav.SelectMap(I);Rebuild();return FReply::Handled();},Nav.map==I,Nav.realms[I],TEXT("未解锁洞天可在传承中购买；图景沿用现有概念背景。")));
-        At(65+I*620,290,560,150,Paragraph(TEXT("洞主：")+CN(C.bossName)+TEXT("\n妖魔：")+CN(C.enemies[0])+TEXT("、")+CN(C.enemies[3])+TEXT("\n机缘：")+CN(C.opportunities[0]),540,24,Paper));
+        At(80,200+I*115,470,110,Framed(SNew(SButton).ButtonStyle(Nav.map==I?&RowPrimaryButton:&RowNormalButton)
+            .ContentPadding(FMargin(10,2)).HAlign(HAlign_Fill).IsEnabled(Nav.realms[I])
+            .ToolTipText(FText::FromString(TEXT("未解锁洞天可在传承中购买。")))
+            .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectMap(I);Rebuild();}return FReply::Handled();})
+            [SNew(SHorizontalBox)
+                +SHorizontalBox::Slot().AutoWidth()[SNew(SBox).WidthOverride(100).HeightOverride(100)[SNew(SImage).Image(ConceptCell(TEXT("concept-realm-thumbs.png"),I))]]
+                +SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(20,0)[SNew(SVerticalBox)
+                    +SVerticalBox::Slot().AutoHeight()[Label(CN(C.name),24,Nav.realms[I]?Paper:Muted,true)]
+                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.realms[I]?TEXT("进入此洞天  ›"):TEXT("传承解锁"),18,Muted)]]],Nav.map==I));
     }
-    const TCHAR* Modes[]={TEXT("快速 · 四波"),TEXT("传统 · 十波"),TEXT("无尽 · 每五波洞主")};
-    for(int I=0;I<3;++I) At(60+I*620,475,580,85,Button(Modes[I],[this,I]{Nav.SelectMode(dywx::Mode(I));if(I==0)Nav.riskMask=0;Rebuild();return FReply::Handled();},int(Nav.mode)==I,I<2||Nav.endlessUnlocked,TEXT("传统首胜后解锁无尽；快速无波间机缘、无劫数。")));
+    const auto& C=CaveCatalog()[Nav.map];
+    At(95,560,450,2,Panel(SNew(SBox),Gold,0));
+    At(95,570,450,65,Label(FString(TEXT("◇  "))+CN(C.name),32,Gold,true));
+    At(95,640,440,130,Paragraph(TEXT("洞主 · ")+CN(C.bossName)+TEXT("\n妖魔 · ")+CN(C.enemies[0])+TEXT("、")+CN(C.enemies[3])+TEXT("\n机缘 · ")+CN(C.opportunities[0]),440,20,Paper));
+    const TCHAR* Modes[]={TEXT("快速"),TEXT("传统"),TEXT("无尽")};
+    for(int I=0;I<3;++I) At(80+I*158,790,150,54,Framed(SNew(SButton)
+        .ButtonStyle(int(Nav.mode)==I?&RowPrimaryButton:&RowNormalButton).ContentPadding(FMargin(8,4))
+        .HAlign(HAlign_Center).VAlign(VAlign_Center).IsEnabled(I<2||Nav.endlessUnlocked)
+        .ToolTipText(FText::FromString(TEXT("传统首胜后解锁无尽；快速四波且无波间机缘、无劫数。")))
+        .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectMode(dywx::Mode(I));Rebuild();}return FReply::Handled();})
+        [Label(Modes[I],20,int(Nav.mode)==I?Gold:Paper,true)],int(Nav.mode)==I));
     const auto& Profile=Owner->CampaignProfile();
-    At(65,590,1600,60,Label(FString::Printf(TEXT("劫数 · 当前允许风险 %u · 已选 %u · 高品权重与道韵随风险提高"),Profile.unlockedRisk,GetTrialEffects(Nav.riskMask).risk),24,Gold));
-    const TCHAR* Risks[]={TEXT("妖潮更多"),TEXT("妖魔更快"),TEXT("大妖更多"),TEXT("异象更凶险")};
-    for(int I=0;I<4;++I) At(60+I*465,670,440,80,Button(Risks[I],[this,I]{unsigned Next=Nav.riskMask^(1u<<I);if(GetTrialEffects(Next).risk<=Owner->CampaignProfile().unlockedRisk)Nav.riskMask=Next;else RunNotice=TEXT("风险未解锁：通关当前风险后提升上限。");Rebuild();return FReply::Handled();},(Nav.riskMask&(1u<<I))!=0,Nav.mode!=dywx::Mode::Quick&&HasFeature(Profile,Feature::Trials),TEXT("第三层开放：传统首胜。通关当前风险解锁下一档。")));
-    At(60,790,1750,60,Label(RunNotice,22,Gold));
-    At(1050,900,360,80,Button(TEXT("传承"),[this]{return OpenModal(dywx::Modal::Legacy);}));
-    At(1450,900,400,80,Button(TEXT("进入洞天"),[this]{return Primary();},true,!Nav.savedRuns[Nav.character],TEXT("有进行中存档时请先续接此修士，不覆盖存档。")));
+    const int Layer=int(FeatureTier(Profile));
+    At(95,850,450,45,Label(FString::Printf(TEXT("层级 %d · 已选风险 %u"),Layer,GetTrialEffects(Nav.riskMask).risk),22,Gold));
+    At(80,910,470,60,Button(bAdvancedSettings?TEXT("收起进阶设置  ‹"):TEXT("进阶设置  ›"),[this]{bAdvancedSettings=!bAdvancedSettings;Rebuild();return FReply::Handled();}));
+    if(bAdvancedSettings) {
+        auto Options=SNew(SVerticalBox);
+        Options->AddSlot().AutoHeight()[Paragraph(FString::Printf(TEXT("劫数 · 当前允许风险 %u\n高品权重与道韵随风险提高"),Profile.unlockedRisk),540,22,Gold)];
+        const TCHAR* Risks[]={TEXT("妖潮更多"),TEXT("妖魔更快"),TEXT("大妖更多"),TEXT("异象更凶险")};
+        for(int I=0;I<4;++I)Options->AddSlot().AutoHeight().Padding(0,8)[SNew(SBox).HeightOverride(70)[Button(Risks[I],[this,I]{unsigned Next=Nav.riskMask^(1u<<I);if(GetTrialEffects(Next).risk<=Owner->CampaignProfile().unlockedRisk)Nav.riskMask=Next;else RunNotice=TEXT("风险未解锁：通关当前风险后提升上限。");Rebuild();return FReply::Handled();},(Nav.riskMask&(1u<<I))!=0,Nav.mode!=dywx::Mode::Quick&&HasFeature(Profile,Feature::Trials),TEXT("第三层开放：传统首胜。通关当前风险解锁下一档。"))]];
+        Options->AddSlot().AutoHeight()[SNew(SBox).HeightOverride(65)[Button(TEXT("传承与解锁"),[this]{return OpenModal(dywx::Modal::Legacy);})]];
+        At(650,380,600,560,Panel(Options,Ink,24));
+    }
+    At(1260,880,600,55,Paragraph(FString(Names[Nav.character])+TEXT(" · ")+Modes[int(Nav.mode)]+FString::Printf(TEXT(" · 第 %d 层"),Layer),590,22,Gold));
+    At(1440,950,420,80,Button(TEXT("进入洞天  ›"),[this]{return Primary();},true,!Nav.savedRuns[Nav.character],TEXT("有进行中存档时请先续接此修士，不覆盖存档。"),true));
+    At(650,960,740,90,Paragraph(RunNotice,720,20,Gold));
 }
 TSharedRef<SWidget> SDywxRoot::LiveText(TFunction<FString()> Value, int32 Size, FLinearColor Color)
 {
@@ -332,6 +468,16 @@ TSharedRef<SWidget> SDywxRoot::LiveText(TFunction<FString()> Value, int32 Size, 
 }
 void SDywxRoot::BattleScreen()
 {
+    const bool bSmallViewport=ResolutionScale<1.0;
+    // Only the minimum-resolution dock expands;1080p/1440p keep authored anchors.
+    const float DockY=bSmallViewport?850.f:880.f;
+    const float SpellY=bSmallViewport?860.f:894.f;
+    const float RankY=bSmallViewport?950.f:974.f;
+
+    const bool bUpgradeOpen=!Run.progression.offers.empty() && (Run.phase==RunPhase::Wave || Run.phase==RunPhase::Boss || Run.phase==RunPhase::Rest);
+    // Do not construct obscured controls: they must not receive Tab focus either.
+    if(!bUpgradeOpen) {
+
     auto IsOpportunityCombat=[this] {
         const auto* Sim=Owner.IsValid()?Owner->Simulation():nullptr;
         return Sim && Sim->IsCampaign() && Run.phase==RunPhase::Wave
@@ -351,18 +497,25 @@ void SDywxRoot::BattleScreen()
     Details->AddSlot().AutoHeight().Padding(0,8)[LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    击败后继续整理"),Run.statistics.damageDealt,Run.statistics.damageTaken);return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    妖潮余时 %.0f 秒"),Run.statistics.damageDealt,Run.statistics.damageTaken,FMath::Max(0.f,Run.waveDuration-Run.waveElapsed));},18,Paper)];
     for(int32 I=0;I<4;++I)Details->AddSlot().AutoHeight()[LiveText([this,I]{const auto& P=Run.progression.build.passives;return I<int(P.size())?CN(PassiveCatalog()[int(P[I])].name):FString::Printf(TEXT("心法槽 %d · 空"),I+1);},18,Gold)];
     Details->AddSlot().AutoHeight().Padding(0,8)[LiveText([this]{return FString::Printf(TEXT("修为 %.0f / %.0f   境界 %d\nWASD / 方向键移动 · 空格遁术 · 1 / 2 / 3 顿悟"),HUD.Experience,HUD.ExperienceToNext,Run.progression.level);},18,Paper)];
-    At(24,20,400,32,SNew(SBox).ToolTip(SNew(SToolTip)[Details])[
+    At(24,48,480,32,SNew(SBox).ToolTip(SNew(SToolTip)[Details])[
         SNew(SOverlay)
         +SOverlay::Slot().Padding(26,10)[SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.72f,.055f,.025f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Health,HUD.MaxHealth));})]
         +SOverlay::Slot()[SNew(SCombatOrnament)]]);
-    At(50,57,348,3,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.48f,.62f,.57f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Experience,HUD.ExperienceToNext));}));
-    At(800,24,520,34,LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("机缘 · 大妖    第 %d 波    %02d:%02d"),Run.wave,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60);return FString::Printf(TEXT("第 %d / %d 波   ·   %02d:%02d   ·   斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},16,Paper));
-    At(1770,22,120,40,CombatButton(TEXT("暂停 Esc"),[this]{return Pause();}));
-    At(1640,22,110,40,CombatButton(TEXT("道典 C"),[this]{return OpenModal(dywx::Modal::Codex);}));
+    At(50,85,290,3,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.48f,.62f,.57f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Experience,HUD.ExperienceToNext));}));
+    At(28,0,600,44,LiveText([this]{return FString::Printf(TEXT("气血 %.0f / %.0f    护盾 %.0f"),HUD.Health,HUD.MaxHealth,Run.player.shield);},20,Paper));
+    At(480,DockY,960,bSmallViewport?200:160,Framed(Panel(SNew(SBox),FLinearColor(.006f,.012f,.014f,.88f),0)));
+    At(495,DockY-15,132,132,SNew(SImage).Image(ConceptCell(TEXT("concept-portrait-medallions.png"),Nav.character)).Visibility(EVisibility::HitTestInvisible));
+    At(485,bSmallViewport?970:1000,155,bSmallViewport?44:36,SNew(SBox).HAlign(HAlign_Center)[Label(Names[Nav.character],16,Gold)]);
+    At(660,bSmallViewport?1015:1008,bSmallViewport?420:480,10,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.30f,.66f,.67f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Experience,HUD.ExperienceToNext));}));
+    At(bSmallViewport?1100:1155,bSmallViewport?1000:995,bSmallViewport?320:270,bSmallViewport?44:40,LiveText([this]{return FString::Printf(TEXT("修为 %.0f / %.0f"),HUD.Experience,HUD.ExperienceToNext);},16,Paper));
+    At(360,78,bSmallViewport?190:170,bSmallViewport?44:38,LiveText([this]{return FString::Printf(TEXT("境界 %d"),Run.progression.level);},18,Gold));
+    At(650,24,700,46,LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("机缘 · 大妖    第 %d 波    %02d:%02d"),Run.wave,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60);return FString::Printf(TEXT("第 %d / %d 波   ·   %02d:%02d   ·   斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},20,Paper));
+    At(bSmallViewport?1720:1770,22,bSmallViewport?170:120,bSmallViewport?48:40,CombatButton(TEXT("暂停 Esc"),[this]{return Pause();}));
+    At(40,990,160,48,CombatButton(TEXT("道典 C"),[this]{return OpenModal(dywx::Modal::Codex);}));
     if(Run.phase==RunPhase::Boss)
     {
-        At(635,72,650,40,SNew(SBox).ToolTip(SNew(SToolTip)[Paragraph(Owner.IsValid()&&Owner->Simulation()?CN(Owner->Simulation()->DescribeBossMechanics()):TEXT(""),570,20,Paper)])[LiveText([this]{auto* S=Owner.IsValid()?Owner->Simulation():nullptr;const FString Name=S?CN(CaveCatalog()[int(S->GetArena().cave)].bossName):TEXT("洞主");return (Run.statistics.elapsed<BossChangeUntil?FString(TEXT("洞主破相！ ")):FString())+FString::Printf(TEXT("%s · 第 %d 相   %.0f / %.0f"),*Name,Run.bossPhase,BossHP,BossMaxHP);},17,Gold)]);
-        At(635,112,650,6,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.7f,.12f,.6f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(BossHP,BossMaxHP));}));
+        At(bSmallViewport?610:635,72,bSmallViewport?700:650,bSmallViewport?44:40,SNew(SBox).ToolTip(SNew(SToolTip)[Paragraph(Owner.IsValid()&&Owner->Simulation()?CN(Owner->Simulation()->DescribeBossMechanics()):TEXT(""),570,20,Paper)])[LiveText([this]{auto* S=Owner.IsValid()?Owner->Simulation():nullptr;const FString Name=S?CN(CaveCatalog()[int(S->GetArena().cave)].bossName):TEXT("洞主");return (Run.statistics.elapsed<BossChangeUntil?FString(TEXT("洞主破相！ ")):FString())+FString::Printf(TEXT("%s · 第 %d 相   %.0f / %.0f"),*Name,Run.bossPhase,BossHP,BossMaxHP);},17,Gold)]);
+        At(635,bSmallViewport?124:112,650,6,SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.7f,.12f,.6f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(BossHP,BossMaxHP));}));
     }
     auto AnomalyText=[this]() -> FString {
         auto* S=Owner.IsValid()?Owner->Simulation():nullptr;if(!S)return FString();
@@ -380,24 +533,32 @@ void SDywxRoot::BattleScreen()
         }
         return FString::Printf(TEXT("【%s】%s · 剩余%.0f秒 · 悬停查看完整规律\n"),Icons[int(A.id)],*CN(AnomalyName(A.id)),A.remaining)+Key;
     };
-    At(28,80,400,36,SNew(SBox)
+    At(28,125,400,bSmallViewport?44:36,SNew(SBox)
         .Visibility_Lambda([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return S&&S->GetAnomalies().State().active&&(Run.phase==RunPhase::Wave||Run.phase==RunPhase::Boss)?EVisibility::Visible:EVisibility::Collapsed;})
         .ToolTip(SNew(SToolTip)[SNew(STextBlock).Font(Font(18)).ColorAndOpacity(Paper).WrapTextAt(600).Text_Lambda([this,AnomalyText]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return FText::FromString(AnomalyText()+TEXT("\n")+(S?CN(DescribeAnomaly(S->GetAnomalies().State().id,S->GetAnomalies().Config())):FString()));})])
         [LiveText([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;if(!S)return FString();const auto&A=S->GetAnomalies().State();return A.active?CN(AnomalyName(A.id))+FString::Printf(TEXT(" · %.0f秒"),A.remaining):FString();},16,Gold)]);
     // Six compact, image-backed medallions. Full names and cooldowns stay available on hover.
     for(int32 I=0;I<6;++I) {
         auto Tip=SNew(SToolTip)[LiveText([this,I]{const auto& S=Run.progression.build.spells;if(I>=int(S.size()))return FString::Printf(TEXT("术法槽 %d · 空\n顿悟时选择术法填入此槽"),I+1);return CN(GetSpellConfig(S[I].id,S[I].rank).name)+FString::Printf(TEXT("\n%d重 · 冷却 %.1f秒"),S[I].rank,Run.spellCooldowns[int(S[I].id)]);},18,Paper)];
-        At(696+I*88,970,80,80,SNew(SBox).ToolTip(Tip)[SNew(SImage)
+        At(672+I*120,SpellY,88,88,SNew(SBox).ToolTip(Tip)[SNew(SImage)
             .Image_Lambda([this,I]{const auto&S=Run.progression.build.spells;return CombatIcon(I<int32(S.size())?int32(S[I].id):-1);})
             .ColorAndOpacity_Lambda([this,I]{return I<int32(Run.progression.build.spells.size())?FLinearColor::White:FLinearColor(.30f,.28f,.25f,.65f);})]);
-        At(706+I*88,1050,60,24,SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Gold).Justification(ETextJustify::Center)
+        At(678+I*120,SpellY+26,76,bSmallViewport?44:34,SNew(STextBlock).Font(Font(16)).Justification(ETextJustify::Center).ColorAndOpacity(Paper)
+            .Text_Lambda([this,I]{const auto&S=Run.progression.build.spells;if(I>=int(S.size()))return FText::GetEmpty();const float Cooldown=Run.spellCooldowns[int(S[I].id)];return Cooldown>.05f?FText::FromString(FString::Printf(TEXT("%.1f"),Cooldown)):FText::GetEmpty();}));
+        At(675+I*120,RankY,82,bSmallViewport?44:32,SNew(STextBlock).Font(Font(14)).ColorAndOpacity(Gold).Justification(ETextJustify::Center)
             .Text_Lambda([this,I]{const auto&S=Run.progression.build.spells;if(I>=int(S.size()))return FText::FromString(TEXT("·"));return FText::FromString(FString::ChrN(FMath::Min(S[I].rank,5),TCHAR(0x2022)));}));
     }
-    At(1250,995,155,38,CombatButton(TEXT("遁术 Space"),[this]{return Dash();}));
-    At(1250,1035,160,28,LiveText([this]{return HUD.DashCooldownRemaining>0?FString::Printf(TEXT("%.1f 秒"),HUD.DashCooldownRemaining):FString(TEXT("就绪"));},14,Gold));
+    At(1660,955,205,52,CombatButton(TEXT("遁术 Space"),[this]{return Dash();}));
+    At(1690,1010,170,bSmallViewport?44:34,LiveText([this]{return HUD.DashCooldownRemaining>0?FString::Printf(TEXT("%.1f 秒"),HUD.DashCooldownRemaining):FString(TEXT("就绪"));},14,Gold));
+    if(Run.phase==RunPhase::Rest) RestPanel();
+    if(Run.phase==RunPhase::Won || Run.phase==RunPhase::Dead) ResultPanel();
+    }
+    if(bUpgradeOpen) UpgradePanel();
     // Keep the action right of the boss bar, above the upgrade cards.
     if (Run.phase == RunPhase::Rest || !Run.progression.offers.empty())
     {
+        if(bUpgradeOpen) At(600,960,380,60,Framed(Button(bFusionOpen?TEXT("收起破境"):TEXT("破境配方  ›"),[this]{bFusionOpen=!bFusionOpen;Rebuild();return FReply::Handled();})));
+        if(!bUpgradeOpen || bFusionOpen) {
         auto Fusions=SNew(SScrollBox);
         for(const auto& FusionRecipe:FusionCatalog()) {
             if(FusionRecipe.hero!=Run.progression.build.hero)continue;
@@ -414,38 +575,100 @@ void SDywxRoot::BattleScreen()
                     const auto& Now = S->GetSnapshot();
                     if (Now.generation != Generation || Now.paused ||
                         (Now.phase != RunPhase::Wave && Now.phase != RunPhase::Boss && Now.phase != RunPhase::Rest)) return;
-                    if (auto* Commands = Owner->Session()) Commands->Fuse(Fusion);
+                    if (auto* Commands = Owner->Session()) { SelectedUpgrade=-1; bFusionOpen=false; Commands->Fuse(Fusion); }
                 });
             },CanFuseNow,CanFuseNow,Recipe+TEXT("。仅调息或有待选顿悟时可破境；暂停时不可用。破境继承道象，消耗配方指定的术法。"))]];
         }
-        At(1360,120,510,100,Fusions);
+        if(Run.progression.offers.empty()) At(1360,120,510,100,Fusions);
+        else {
+            auto Popup=SNew(SVerticalBox)
+                +SVerticalBox::Slot().AutoHeight()[Label(TEXT("破境 · 选择配方"),30,Gold,true)]
+                +SVerticalBox::Slot().AutoHeight().Padding(0,12)[Paragraph(TEXT("消耗对应术法完成破境。可用配方以当前修行为准。"),780,20,Paper)]
+                +SVerticalBox::Slot().FillHeight(1)[Fusions]
+                +SVerticalBox::Slot().AutoHeight().Padding(0,14)[SNew(SBox).HeightOverride(65)[Button(TEXT("返回顿悟 · Esc"),[this]{bFusionOpen=false;Rebuild();return FReply::Handled();})]];
+            At(95,325,900,590,Framed(Panel(Popup,Ink,32)));
+        }
+        }
     }
-    if(Run.phase==RunPhase::Rest) RestPanel();
-    if(Run.phase==RunPhase::Won || Run.phase==RunPhase::Dead) ResultPanel();
-    if(!Run.progression.offers.empty() && (Run.phase==RunPhase::Wave || Run.phase==RunPhase::Boss || Run.phase==RunPhase::Rest)) UpgradePanel();
+
 }
 FReply SDywxRoot::RunCommand(TFunction<void()> Command)
 {
     if(Nav.liveBattle && Nav.modal==dywx::Modal::None && Owner.IsValid()) { Command(); Owner->RefreshRunUI(); RefreshRunUI(); }
     return FReply::Handled();
 }
+void SDywxRoot::HandleUpgradeSelection(int32 Index)
+{
+    if(!Nav.liveBattle || Nav.modal!=dywx::Modal::None || bFusionOpen || Run.paused || !Owner.IsValid()) return;
+    const auto* Sim=Owner->Simulation();
+    if(!Sim || !Sim->IsAwaitingUpgrade()) return;
+    const auto& Now=Sim->GetSnapshot();
+    if(Index<0 || Index>=int32(Now.progression.offers.size())) return;
+    SelectedUpgrade=Index; SelectedOffer=Now.progression.offers[Index];
+    SelectedUpgradeGeneration=Now.generation;
+    SelectedUpgradePending=Now.progression.pendingUpgrades;
+    Rebuild();
+}
+FReply SDywxRoot::ConfirmUpgrade()
+{
+    if(bFusionOpen)return FReply::Handled();
+    // Observe any intervening session command before accepting the selection.
+    if(Owner.IsValid()) Owner->RefreshRunUI();
+    return RunCommand([this] {
+        auto* S=Owner->Simulation();if(!S || S->GetSnapshot().paused || !S->IsAwaitingUpgrade())return;
+        const auto& Now=S->GetSnapshot();
+        const int32 I=SelectedUpgrade;
+        if(Now.generation!=SelectedUpgradeGeneration || Now.progression.pendingUpgrades!=SelectedUpgradePending || I<0 || I>=int32(Now.progression.offers.size()))return;
+        const auto& Current=Now.progression.offers[I];
+        if(Current.kind!=SelectedOffer.kind || Current.spell!=SelectedOffer.spell || Current.passive!=SelectedOffer.passive)return;
+        SelectedUpgrade=-1; // Clear before command/callback; never auto-consume a consecutive offer.
+        Owner->ChooseUpgrade(I);
+    });
+}
 void SDywxRoot::UpgradePanel()
 {
-    At(1080,225,810,55,Panel(Label(FString::Printf(TEXT("顿悟待选 %d · 战斗已暂停"),Run.progression.pendingUpgrades),24,Gold),Ink,6));
+    const TCHAR* UpgradeBackground=Nav.character==0?TEXT("concept-upgrade-body-bg.png"):(Nav.character==2?TEXT("concept-upgrade-beast-bg.png"):TEXT("concept-upgrade-bg.png"));
+    // Shield covered HUD/rest actions from pointer hit-testing, not just sight.
+    At(0,0,1920,1080,SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+        .BorderBackgroundColor(FLinearColor::Transparent).Padding(0)
+        .OnMouseButtonDown_Lambda([](const FGeometry&,const FPointerEvent&){return FReply::Handled();})
+        [SNew(SImage).Image(Art(UpgradeBackground)).Visibility(EVisibility::HitTestInvisible)]);
+    At(750,25,430,75,Panel(Label(TEXT("战斗已暂停"),30,Gold,true),FLinearColor(.01f,.10f,.08f,.95f),8));
+    const FString TitleKey=TEXT("upgrade-title-crop");
+    if(!Brushes.Contains(TitleKey)) {
+        auto Title=MakeUnique<FSlateBrush>(*Art(TEXT("concept-upgrade-title.png")));
+        Title->SetUVRegion(FBox2f(FVector2f(15.f/2060.f,75.f/763.f),FVector2f(2045.f/2060.f,700.f/763.f)));
+        Brushes.Add(TitleKey,MoveTemp(Title));
+    }
+    At(95,90,600,185,SNew(SImage).Image(Brushes[TitleKey].Get()).Visibility(EVisibility::HitTestInvisible));
+    At(105,278,900,44,Label(FString::Printf(TEXT("择一术法 · 待领悟 %d 次"),Run.progression.pendingUpgrades),20,Paper));
+    if(bFusionOpen)return; // Covered choices are absent from pointer and Tab navigation.
     for(int32 I=0;I<int(Run.progression.offers.size()) && I<3;++I)
     {
         const auto O=Run.progression.offers[I];
-        FString Name,Desc;
-        if(O.kind==UpgradeKind::Passive) { const auto& P=PassiveCatalog()[int(O.passive)];Name=CN(P.name);Desc=CN(P.name)+TEXT("：\n")+CN(P.description); }
-        else { int Rank=1;for(const auto& S:Run.progression.build.spells)if(S.id==O.spell)Rank=S.rank+1;Name=CN(GetSpellConfig(O.spell,Rank).name);Desc=CN(DescribeSpell(O.spell,Rank)); }
-        auto Card=SNew(SVerticalBox)
-            +SVerticalBox::Slot().AutoHeight()[Button(FString::Printf(TEXT("%d  "),I+1)+Name,[this,I,O,Generation=Run.generation]{return RunCommand([this,I,O,Generation]{auto*S=Owner->Simulation();if(!S)return;const auto&Now=S->GetSnapshot();if(Now.generation!=Generation||I>=int(Now.progression.offers.size()))return;const auto&Current=Now.progression.offers[I];if(Current.kind==O.kind&&Current.spell==O.spell&&Current.passive==O.passive)Owner->ChooseUpgrade(I);});})]
-            +SVerticalBox::Slot().FillHeight(1).Padding(8,8)[SNew(SScrollBox)+SScrollBox::Slot()[Paragraph(Desc,230,18,Paper)]];
-        Card->AddSlot().AutoHeight()[Button(FString::Printf(TEXT("封存 · 余%d"),Run.progression.sealsRemaining),[this,I]{return RunCommand([this,I]{auto* S=Owner->Simulation();RunNotice=S&&Owner->Session()->SealUpgrade(I)?TEXT("本局已封存"):TEXT("不可封存：第二层开放，每局限三次。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)&&Run.progression.sealsRemaining>0,TEXT("永久从本局候选池移除；每局三次。"))];
-        At(1080+I*270,290,260,220,Panel(Card,Ink,6));
+        FString Name,Desc,RankText;
+        if(O.kind==UpgradeKind::Passive) {const auto& P=PassiveCatalog()[int(O.passive)];Name=CN(P.name);Desc=CN(P.description);RankText=TEXT("获得心法");}
+        else {
+            int Rank=1;for(const auto& Spell:Run.progression.build.spells)if(Spell.id==O.spell)Rank=Spell.rank+1;
+            Name=CN(GetSpellConfig(O.spell,Rank).name);Desc=CN(DescribeSpell(O.spell,Rank));
+            RankText=Rank>1?FString::Printf(TEXT("%d 重 → %d 重"),Rank-1,Rank):TEXT("可得一重");
+        }
+        const float RowY=325+I*175;
+        At(95,RowY,900,160,Framed(SNew(SButton).ButtonStyle(SelectedUpgrade==I?&RowPrimaryButton:&RowNormalButton)
+            .ContentPadding(0).HAlign(HAlign_Fill).VAlign(VAlign_Fill)
+            .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch)HandleUpgradeSelection(I);return FReply::Handled();})[SNew(SBox)],SelectedUpgrade==I));
+        At(100,RowY+6,148,148,SNew(SImage).Image(O.kind==UpgradeKind::Passive?(O.passive==PassiveId::ClearMind?ConceptCell(TEXT("concept-upgrade-icons.png"),2):Art(TEXT("icon-mirror.png"))):CombatIcon(int(O.spell))).Visibility(EVisibility::HitTestInvisible));
+        At(265,RowY+6,535,58,SNew(SBox).Visibility(EVisibility::HitTestInvisible)[Label(FString::Printf(TEXT("%d  "),I+1)+Name,30,SelectedUpgrade==I?Gold:Paper,true)]);
+        At(265,RowY+64,535,44,SNew(SBox).Visibility(EVisibility::HitTestInvisible)[Label(RankText,22,Gold)]);
+        // Dedicated scroll viewport x265..795; seal column x825..980 is disjoint.
+        At(265,RowY+108,530,44,SNew(SScrollBox)+SScrollBox::Slot()[Paragraph(Desc,500,18,Paper)]);
+        At(825,RowY+104,155,48,SNew(SBox).IsEnabled(Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)&&Run.progression.sealsRemaining>0)[CombatButton(FString::Printf(TEXT("封存 · %d"),Run.progression.sealsRemaining),[this,I]{return RunCommand([this,I]{SelectedUpgrade=-1;auto* S=Owner->Simulation();RunNotice=S&&Owner->Session()->SealUpgrade(I)?TEXT("本局已封存"):TEXT("不可封存：第二层开放，每局限三次。");});})]);
     }
-    At(1080,520,365,60,Button(TEXT("跳过 · 修为与灵石"),[this]{return RunCommand([this]{auto*S=Owner->Simulation();RunNotice=S&&Owner->Session()->SkipUpgrade()?TEXT("已跳过本次顿悟"):TEXT("不可跳过：需要第二层与有效顿悟。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)));
-    At(1460,520,430,60,Button(FString::Printf(TEXT("重悟 · 剩余 %d 次"),Run.progression.rerollsRemaining),[this]{return RunCommand([this]{if(auto* S=Owner->Simulation())Owner->Session()->Reroll();});},false,Run.progression.rerollsRemaining>0));
+    At(100,860,430,80,Button(TEXT("确认领悟"),[this]{return ConfirmUpgrade();},true,SelectedUpgrade>=0,TEXT("完成所有顿悟后战斗继续；手动暂停与失焦暂停不会因此解除。"),true));
+    At(550,860,430,80,Button(FString::Printf(TEXT("重悟 · 剩余 %d 次"),Run.progression.rerollsRemaining),[this]{return RunCommand([this]{SelectedUpgrade=-1;if(auto* S=Owner->Simulation())Owner->Session()->Reroll();});},false,Run.progression.rerollsRemaining>0));
+    At(100,960,470,60,Button(TEXT("跳过 · 修为与灵石"),[this]{return RunCommand([this]{SelectedUpgrade=-1;auto*S=Owner->Simulation();RunNotice=S&&Owner->Session()->SkipUpgrade()?TEXT("已跳过本次顿悟"):TEXT("不可跳过：需要第二层与有效顿悟。");});},false,Owner.IsValid()&&HasFeature(Owner->CampaignProfile(),Feature::SealSkip)));
+    At(1100,990,720,48,Label(TEXT("1 / 2 / 3 选择 · Enter 确认"),20,Paper));
+    At(100,1025,1500,45,Paragraph(RunNotice.IsEmpty()?TEXT("完成所有顿悟后，战斗继续"):RunNotice,1450,20,Gold));
 }
 void SDywxRoot::ResultPanel()
 {
@@ -658,6 +881,7 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
 FReply SDywxRoot::Primary()
 {
     if (Nav.modal != dywx::Modal::None) return CloseModal(); // Never confirm quitting with a stray Enter.
+    if(Nav.liveBattle && !Run.progression.offers.empty()) return ConfirmUpgrade();
     switch (Nav.screen)
     {
     case dywx::Screen::Main: Nav.Start(); Rebuild(); break;
@@ -677,6 +901,7 @@ FReply SDywxRoot::Primary()
 FReply SDywxRoot::Back()
 {
     if (Nav.modal != dywx::Modal::None) return CloseModal();
+    if(bFusionOpen){bFusionOpen=false;Rebuild();return FReply::Handled();}
     const bool WasBattle = Nav.screen == dywx::Screen::Battle;
     Nav.Back(); Rebuild(); SyncInput();
     if (WasBattle && Owner.IsValid()) Owner->SetUIPaused(true);
@@ -717,7 +942,7 @@ FReply SDywxRoot::Pause()
 }
 FReply SDywxRoot::Dash()
 {
-    if (Nav.screen==dywx::Screen::Battle && Nav.modal==dywx::Modal::None && Nav.liveBattle && HUD.DashCooldownRemaining<=0.0f && Owner.IsValid()) Owner->RequestDash();
+    if (Nav.screen==dywx::Screen::Battle && Nav.modal==dywx::Modal::None && Nav.liveBattle && Run.progression.offers.empty() && HUD.DashCooldownRemaining<=0.0f && Owner.IsValid()) Owner->RequestDash();
     return FReply::Handled();
 }
 FReply SDywxRoot::OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
@@ -726,7 +951,7 @@ FReply SDywxRoot::OnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
     if (Nav.liveBattle && Nav.modal==dywx::Modal::None && Owner.IsValid())
     {
         if(Event.GetKey()==EKeys::One || Event.GetKey()==EKeys::Two || Event.GetKey()==EKeys::Three)
-        { Owner->ChooseUpgrade(Event.GetKey()==EKeys::One?0:(Event.GetKey()==EKeys::Two?1:2));return FReply::Handled(); }
+        { HandleUpgradeSelection(Event.GetKey()==EKeys::One?0:(Event.GetKey()==EKeys::Two?1:2));return FReply::Handled(); }
     }
     if (Event.GetKey()==EKeys::C && Nav.modal==dywx::Modal::None) return OpenModal(dywx::Modal::Codex);
     if (Event.GetKey()==EKeys::Escape) return Back();
@@ -760,7 +985,7 @@ void SDywxRoot::BeginLiveHUD(const FDywxHUDState& State)
     // presentation-only state explicitly rather than relying on generation changes.
     Run=dywx::mvp::Snapshot{}; BossChangeUntil=0; BossHP=0; BossMaxHP=1;
     bBeastVisible=false; BeastOffset={}; SelectedBag=0; SelectedSlot=0;
-    bRefinePreview=false; RunNotice.Empty();
+    bRefinePreview=false; SelectedUpgrade=-1; bFusionOpen=false; RunNotice.Empty();
     if(Owner.IsValid())if(auto* S=Owner->Simulation())if(S->IsCampaign()) {
         const auto& C=S->GetCampaign().GetState();Nav.character=C.hero;Nav.mode=dywx::Mode(int(C.mode));Nav.map=int(S->GetArena().cave);Nav.riskMask=C.riskMask;
     }
@@ -768,7 +993,7 @@ void SDywxRoot::BeginLiveHUD(const FDywxHUDState& State)
 }
 void SDywxRoot::ReturnToMenu()
 {
-    bModalPausedRun=false;Nav.ReturnToMenu();Rebuild();SyncInput();
+    bModalPausedRun=false;bFusionOpen=false;Nav.ReturnToMenu();Rebuild();SyncInput();
 }
 void SDywxRoot::SetEndlessUnlocked(bool bUnlocked)
 {
@@ -782,6 +1007,11 @@ void SDywxRoot::SetSnapshot(const dywx::mvp::Snapshot& State)
 {
     if(!Nav.liveBattle) return;
     bool Changed=Run.generation!=State.generation || Run.paused!=State.paused || Run.phase!=State.phase || Run.progression.pendingUpgrades!=State.progression.pendingUpgrades || Run.progression.rerollsRemaining!=State.progression.rerollsRemaining;
+    // A fuse/upgrade can regenerate the same offer IDs/count. Treat build and
+    // charge mutations as a new selection batch, including non-widget commands.
+    const auto& Before=Run.progression.build;const auto& After=State.progression.build;
+    if(Before.hero!=After.hero || Before.spells.size()!=After.spells.size() || Before.passives!=After.passives || Run.progression.sealsRemaining!=State.progression.sealsRemaining || Run.progression.skippedUpgrades!=State.progression.skippedUpgrades) Changed=true;
+    else for(size_t I=0;I<After.spells.size();++I)if(Before.spells[I].id!=After.spells[I].id || Before.spells[I].rank!=After.spells[I].rank)Changed=true;
     if(Run.progression.bossRewards.size()!=State.progression.bossRewards.size()) Changed=true;
     if(Run.progression.offers.size()!=State.progression.offers.size()) Changed=true;
     else for(size_t I=0;I<State.progression.offers.size();++I) { const auto&A=Run.progression.offers[I];const auto&B=State.progression.offers[I];if(A.kind!=B.kind || A.spell!=B.spell || A.passive!=B.passive) Changed=true; }
@@ -793,7 +1023,8 @@ void SDywxRoot::SetSnapshot(const dywx::mvp::Snapshot& State)
     BossHP=0;BossMaxHP=1;for(const auto&E:State.enemies)if(E.role==EnemyRole::Boss){BossHP=E.hp;BossMaxHP=E.maxHp;break;}
     HUD.Health=State.player.hp;HUD.MaxHealth=State.progression.build.stats.maxHp;HUD.Experience=State.progression.xp;HUD.ExperienceToNext=State.progression.xpRequired;
     HUD.ElapsedSeconds=State.statistics.elapsed;HUD.Wave=State.wave;HUD.DashCooldownRemaining=State.player.dashCooldown;HUD.DashCooldownTotal=State.progression.build.stats.dashCooldown;
-    if(Changed) { SelectedBag=0;bRefinePreview=false;Rebuild(); }
+    if(State.progression.offers.empty())bFusionOpen=false;
+    if(Changed) { SelectedUpgrade=-1;SelectedBag=0;bRefinePreview=false;Rebuild(); }
 }
 
 void SDywxRoot::RestPanel()

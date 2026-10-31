@@ -1,0 +1,1515 @@
+PASS: navigation, locked content, repeated actions, back/pause, selection retention, invalid fractions
+PASS: 720/1080/1440 layout scale, text floor, user bounds and invalid sizes
+PASS: preview foreground/background/minimized caps and stricter user limits (policy only, not UE/GPU validation)
+MVP progression: all assertions passed; normal drops 557/100000
+MVP discoveries: metadata, reset, merge, RNG and encounter assertions passed
+mvp_simulation_tests: 10 suites passed
+mvp_proc_tests: T2/T5/T6/M5/M6/U1 + boss caps passed across 200 fixed seeds
+Owned-spell combat tests passed: rank4 aura cadence, rank5 hurt burst/cooldown, rank4 ring rotation
+MELEE post-empty-cast 0.7s enemy-front: dealt=18 taken=0
+STRESS seed=991 ticks=36000 simulated_seconds=599.898 maxEnemies=150 cappedEvents=43815 wall_ms=214.216 (explicit harness HP resets; not balance)
+PASS 607446 checks; elapsed_ms=217.863
+PASS 720p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 26.0px
+PASS 720p 100% fusion-action: 355.53/510 width; 59/80 height; ink 26.0px
+PASS 720p 100% main-help: 530.59/950 width; 35/44 height; ink 18.0px
+PASS 720p 100% main-footer: 253.06/420 width; 35/44 height; ink 18.0px
+PASS 720p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 28.0px
+PASS 720p 100% upgrade-pending: 304.41/900 width; 35/44 height; ink 18.0px
+PASS 720p 100% main-primary: 192.00/440 width; 57/80 height; ink 26.0px
+PASS 720p 100% main-continue: 160.00/440 width; 48/70 height; ink 20.7px
+PASS 720p 100% codex-button: 96.00/440 width; 48/70 height; ink 21.3px
+PASS 720p 100% legacy-button: 96.00/440 width; 48/70 height; ink 20.7px
+PASS 720p 100% settings-button: 96.00/440 width; 48/70 height; ink 20.0px
+PASS 720p 100% quit-button: 96.00/440 width; 48/70 height; ink 20.0px
+PASS 720p 100% back-button: 169.38/190 width; 48/60 height; ink 20.0px
+PASS 720p 100% map-mode: 72.00/150 width; 43/54 height; ink 17.3px
+PASS 720p 100% map-caption: 128.00/306 width; 39/52 height; ink 20.0px
+PASS 720p 100% hero-row: 128.00/258 width; 39/52 height; ink 20.7px
+PASS 720p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 26.0px
+PASS 720p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 26.0px
+PASS 720p 100% hud-xp: 197.52/320 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-level: 99.81/190 width; 35/44 height; ink 18.0px
+PASS 720p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 17.3px
+PASS 720p 100% passive-heading: 253.06/355 width; 35/45 height; ink 18.0px
+PASS 720p 100% upgrade-seal: 113.20/155 width; 39/48 height; ink 18.0px
+PASS 720p 100% dash-cooldown: 97.48/170 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-health: 381.88/600 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-spell-cooldown: 61.95/76 width; 35/44 height; ink 14.0px
+PASS 720p 100% hud-spell-rank: 70.00/82 width; 35/44 height; ink 9.3px
+PASS 720p 100% hud-portrait-name: 112.00/155 width; 35/44 height; ink 18.0px
+PASS 720p 100% dash-button: 156.97/205 width; 39/52 height; ink 20.0px
+PASS 720p 100% battle-pause: 121.12/170 width; 39/48 height; ink 18.0px
+PASS 720p 100% battle-codex: 93.97/160 width; 39/48 height; ink 18.0px
+PASS 720p 100% battle-wave: 521.47/700 width; 35/46 height; ink 18.0px
+PASS 720p 100% screen-heading: 224.00/450 width; 69/80 height; ink 36.0px
+PASS 720p 100% map-title: 224.00/450 width; 69/80 height; ink 36.0px
+PASS 720p 100% hud-resonance: 300.48/600 width; 35/48 height; ink 18.0px
+PASS 720p 100% rest-refine: 353.22/470 width; 48/60 height; ink 21.3px
+PASS 720p 100% rest-lock: 189.64/245 width; 48/60 height; ink 21.3px
+PASS 720p 100% rest-ready: 395.53/810 width; 59/70 height; ink 26.0px
+PASS 720p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 21.3px
+PASS 720p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 21.3px
+PASS 720p 100% save-exit: 192.00/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% saved-hero: 274.00/420 width; 59/80 height; ink 26.0px
+PASS 720p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 18.0px
+PASS 720p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 18.0px
+PASS 720p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 21.3px
+PASS 720p 100% opportunity-reward-line: 515.91/780 width; 35/55 height; ink 18.0px
+PASS 720p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 18.0px
+PASS 720p 100% boss-realm-title: 606.94/700 width; 35/44 height; ink 18.0px
+PASS 720p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 20.7px
+PASS 720p 100% local-ranking-line: 368.17/560 width; 35/55 height; ink 18.0px
+PASS 720p 100% anomaly-hud-header: 149.34/400 width; 35/44 height; ink 18.0px
+PASS 720p 100% anomaly-hud-numbers: 406.03/600 width; 35/48 height; ink 18.0px
+PASS 720p 100% hover-comparison-heading: 504.97/570 width; 35/48 height; ink 18.0px
+PASS 720p 100% rest-title: 619.47/980 width; 43/55 height; ink 23.3px
+PASS 720p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 28.7px
+PASS 720p 110% fusion-action: 387.69/510 width; 64/80 height; ink 28.7px
+PASS 720p 110% main-help: 587.53/950 width; 39/44 height; ink 19.3px
+PASS 720p 110% main-footer: 280.19/420 width; 39/44 height; ink 19.3px
+PASS 720p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 30.7px
+PASS 720p 110% upgrade-pending: 337.06/900 width; 39/44 height; ink 19.3px
+PASS 720p 110% main-primary: 208.00/440 width; 62/80 height; ink 28.7px
+PASS 720p 110% main-continue: 172.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% codex-button: 102.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% legacy-button: 102.00/440 width; 52/70 height; ink 22.7px
+PASS 720p 110% settings-button: 102.00/440 width; 52/70 height; ink 22.7px
+PASS 720p 110% quit-button: 102.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% back-button: 182.27/190 width; 52/60 height; ink 22.7px
+PASS 720p 110% map-mode: 78.00/150 width; 47/54 height; ink 19.3px
+PASS 720p 110% map-caption: 140.00/306 width; 43/52 height; ink 22.7px
+PASS 720p 110% hero-row: 140.00/258 width; 43/52 height; ink 23.3px
+PASS 720p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 28.7px
+PASS 720p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 28.7px
+PASS 720p 110% hud-xp: 218.75/320 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-level: 110.53/190 width; 39/44 height; ink 19.3px
+PASS 720p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 18.7px
+PASS 720p 110% passive-heading: 280.19/355 width; 39/45 height; ink 19.3px
+PASS 720p 110% upgrade-seal: 124.28/155 width; 43/48 height; ink 19.3px
+PASS 720p 110% dash-cooldown: 107.97/170 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-health: 422.94/600 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-spell-cooldown: 68.62/76 width; 39/44 height; ink 14.7px
+PASS 720p 110% hud-spell-rank: 77.50/82 width; 39/44 height; ink 10.0px
+PASS 720p 110% hud-portrait-name: 124.00/155 width; 39/44 height; ink 19.3px
+PASS 720p 110% dash-button: 172.73/205 width; 43/52 height; ink 21.3px
+PASS 720p 110% battle-pause: 133.05/170 width; 43/48 height; ink 19.3px
+PASS 720p 110% battle-codex: 102.97/160 width; 43/48 height; ink 19.3px
+PASS 720p 110% battle-wave: 577.56/700 width; 39/46 height; ink 19.3px
+PASS 720p 110% screen-heading: 248.00/450 width; 76/80 height; ink 40.0px
+PASS 720p 110% map-title: 248.00/450 width; 76/80 height; ink 40.0px
+PASS 720p 110% hud-resonance: 332.72/600 width; 39/48 height; ink 19.3px
+PASS 720p 110% rest-refine: 383.34/470 width; 52/60 height; ink 23.3px
+PASS 720p 110% rest-lock: 204.42/245 width; 52/60 height; ink 23.3px
+PASS 720p 110% rest-ready: 431.69/810 width; 64/70 height; ink 28.7px
+PASS 720p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 23.3px
+PASS 720p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 23.3px
+PASS 720p 110% save-exit: 207.00/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% saved-hero: 298.00/420 width; 64/80 height; ink 28.7px
+PASS 720p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 19.3px
+PASS 720p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 19.3px
+PASS 720p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 23.3px
+PASS 720p 110% opportunity-reward-line: 571.25/780 width; 39/55 height; ink 20.7px
+PASS 720p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 19.3px
+PASS 720p 110% boss-realm-title: 672.12/700 width; 39/44 height; ink 19.3px
+PASS 720p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 22.7px
+PASS 720p 110% local-ranking-line: 407.72/560 width; 39/55 height; ink 19.3px
+PASS 720p 110% anomaly-hud-header: 165.38/400 width; 39/44 height; ink 19.3px
+PASS 720p 110% anomaly-hud-numbers: 449.62/600 width; 39/48 height; ink 19.3px
+PASS 720p 110% hover-comparison-heading: 559.16/570 width; 39/48 height; ink 19.3px
+PASS 720p 110% rest-title: 690.16/980 width; 48/55 height; ink 25.3px
+PASS 1080p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 39.0px
+PASS 1080p 100% fusion-action: 355.53/510 width; 59/80 height; ink 39.0px
+PASS 1080p 100% main-help: 511.70/950 width; 34/44 height; ink 26.0px
+PASS 1080p 100% main-footer: 216.91/420 width; 30/44 height; ink 23.0px
+PASS 1080p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 42.0px
+PASS 1080p 100% upgrade-pending: 293.56/900 width; 34/44 height; ink 26.0px
+PASS 1080p 100% main-primary: 192.00/440 width; 57/80 height; ink 39.0px
+PASS 1080p 100% main-continue: 160.00/440 width; 48/70 height; ink 31.0px
+PASS 1080p 100% codex-button: 96.00/440 width; 48/70 height; ink 32.0px
+PASS 1080p 100% legacy-button: 96.00/440 width; 48/70 height; ink 31.0px
+PASS 1080p 100% settings-button: 96.00/440 width; 48/70 height; ink 30.0px
+PASS 1080p 100% quit-button: 96.00/440 width; 48/70 height; ink 30.0px
+PASS 1080p 100% back-button: 169.38/190 width; 48/60 height; ink 30.0px
+PASS 1080p 100% map-mode: 70.00/150 width; 42/54 height; ink 25.0px
+PASS 1080p 100% map-caption: 128.00/306 width; 39/52 height; ink 30.0px
+PASS 1080p 100% hero-row: 128.00/258 width; 39/52 height; ink 31.0px
+PASS 1080p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 39.0px
+PASS 1080p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 39.0px
+PASS 1080p 100% hud-xp: 155.19/270 width; 28/40 height; ink 21.0px
+PASS 1080p 100% hud-level: 85.55/170 width; 30/38 height; ink 23.0px
+PASS 1080p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 26.0px
+PASS 1080p 100% passive-heading: 244.03/355 width; 34/45 height; ink 26.0px
+PASS 1080p 100% upgrade-seal: 91.09/155 width; 32/48 height; ink 21.0px
+PASS 1080p 100% dash-cooldown: 66.16/170 width; 24/34 height; ink 19.0px
+PASS 1080p 100% hud-health: 368.34/600 width; 34/44 height; ink 26.0px
+PASS 1080p 100% hud-spell-cooldown: 48.67/76 width; 28/34 height; ink 16.0px
+PASS 1080p 100% hud-spell-rank: 47.50/82 width; 24/32 height; ink 9.0px
+PASS 1080p 100% hud-portrait-name: 88.00/155 width; 28/36 height; ink 21.0px
+PASS 1080p 100% dash-button: 125.48/205 width; 32/52 height; ink 23.0px
+PASS 1080p 100% battle-pause: 97.31/120 width; 32/40 height; ink 21.0px
+PASS 1080p 100% battle-codex: 75.98/160 width; 32/48 height; ink 21.0px
+PASS 1080p 100% battle-wave: 503.00/700 width; 34/46 height; ink 26.0px
+PASS 1080p 100% screen-heading: 224.00/450 width; 69/80 height; ink 54.0px
+PASS 1080p 100% map-title: 224.00/450 width; 69/80 height; ink 54.0px
+PASS 1080p 100% hud-resonance: 257.55/600 width; 30/48 height; ink 24.0px
+PASS 1080p 100% rest-refine: 353.22/470 width; 48/60 height; ink 32.0px
+PASS 1080p 100% rest-lock: 189.64/245 width; 48/60 height; ink 32.0px
+PASS 1080p 100% rest-ready: 395.53/810 width; 59/70 height; ink 39.0px
+PASS 1080p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 32.0px
+PASS 1080p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 32.0px
+PASS 1080p 100% save-exit: 192.00/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% saved-hero: 274.00/420 width; 59/80 height; ink 39.0px
+PASS 1080p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 27.0px
+PASS 1080p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 27.0px
+PASS 1080p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 32.0px
+PASS 1080p 100% opportunity-reward-line: 497.53/780 width; 34/55 height; ink 28.0px
+PASS 1080p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 27.0px
+PASS 1080p 100% boss-realm-title: 498.62/650 width; 29/40 height; ink 23.0px
+PASS 1080p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 31.0px
+PASS 1080p 100% local-ranking-line: 355.09/560 width; 34/55 height; ink 26.0px
+PASS 1080p 100% anomaly-hud-header: 117.34/400 width; 28/36 height; ink 21.0px
+PASS 1080p 100% anomaly-hud-numbers: 348.00/600 width; 30/48 height; ink 23.0px
+PASS 1080p 100% hover-comparison-heading: 432.80/570 width; 30/48 height; ink 23.0px
+PASS 1080p 100% rest-title: 619.47/980 width; 43/55 height; ink 35.0px
+PASS 1080p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 43.0px
+PASS 1080p 110% fusion-action: 387.69/510 width; 64/80 height; ink 43.0px
+PASS 1080p 110% main-help: 568.39/950 width; 38/44 height; ink 28.0px
+PASS 1080p 110% main-footer: 244.03/420 width; 34/44 height; ink 26.0px
+PASS 1080p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 46.0px
+PASS 1080p 110% upgrade-pending: 326.12/900 width; 38/44 height; ink 28.0px
+PASS 1080p 110% main-primary: 208.00/440 width; 62/80 height; ink 43.0px
+PASS 1080p 110% main-continue: 172.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% codex-button: 102.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% legacy-button: 102.00/440 width; 52/70 height; ink 34.0px
+PASS 1080p 110% settings-button: 102.00/440 width; 52/70 height; ink 34.0px
+PASS 1080p 110% quit-button: 102.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% back-button: 182.27/190 width; 52/60 height; ink 34.0px
+PASS 1080p 110% map-mode: 76.00/150 width; 46/54 height; ink 28.0px
+PASS 1080p 110% map-caption: 140.00/306 width; 43/52 height; ink 34.0px
+PASS 1080p 110% hero-row: 140.00/258 width; 43/52 height; ink 35.0px
+PASS 1080p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 43.0px
+PASS 1080p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 43.0px
+PASS 1080p 110% hud-xp: 169.28/270 width; 30/40 height; ink 24.0px
+PASS 1080p 110% hud-level: 96.27/170 width; 34/38 height; ink 26.0px
+PASS 1080p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 28.0px
+PASS 1080p 110% passive-heading: 271.12/355 width; 38/45 height; ink 28.0px
+PASS 1080p 110% upgrade-seal: 98.45/155 width; 34/48 height; ink 23.0px
+PASS 1080p 110% dash-cooldown: 69.61/170 width; 25/34 height; ink 20.0px
+PASS 1080p 110% hud-health: 409.11/600 width; 38/44 height; ink 28.0px
+PASS 1080p 110% hud-spell-cooldown: 53.09/76 width; 30/34 height; ink 17.0px
+PASS 1080p 110% hud-spell-rank: 50.00/82 width; 25/32 height; ink 9.0px
+PASS 1080p 110% hud-portrait-name: 96.00/155 width; 30/36 height; ink 23.0px
+PASS 1080p 110% dash-button: 135.95/205 width; 34/52 height; ink 26.0px
+PASS 1080p 110% battle-pause: 105.25/120 width; 34/40 height; ink 23.0px
+PASS 1080p 110% battle-codex: 81.97/160 width; 34/48 height; ink 23.0px
+PASS 1080p 110% battle-wave: 558.61/700 width; 38/46 height; ink 28.0px
+PASS 1080p 110% screen-heading: 248.00/450 width; 76/80 height; ink 60.0px
+PASS 1080p 110% map-title: 248.00/450 width; 76/80 height; ink 60.0px
+PASS 1080p 110% hud-resonance: 289.78/600 width; 34/48 height; ink 26.0px
+PASS 1080p 110% rest-refine: 383.34/470 width; 52/60 height; ink 35.0px
+PASS 1080p 110% rest-lock: 204.42/245 width; 52/60 height; ink 35.0px
+PASS 1080p 110% rest-ready: 431.69/810 width; 64/70 height; ink 43.0px
+PASS 1080p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 35.0px
+PASS 1080p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 35.0px
+PASS 1080p 110% save-exit: 207.00/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% saved-hero: 298.00/420 width; 64/80 height; ink 43.0px
+PASS 1080p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 29.0px
+PASS 1080p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 29.0px
+PASS 1080p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 35.0px
+PASS 1080p 110% opportunity-reward-line: 552.75/780 width; 38/55 height; ink 29.0px
+PASS 1080p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 29.0px
+PASS 1080p 110% boss-realm-title: 563.64/650 width; 33/40 height; ink 25.0px
+PASS 1080p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 34.0px
+PASS 1080p 110% local-ranking-line: 394.44/560 width; 38/55 height; ink 28.0px
+PASS 1080p 110% anomaly-hud-header: 128.00/400 width; 30/36 height; ink 23.0px
+PASS 1080p 110% anomaly-hud-numbers: 391.59/600 width; 34/48 height; ink 26.0px
+PASS 1080p 110% hover-comparison-heading: 486.98/570 width; 34/48 height; ink 26.0px
+PASS 1080p 110% rest-title: 690.16/980 width; 48/55 height; ink 38.0px
+PASS 1440p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 52.0px
+PASS 1440p 100% fusion-action: 355.53/510 width; 59/80 height; ink 52.0px
+PASS 1440p 100% main-help: 511.70/950 width; 34/44 height; ink 34.7px
+PASS 1440p 100% main-footer: 216.91/420 width; 30/44 height; ink 30.7px
+PASS 1440p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 56.0px
+PASS 1440p 100% upgrade-pending: 293.56/900 width; 34/44 height; ink 34.7px
+PASS 1440p 100% main-primary: 192.00/440 width; 57/80 height; ink 52.0px
+PASS 1440p 100% main-continue: 160.00/440 width; 48/70 height; ink 41.3px
+PASS 1440p 100% codex-button: 96.00/440 width; 48/70 height; ink 42.7px
+PASS 1440p 100% legacy-button: 96.00/440 width; 48/70 height; ink 41.3px
+PASS 1440p 100% settings-button: 96.00/440 width; 48/70 height; ink 40.0px
+PASS 1440p 100% quit-button: 96.00/440 width; 48/70 height; ink 40.0px
+PASS 1440p 100% back-button: 169.38/190 width; 48/60 height; ink 40.0px
+PASS 1440p 100% map-mode: 70.00/150 width; 42/54 height; ink 33.3px
+PASS 1440p 100% map-caption: 128.00/306 width; 39/52 height; ink 40.0px
+PASS 1440p 100% hero-row: 128.00/258 width; 39/52 height; ink 41.3px
+PASS 1440p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 52.0px
+PASS 1440p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 52.0px
+PASS 1440p 100% hud-xp: 155.19/270 width; 28/40 height; ink 28.0px
+PASS 1440p 100% hud-level: 85.55/170 width; 30/38 height; ink 30.7px
+PASS 1440p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 34.7px
+PASS 1440p 100% passive-heading: 244.03/355 width; 34/45 height; ink 34.7px
+PASS 1440p 100% upgrade-seal: 91.09/155 width; 32/48 height; ink 28.0px
+PASS 1440p 100% dash-cooldown: 66.16/170 width; 24/34 height; ink 25.3px
+PASS 1440p 100% hud-health: 368.34/600 width; 34/44 height; ink 34.7px
+PASS 1440p 100% hud-spell-cooldown: 48.67/76 width; 28/34 height; ink 21.3px
+PASS 1440p 100% hud-spell-rank: 47.50/82 width; 24/32 height; ink 12.0px
+PASS 1440p 100% hud-portrait-name: 88.00/155 width; 28/36 height; ink 28.0px
+PASS 1440p 100% dash-button: 125.48/205 width; 32/52 height; ink 30.7px
+PASS 1440p 100% battle-pause: 97.31/120 width; 32/40 height; ink 28.0px
+PASS 1440p 100% battle-codex: 75.98/160 width; 32/48 height; ink 28.0px
+PASS 1440p 100% battle-wave: 503.00/700 width; 34/46 height; ink 34.7px
+PASS 1440p 100% screen-heading: 224.00/450 width; 69/80 height; ink 72.0px
+PASS 1440p 100% map-title: 224.00/450 width; 69/80 height; ink 72.0px
+PASS 1440p 100% hud-resonance: 257.55/600 width; 30/48 height; ink 32.0px
+PASS 1440p 100% rest-refine: 353.22/470 width; 48/60 height; ink 42.7px
+PASS 1440p 100% rest-lock: 189.64/245 width; 48/60 height; ink 42.7px
+PASS 1440p 100% rest-ready: 395.53/810 width; 59/70 height; ink 52.0px
+PASS 1440p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 42.7px
+PASS 1440p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 42.7px
+PASS 1440p 100% save-exit: 192.00/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% saved-hero: 274.00/420 width; 59/80 height; ink 52.0px
+PASS 1440p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 36.0px
+PASS 1440p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 36.0px
+PASS 1440p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 42.7px
+PASS 1440p 100% opportunity-reward-line: 497.53/780 width; 34/55 height; ink 37.3px
+PASS 1440p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 36.0px
+PASS 1440p 100% boss-realm-title: 498.62/650 width; 29/40 height; ink 30.7px
+PASS 1440p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 41.3px
+PASS 1440p 100% local-ranking-line: 355.09/560 width; 34/55 height; ink 34.7px
+PASS 1440p 100% anomaly-hud-header: 117.34/400 width; 28/36 height; ink 28.0px
+PASS 1440p 100% anomaly-hud-numbers: 348.00/600 width; 30/48 height; ink 30.7px
+PASS 1440p 100% hover-comparison-heading: 432.80/570 width; 30/48 height; ink 30.7px
+PASS 1440p 100% rest-title: 619.47/980 width; 43/55 height; ink 46.7px
+PASS 1440p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 57.3px
+PASS 1440p 110% fusion-action: 387.69/510 width; 64/80 height; ink 57.3px
+PASS 1440p 110% main-help: 568.39/950 width; 38/44 height; ink 37.3px
+PASS 1440p 110% main-footer: 244.03/420 width; 34/44 height; ink 34.7px
+PASS 1440p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 61.3px
+PASS 1440p 110% upgrade-pending: 326.12/900 width; 38/44 height; ink 37.3px
+PASS 1440p 110% main-primary: 208.00/440 width; 62/80 height; ink 57.3px
+PASS 1440p 110% main-continue: 172.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% codex-button: 102.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% legacy-button: 102.00/440 width; 52/70 height; ink 45.3px
+PASS 1440p 110% settings-button: 102.00/440 width; 52/70 height; ink 45.3px
+PASS 1440p 110% quit-button: 102.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% back-button: 182.27/190 width; 52/60 height; ink 45.3px
+PASS 1440p 110% map-mode: 76.00/150 width; 46/54 height; ink 37.3px
+PASS 1440p 110% map-caption: 140.00/306 width; 43/52 height; ink 45.3px
+PASS 1440p 110% hero-row: 140.00/258 width; 43/52 height; ink 46.7px
+PASS 1440p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 57.3px
+PASS 1440p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 57.3px
+PASS 1440p 110% hud-xp: 169.28/270 width; 30/40 height; ink 32.0px
+PASS 1440p 110% hud-level: 96.27/170 width; 34/38 height; ink 34.7px
+PASS 1440p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 37.3px
+PASS 1440p 110% passive-heading: 271.12/355 width; 38/45 height; ink 37.3px
+PASS 1440p 110% upgrade-seal: 98.45/155 width; 34/48 height; ink 30.7px
+PASS 1440p 110% dash-cooldown: 69.61/170 width; 25/34 height; ink 26.7px
+PASS 1440p 110% hud-health: 409.11/600 width; 38/44 height; ink 37.3px
+PASS 1440p 110% hud-spell-cooldown: 53.09/76 width; 30/34 height; ink 22.7px
+PASS 1440p 110% hud-spell-rank: 50.00/82 width; 25/32 height; ink 12.0px
+PASS 1440p 110% hud-portrait-name: 96.00/155 width; 30/36 height; ink 30.7px
+PASS 1440p 110% dash-button: 135.95/205 width; 34/52 height; ink 34.7px
+PASS 1440p 110% battle-pause: 105.25/120 width; 34/40 height; ink 30.7px
+PASS 1440p 110% battle-codex: 81.97/160 width; 34/48 height; ink 30.7px
+PASS 1440p 110% battle-wave: 558.61/700 width; 38/46 height; ink 37.3px
+PASS 1440p 110% screen-heading: 248.00/450 width; 76/80 height; ink 80.0px
+PASS 1440p 110% map-title: 248.00/450 width; 76/80 height; ink 80.0px
+PASS 1440p 110% hud-resonance: 289.78/600 width; 34/48 height; ink 34.7px
+PASS 1440p 110% rest-refine: 383.34/470 width; 52/60 height; ink 46.7px
+PASS 1440p 110% rest-lock: 204.42/245 width; 52/60 height; ink 46.7px
+PASS 1440p 110% rest-ready: 431.69/810 width; 64/70 height; ink 57.3px
+PASS 1440p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 46.7px
+PASS 1440p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 46.7px
+PASS 1440p 110% save-exit: 207.00/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% saved-hero: 298.00/420 width; 64/80 height; ink 57.3px
+PASS 1440p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 38.7px
+PASS 1440p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 38.7px
+PASS 1440p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 46.7px
+PASS 1440p 110% opportunity-reward-line: 552.75/780 width; 38/55 height; ink 38.7px
+PASS 1440p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 38.7px
+PASS 1440p 110% boss-realm-title: 563.64/650 width; 33/40 height; ink 33.3px
+PASS 1440p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 45.3px
+PASS 1440p 110% local-ranking-line: 394.44/560 width; 38/55 height; ink 37.3px
+PASS 1440p 110% anomaly-hud-header: 128.00/400 width; 30/36 height; ink 30.7px
+PASS 1440p 110% anomaly-hud-numbers: 391.59/600 width; 34/48 height; ink 34.7px
+PASS 1440p 110% hover-comparison-heading: 486.98/570 width; 34/48 height; ink 34.7px
+PASS 1440p 110% rest-title: 690.16/980 width; 48/55 height; ink 50.7px
+PASS 100% BodyScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 78px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 78px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 117px content, 95px scroll viewport
+PASS 100% BodyScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 114px content, 95px scroll viewport
+PASS 100% BodyScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 114px content, 95px scroll viewport
+PASS: 354 offline checks. UE/Slate runtime validation NOT RUN.
+PASS: new run clears transient old-run display
+PASS: death result consumes authoritative damage facts
+PASS: failed retry retains current result
+PASS: full game transactions
+PASS: save and leave only after success
+PASS: pause save guard rejects unresolved encounters and transactions
+PASS: pause save preserves pending upgrades
+PASS: first-layer cave identification reachable
+PASS: data-driven opportunities and anomaly rules
+PASS: all hero fusion recipes remain selectable
+PASS: explicit ready fusion and tier-aware opportunity guidance
+PASS: elite combat HUD is distinct from normal wave countdown
+PASS: elite preparation has an explicit battle action
+PASS: local ranking uses authoritative order
+PASS: active anomaly HUD with numeric tooltip
+PASS: authoritative complete codex rules
+PASS: shared full stat colored hover comparison
+PASS: phase notice uses paused simulation clock
+PASS: no quick-only retry
+PASS: player lore preserved
+PASS: world bridge
+PASS: six spell four passive slots
+PASS: catalog not legacy three skills
+PASS: upgrade not modal
+PASS: inventory controls
+PASS: stale widget guard
+PASS: snapshot copy excludes entity arrays
+PASS: movement and upgrade selection routing
+PASS: bounded HUD refresh
+PASS: playable fusion action
+PASS: codex saved view without world spawn
+PASS: codex grey and lit complete list
+PASS: balanced source delimiters and 685 CJK glyphs in both actual Sarasa fonts
+NOT_RUN: UHT/C++ Unreal build, Slate input/layout, packaged gameplay, GPU/FPS
+PASS: slender framed health and experience
+PASS: six centered compact image slots
+PASS: numeric details not discarded
+PASS: anomaly tooltip retains complete rules
+PASS: fusion only during actionable phases
+PASS: atlas cropped and strongly owned
+PASS: font and resolution scaling preserved
+PASS: all six fallback glyph files decode
+PASS: transparent 3x2 medallion atlas and all six clean cell gutters (1536, 1024)
+NOT_RUN: Unreal compile, 720p/1080p Slate render, hover and gameplay interaction
+PASS: Content/UI/Images/concept-beast-bg.png 1672 941
+PASS: Content/UI/Images/concept-body-bg.png 1672 941
+PASS: Content/UI/Images/concept-ember-bg.png 1672 941
+PASS: Content/UI/Images/concept-logo.png 1983 793
+PASS: Content/UI/Images/concept-main-bg.png 1672 941
+PASS: Content/UI/Images/concept-mist-bg.png 1672 941
+PASS: Content/UI/Images/concept-panel-frame.png 1024 1536
+PASS: Content/UI/Images/concept-portrait-medallions.png 2172 724
+PASS: Content/UI/Images/concept-portraits.png 2172 724
+PASS: Content/UI/Images/concept-primary-button.png 2172 724
+PASS: Content/UI/Images/concept-realm-thumbs.png 2172 724
+PASS: Content/UI/Images/concept-sword-bg.png 1672 941
+PASS: Content/UI/Images/concept-thunder-bg.png 1672 941
+PASS: Content/UI/Images/concept-upgrade-beast-bg.png 1672 941
+PASS: Content/UI/Images/concept-upgrade-bg.png 1672 941
+PASS: Content/UI/Images/concept-upgrade-body-bg.png 1672 941
+PASS: Content/UI/Images/concept-upgrade-icons.png 2172 724
+PASS: Content/UI/Images/concept-upgrade-title.png 2060 763
+NOT_RUN: Slate compositing, native layout, interactions, GPU or game appearance
+PASS: viewport resize is presentation only
+PASS: footer is restricted to main and cannot overlap selection CTA
+PASS: font uses tested shared policy
+PASS: minimum small-profile pointer controls are 32px at720p
+PASS: combat primary numbers retain readable font size
+PASS: confirmation refreshes external mutations before selection read
+PASS: six native main actions, genuine continuation and currency
+PASS: clean scenes selected by actual hero/realm
+PASS: no fake battle screenshot
+PASS: square portrait atlas thirds and strong texture ownership
+PASS: ornament crop and alpha frame contract
+PASS: character sidebar keeps real starter build and save controls
+PASS: realm advanced options collapsed by default without losing risk gating
+PASS: selection does not consume, pause or resume
+PASS: confirmation rechecks identity, generation and pending count
+PASS: keyboard number keys select only and Enter confirms
+PASS: pending upgrade blocks UI dash
+PASS: upgrade has paused label and left stacked native choices
+PASS: offer mutations clear selection, not manual pause
+PASS: upgrade excludes covered HUD and rest from focus tree
+PASS: upgrade shield consumes pointer presses
+PASS: fusion invalidates pending selection before command
+PASS: external build and charge changes invalidate same-ID offers
+PASS: upgrade scroll and seal have separate disjoint viewports
+PASS: image row padding fits image and style adds no hidden padding
+PASS: explicit padding styles used by image, mode and combat controls
+PASS: passive wrap leaves dedicated scrollbar allowance
+PASS: passive description is independently scrollable
+PASS: framed face rows and active stepper
+PASS: HUD uses real circular portrait atlas by selected hero
+PASS: realm rows use actual thumbnail atlas thirds
+PASS: upgrade identity art follows current hero
+PASS: title is cropped art and broad slab removed
+PASS: closed fusion popup has no recipe focus targets
+PASS: fusion popup Escape returns without unpausing
+PASS: bottom dock keeps XP, level and safe readable labels
+PASS: seal keeps feature and charge gates
+PASS: fusion, rest and rewards remain reachable
+PASS: manifest-backed transparent three-cell atlas concept-realm-thumbs.png
+PASS: manifest-backed transparent three-cell atlas concept-upgrade-icons.png
+PASS: manifest-backed transparent three-cell atlas concept-portrait-medallions.png
+NOT_RUN: Unreal compilation, native interaction, 720p/1080p and110% rendered layout
+PASS: v1 optional flags migration, v2 bounded codec, dirty/write guards and transactional consume source contract
+NOT_RUN: Unreal compile, restart/file IO, atomic replacement and power-loss fault injection
+PASS: upgrade waiting uses the core freeze for visual time
+PASS: upgrade waiting clears input and cannot enqueue dash
+PASS: explicit resume cannot undo a nested focus-loss pause
+PASS: live HUD preserves navigation-selected modal input mode
+PASS: focus navigation cannot be overwritten after nested input-mode change
+PASS: pause entry clears queued dash and stale held keys
+PASS: UIOnly entry clears keys even for non-pausing economy
+PASS: flush only through clear helper, not each player tick or upgrade
+PASS: one live integration owner; world renderer never steps
+PASS: local focus/input sampled immediately before simulation step
+PASS: native minimized/foreground and Slate active
+PASS: shared budget preserves external baseline and accepted cap
+PASS: PIE cap excluded
+PASS: focus loss pauses once per transition and never auto-resumes
+PASS: existing pause menu is idempotent, not Escape toggle
+PASS: release restores only owned exact cap and prior view
+PASS: live pause preserves scene instead of preview suppression
+PASS: modal and background input not sampled
+PASS: single budget remains bound across menu/run transitions
+PASS: world released before menu reacquires preview
+PASS: pre-step delegate removed during teardown
+NOT_RUN: Unreal compile, actual focus/minimize/input transitions, rendered pause scene, FPS/GPU measurements
+{
+  "scope": "asset and configuration checks only; not an Unreal build or runtime test",
+  "passed": true,
+  "checks": [
+    {
+      "name": "main-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "26d17c49a3487a0ca5d93006d83289d45975eb8d6b77250539bae35e6188d576"
+      }
+    },
+    {
+      "name": "character-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "8a6e0d66af0c3da21614c2dfe1739ba3c60b3c883c81a16f49a7003f0e3c2dc2"
+      }
+    },
+    {
+      "name": "map-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "a38d7279c78a42b3157a78d4ea96d19cc9bd28d560b3dfe50d0dbeae6ca5120c"
+      }
+    },
+    {
+      "name": "battle-background.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1672,
+          941
+        ],
+        "sha256": "b627787f193ae430e2ed2edfad37caf35e8ed27620619568169dde814912da9d"
+      }
+    },
+    {
+      "name": "icon-slash.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          43,
+          100,
+          391,
+          468
+        ],
+        "sha256": "f80a352385a84e787e63c65fb104d1ae17391c1b63756dc18d311fcfbe47897b"
+      }
+    },
+    {
+      "name": "icon-orbit.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          65,
+          65,
+          446,
+          446
+        ],
+        "sha256": "24e4b65d1ad7fc20f91ae72ed407e3a037e090a4d35cefd323b94d965d37ca5a"
+      }
+    },
+    {
+      "name": "icon-arrow.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          82,
+          75,
+          437,
+          431
+        ],
+        "sha256": "cee6576a038c9f0679de9280de800d645d2c1a496991833bfd2770be416a7810"
+      }
+    },
+    {
+      "name": "icon-dash.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          51,
+          93,
+          397,
+          402
+        ],
+        "sha256": "3b98c7582b6aa6a75e18a84852dff9d0c50f94cd85d72ceeaecb8cd3b2265e38"
+      }
+    },
+    {
+      "name": "icon-stone.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          158,
+          105,
+          354,
+          407
+        ],
+        "sha256": "c4f8004dc5cb3ec28c81116349c34de680669f2590548fee0ecb7cdd78ecbbb8"
+      }
+    },
+    {
+      "name": "icon-mirror.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          512,
+          512
+        ],
+        "mode": "RGBA",
+        "visible_bounds": [
+          62,
+          62,
+          450,
+          451
+        ],
+        "sha256": "5f97e8b2938701591dd3ecd67f4ea67421e51c96a421cfdf15aa789136dbf660"
+      }
+    },
+    {
+      "name": "character-portraits.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          1774,
+          887
+        ],
+        "uv_ranges": [
+          [
+            0.0,
+            0,
+            0.25,
+            1
+          ],
+          [
+            0.25,
+            0,
+            0.5,
+            1
+          ],
+          [
+            0.5,
+            0,
+            0.75,
+            1
+          ],
+          [
+            0.75,
+            0,
+            1.0,
+            1
+          ]
+        ],
+        "nonempty_slices": [
+          true,
+          true,
+          true,
+          true
+        ],
+        "sha256": "abf9f34707a52a05859f788d7067b4de92d45007517941d6f29ac6f19165c9ca"
+      }
+    },
+    {
+      "name": "button-gold.png",
+      "passed": true,
+      "detail": {
+        "size": [
+          2172,
+          724
+        ],
+        "mode": "RGBA",
+        "visible_bounds_alpha_above_1": [
+          0,
+          153,
+          2167,
+          551
+        ],
+        "uv_range": [
+          0,
+          0.21,
+          1,
+          0.77
+        ],
+        "sha256": "d64d61a1816ec765be2f589f4a4e5ae478fa22cccc2fa80e6fa0486909bb1a87"
+      }
+    },
+    {
+      "name": "SarasaUiSC-Regular.ttf",
+      "passed": true,
+      "detail": {
+        "han_glyphs_checked": 799,
+        "missing": ""
+      }
+    },
+    {
+      "name": "SarasaUiSC-Bold.ttf",
+      "passed": true,
+      "detail": {
+        "han_glyphs_checked": 799,
+        "missing": ""
+      }
+    },
+    {
+      "name": "font license present",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "loose UI files included in packaging",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "runtime module declared",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "not_run": [
+    "Unreal compilation/UHT",
+    "editor launch",
+    "packaging",
+    "Slate rendering/input",
+    "GPU performance"
+  ]
+}
+{
+  "status": "passed",
+  "mesh_count": 38,
+  "triangles": 62268,
+  "scope": "JSON + staging + source contracts only",
+  "ue_compile": "not_run",
+  "ue_render": "not_run"
+}
+PASS: 10 case-insensitive mesh/batch ID overlaps use independent UObject component names; packaged entry must also be tested
+PASS: full-game world, persistence ordering, seeded arena and bounded six-element/companion presentation source contracts
+PASS: six-color low-priority anomaly halos gated by actual modifiers/roles; no fictitious lightning/array enemy buffs
+{
+  "status": "passed",
+  "scope": "static exported art + material source contracts only",
+  "meshes": 38,
+  "areaWeightedBaseColorLuminance": {
+    "hero_body": 0.4255956437983079,
+    "enemy_swarm": 0.11191074301933024,
+    "tile": 0.060042246485295415
+  },
+  "ue_shader_compile": "not_run",
+  "ue_render": "not_run",
+  "gpu_performance": "not_run"
+}
+{
+  "source": "Content/MVP/Geometry/scene.json",
+  "sha256": "b1ebc67c1667ba554f3ad0c0350dd6846ee03e664a9d315865cc89e9c63a1f0d",
+  "meshCount": 38,
+  "rawBytes": 16550621,
+  "passed": true,
+  "meshes": [
+    {
+      "name": "hero_body",
+      "vertices": 5276,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.0
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.179156
+    },
+    {
+      "name": "hero_sword",
+      "vertices": 386,
+      "triangles": 158,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.61,
+          -0.19,
+          0.0
+        ],
+        "max": [
+          1.18,
+          0.19,
+          0.16
+        ]
+      },
+      "signedVolume": 0.007281
+    },
+    {
+      "name": "enemy_swarm",
+      "vertices": 4221,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.005
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177903
+    },
+    {
+      "name": "enemy_exploder",
+      "vertices": 944,
+      "triangles": 818,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.32185,
+          -0.338121,
+          0.19
+        ],
+        "max": [
+          0.343637,
+          0.338121,
+          1.26
+        ]
+      },
+      "signedVolume": 0.193492
+    },
+    {
+      "name": "enemy_charger",
+      "vertices": 7450,
+      "triangles": 3082,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -1.02,
+          -0.431298,
+          0.005
+        ],
+        "max": [
+          0.94,
+          0.431298,
+          1.31
+        ]
+      },
+      "signedVolume": 0.683704
+    },
+    {
+      "name": "enemy_boss",
+      "vertices": 10284,
+      "triangles": 3674,
+      "triangleBudgetExclusive": 10000,
+      "boundsMetres": {
+        "min": [
+          -1.785,
+          -0.754772,
+          0.00875
+        ],
+        "max": [
+          1.645,
+          0.754772,
+          2.2925
+        ]
+      },
+      "signedVolume": 3.863202
+    },
+    {
+      "name": "enemy_rangedbird",
+      "vertices": 1368,
+      "triangles": 624,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -1.0,
+          -1.0,
+          0.48
+        ],
+        "max": [
+          0.53,
+          1.0,
+          1.18
+        ]
+      },
+      "signedVolume": 0.098272
+    },
+    {
+      "name": "enemy_supporttotem",
+      "vertices": 616,
+      "triangles": 330,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.303109,
+          -0.35,
+          0.0
+        ],
+        "max": [
+          0.303109,
+          0.35,
+          1.33
+        ]
+      },
+      "signedVolume": 0.182776
+    },
+    {
+      "name": "enemy_summoner",
+      "vertices": 1456,
+      "triangles": 744,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.56,
+          -0.433013,
+          0.06
+        ],
+        "max": [
+          0.56,
+          0.433013,
+          0.94
+        ]
+      },
+      "signedVolume": 0.342892
+    },
+    {
+      "name": "enemy_spirit",
+      "vertices": 1328,
+      "triangles": 462,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.635453,
+          -0.151609,
+          0.025004
+        ],
+        "max": [
+          0.49515,
+          0.151609,
+          0.85
+        ]
+      },
+      "signedVolume": 0.048366
+    },
+    {
+      "name": "rock",
+      "vertices": 234,
+      "triangles": 80,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.828994,
+          -0.818085,
+          0.0
+        ],
+        "max": [
+          0.940872,
+          0.997783,
+          1.060426
+        ]
+      },
+      "signedVolume": 1.642878
+    },
+    {
+      "name": "pillar",
+      "vertices": 2700,
+      "triangles": 1172,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.5,
+          -0.5,
+          0.0
+        ],
+        "max": [
+          0.5,
+          0.5,
+          2.83
+        ]
+      },
+      "signedVolume": 1.270842
+    },
+    {
+      "name": "tile",
+      "vertices": 354,
+      "triangles": 138,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.49,
+          -0.49,
+          -0.14
+        ],
+        "max": [
+          0.49,
+          0.49,
+          0.002
+        ]
+      },
+      "signedVolume": 0.132957
+    },
+    {
+      "name": "shrine_banner",
+      "vertices": 1844,
+      "triangles": 744,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.24,
+          -0.747063,
+          0.0
+        ],
+        "max": [
+          0.24,
+          0.747063,
+          3.05
+        ]
+      },
+      "signedVolume": 0.027211
+    },
+    {
+      "name": "shrine_arch",
+      "vertices": 5644,
+      "triangles": 2400,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.7,
+          -2.65,
+          0.0
+        ],
+        "max": [
+          0.7,
+          2.65,
+          4.42
+        ]
+      },
+      "signedVolume": 6.670971
+    },
+    {
+      "name": "courtyard_pillar",
+      "vertices": 6700,
+      "triangles": 2556,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.7,
+          -0.7,
+          0.0
+        ],
+        "max": [
+          0.7,
+          0.7,
+          5.55
+        ]
+      },
+      "signedVolume": 4.154165
+    },
+    {
+      "name": "courtyard_rail",
+      "vertices": 4092,
+      "triangles": 1680,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -2.04,
+          -0.25,
+          0.0
+        ],
+        "max": [
+          2.04,
+          0.25,
+          1.37
+        ]
+      },
+      "signedVolume": 1.014794
+    },
+    {
+      "name": "courtyard_brazier",
+      "vertices": 4078,
+      "triangles": 1618,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.635,
+          -0.809026,
+          0.06
+        ],
+        "max": [
+          0.635,
+          0.809026,
+          2.18
+        ]
+      },
+      "signedVolume": 0.789317
+    },
+    {
+      "name": "courtyard_pine",
+      "vertices": 13798,
+      "triangles": 4600,
+      "triangleBudgetExclusive": 6000,
+      "boundsMetres": {
+        "min": [
+          -2.755688,
+          -2.305016,
+          -0.045364
+        ],
+        "max": [
+          2.962785,
+          3.012847,
+          5.78
+        ]
+      },
+      "signedVolume": 1.496074
+    },
+    {
+      "name": "courtyard_steps",
+      "vertices": 1056,
+      "triangles": 432,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -2.0,
+          -0.29,
+          0.0
+        ],
+        "max": [
+          2.0,
+          1.67,
+          1.06
+        ]
+      },
+      "signedVolume": 5.645743
+    },
+    {
+      "name": "courtyard_slab",
+      "vertices": 264,
+      "triangles": 108,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.5,
+          -0.5,
+          -0.09
+        ],
+        "max": [
+          0.5,
+          0.5,
+          0.0
+        ]
+      },
+      "signedVolume": 0.089844
+    },
+    {
+      "name": "courtyard_medallion",
+      "vertices": 576,
+      "triangles": 380,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.5,
+          -0.5,
+          -0.012
+        ],
+        "max": [
+          0.5,
+          0.5,
+          0.006
+        ]
+      },
+      "signedVolume": 0.014127
+    },
+    {
+      "name": "hero_walk_0",
+      "vertices": 5276,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.17896
+    },
+    {
+      "name": "hero_walk_1",
+      "vertices": 5310,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.507123,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.178251
+    },
+    {
+      "name": "hero_walk_2",
+      "vertices": 5334,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.508724,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.178189
+    },
+    {
+      "name": "hero_walk_3",
+      "vertices": 5310,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.507123,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.178264
+    },
+    {
+      "name": "hero_walk_4",
+      "vertices": 5276,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.499751,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.17898
+    },
+    {
+      "name": "hero_walk_5",
+      "vertices": 5320,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.498391,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.17971
+    },
+    {
+      "name": "hero_walk_6",
+      "vertices": 5332,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.566328,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.180161
+    },
+    {
+      "name": "hero_walk_7",
+      "vertices": 5320,
+      "triangles": 2284,
+      "triangleBudgetExclusive": 5000,
+      "boundsMetres": {
+        "min": [
+          -0.65,
+          -0.45361,
+          0.008
+        ],
+        "max": [
+          0.498391,
+          0.45361,
+          1.793
+        ]
+      },
+      "signedVolume": 0.179696
+    },
+    {
+      "name": "enemy_swarm_walk_0",
+      "vertices": 4223,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177801
+    },
+    {
+      "name": "enemy_swarm_walk_1",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177458
+    },
+    {
+      "name": "enemy_swarm_walk_2",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.578316,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177303
+    },
+    {
+      "name": "enemy_swarm_walk_3",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177458
+    },
+    {
+      "name": "enemy_swarm_walk_4",
+      "vertices": 4223,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.49,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177801
+    },
+    {
+      "name": "enemy_swarm_walk_5",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177457
+    },
+    {
+      "name": "enemy_swarm_walk_6",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.578316,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.1773
+    },
+    {
+      "name": "enemy_swarm_walk_7",
+      "vertices": 4273,
+      "triangles": 1768,
+      "triangleBudgetExclusive": 3500,
+      "boundsMetres": {
+        "min": [
+          -0.47,
+          -0.480942,
+          0.008
+        ],
+        "max": [
+          0.553629,
+          0.480942,
+          1.154528
+        ]
+      },
+      "signedVolume": 0.177457
+    }
+  ]
+}
+
+PASS: available offline gates. NOT_RUN: Unreal build/cook/launch/render/GPU/human-play acceptance.

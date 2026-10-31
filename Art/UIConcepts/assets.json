@@ -1,0 +1,181 @@
+[
+  {
+    "path": "Content/UI/Images/concept-beast-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "9f49f7925ec257a3ceb5f8d5af0c3f5931d6d009a6822f51dac554af7065374c",
+    "bytes": 2717047
+  },
+  {
+    "path": "Content/UI/Images/concept-body-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "8b960313e3388e9f0b344272ec5be5c133a31db04602c40e061797ce920ee62a",
+    "bytes": 2812239
+  },
+  {
+    "path": "Content/UI/Images/concept-ember-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "0f877684c7042b60500189075c5a203b083f85c99167c7b2442364bb95b36cc2",
+    "bytes": 2505653
+  },
+  {
+    "path": "Content/UI/Images/concept-logo.png",
+    "width": 1983,
+    "height": 793,
+    "mode": "RGBA",
+    "sha256": "6cd05dda8b347ed9f5ab83330cd0713e4a825efba9c42e1c74df14ba50c57839",
+    "bytes": 1991842,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 0
+  },
+  {
+    "path": "Content/UI/Images/concept-main-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "ee7c1cbd38ad604566208f604396cd206ce7924220a75d6480a7cd0ced9c5438",
+    "bytes": 2713871
+  },
+  {
+    "path": "Content/UI/Images/concept-mist-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "466c6fc67559af380ccecd3a5e4c8fa0a2e0a13b0606d5d837eb333bfe4073e5",
+    "bytes": 2775599
+  },
+  {
+    "path": "Content/UI/Images/concept-panel-frame.png",
+    "width": 1024,
+    "height": 1536,
+    "mode": "RGBA",
+    "sha256": "c69082cc48a76df2976f658c787654ddeca874643eee7843f31d57ae74f07d3b",
+    "bytes": 992156,
+    "alpha_extrema": [
+      0,
+      254
+    ],
+    "center_alpha": 0
+  },
+  {
+    "path": "Content/UI/Images/concept-portrait-medallions.png",
+    "width": 2172,
+    "height": 724,
+    "mode": "RGBA",
+    "sha256": "43b258fe282864acb65512d7403c225c2541bdfc4053071e676d090724401c56",
+    "bytes": 2711650,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 253
+  },
+  {
+    "path": "Content/UI/Images/concept-portraits.png",
+    "width": 2172,
+    "height": 724,
+    "mode": "RGB",
+    "sha256": "a82b0620d23c69b1e4a07c6e9ff07633f881f7844e531024a44d8e923a534383",
+    "bytes": 3116315
+  },
+  {
+    "path": "Content/UI/Images/concept-primary-button.png",
+    "width": 2172,
+    "height": 724,
+    "mode": "RGBA",
+    "sha256": "3aee0e56ab1976b99f40e1b64ffc6a7f306e4757a085b3cdafd75fbaa0021d65",
+    "bytes": 1124256,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 253
+  },
+  {
+    "path": "Content/UI/Images/concept-realm-thumbs.png",
+    "width": 2172,
+    "height": 724,
+    "mode": "RGBA",
+    "sha256": "1f3763eb3ec17aea64c98ca7d847243077633835d03f33dca43b4769a1c220b2",
+    "bytes": 2694697,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 252
+  },
+  {
+    "path": "Content/UI/Images/concept-sword-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "4d94a506708bc82d5654daa03f6966b95e5e7545e40f3ef5c1a5ee89e08af121",
+    "bytes": 2802326
+  },
+  {
+    "path": "Content/UI/Images/concept-thunder-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "e83f43181038b31512e155caee1cb7099c29cab8f81d693afd5cf898a46bc431",
+    "bytes": 2705575
+  },
+  {
+    "path": "Content/UI/Images/concept-upgrade-beast-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "28b7d0c3298cf381274a43db2ee40f3ff19d6469f7748341d009d3fa46b8347e",
+    "bytes": 2101037
+  },
+  {
+    "path": "Content/UI/Images/concept-upgrade-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "8ba9902423ee41d05b2c788e4552ec41e77296635200de6fa704dbc8c8f78005",
+    "bytes": 2044201
+  },
+  {
+    "path": "Content/UI/Images/concept-upgrade-body-bg.png",
+    "width": 1672,
+    "height": 941,
+    "mode": "RGB",
+    "sha256": "76ff5ddbf719790d08c0c2b6a418b3f3e2e734dffe13a95b20c64451e66e9e92",
+    "bytes": 2023295
+  },
+  {
+    "path": "Content/UI/Images/concept-upgrade-icons.png",
+    "width": 2172,
+    "height": 724,
+    "mode": "RGBA",
+    "sha256": "b6dc8b62a86a03d3eea84cc763080807349505365e9183d0ade1b8a1e34ded99",
+    "bytes": 1818345,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 252
+  },
+  {
+    "path": "Content/UI/Images/concept-upgrade-title.png",
+    "width": 2060,
+    "height": 763,
+    "mode": "RGBA",
+    "sha256": "d3def96b53bf0e1418b50e6f4405a1640544a902eaf1072a15fdcf7bd580447c",
+    "bytes": 1756309,
+    "alpha_extrema": [
+      0,
+      255
+    ],
+    "center_alpha": 253
+  }
+]
