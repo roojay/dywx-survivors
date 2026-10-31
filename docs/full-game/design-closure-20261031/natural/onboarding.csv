@@ -1,9 +1,0 @@
-seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build,first_upgrade,first_fusion,uncollected_xp,harness_revision
-11,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,710.554,4,0,1471,19,91,0,0,0,0,0,0,0,1,4,519.934,2,591.8,6,0,0,4,"4:1;7:1;2:3;9:3;10:1;P0;2;",100.007,519.934,78,pickup-distance-v1
-29,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,309.235,3,0,626,11,58,0,0,0,0,0,0,0,1,3,-1,0,0,4,0,0,2,"0:3;4:1;2:1;1:4;7:1;P0;2;",100.007,-1,60,pickup-distance-v1
-73,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,176.918,2,0,287,5,56,0,0,0,0,0,0,0,1,2,-1,0,0,1,0,0,1,"0:4;7:1;P0;",72.2676,-1,118,pickup-distance-v1
-101,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,454.233,4,0,1094,15,72,0,0,0,0,1,1,0,1,4,-1,0,0,6,0,0,3,"7:1;4:1;2:2;10:1;P0;2;",72.1343,421.258,37,pickup-distance-v1
-11,0,1,0,fresh_tier1_no_unlocks,0,1200,dead,480.61,4,0,1274,17,75,0,0,0,0,0,0,0,1,4,-1,0,0,5,0,0,3,"4:3;9:1;2:2;11:1;P1;2;",70.0672,359.973,166,pickup-distance-v1
-29,0,1,0,fresh_tier1_no_unlocks,0,1200,dead,336.295,3,0,844,13,51,0,0,0,0,0,0,0,1,3,-1,0,0,4,0,0,2,"3:4;2:2;4:1;5:3;7:1;6:1;P1;2;",47.8661,-1,91,pickup-distance-v1
-73,0,1,0,fresh_tier1_no_unlocks,0,1200,dead,344.527,3,0,894,14,54,0,0,0,0,0,0,0,1,3,-1,0,0,4,0,0,2,"3:5;7:1;4:2;6:2;9:1;5:2;P1;2;",53.2827,-1,156,pickup-distance-v1
-101,0,1,0,fresh_tier1_no_unlocks,0,1200,dead,628.424,4,0,1795,21,94,0,0,0,0,4,2,0,1,4,519.934,2,13632.8,6,0,0,4,"2:4;4:1;11:1;7:3;9:1;6:1;P1;2;",51.0327,359.973,177,pickup-distance-v1

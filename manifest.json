@@ -1,0 +1,58 @@
+{
+  "format": 1,
+  "base_commit": "55e5fcb021da7bfa9490d55778e92d46cf650618",
+  "target_commit": "3c71b20705e212954cd8e0c27ada2a06a62fa325",
+  "target_tree": "c3672aeac364127ce1345e6a36c913f178fb20b0",
+  "source_ref": "refs/heads/feat/playable-mvp",
+  "prerequisites": [
+    "55e5fcb021da7bfa9490d55778e92d46cf650618"
+  ],
+  "bundle_name": "art-delta.bundle",
+  "bytes": 41602037,
+  "sha256": "e577b7d21040131d8cd3cf183d6058ca7021436904a6737b312038103f0c3c77",
+  "parts": [
+    {
+      "name": "art-delta.bundle.part-000",
+      "bytes": 6291456,
+      "sha256": "1e56b753d71721f11bbc71f5b64129e5816b7409e963c099d390bff866f46413",
+      "git_blob_sha": "e6ded5ba93edbdcc75449f0e351eb6fb918f3139"
+    },
+    {
+      "name": "art-delta.bundle.part-001",
+      "bytes": 6291456,
+      "sha256": "c8fd728e383427b4882a0ed54f918e1fd05580d8c71f77e6b8ad6a6518c4a161",
+      "git_blob_sha": "45647f35a69ead49ddbb6c9528b7fc97903dadc4"
+    },
+    {
+      "name": "art-delta.bundle.part-002",
+      "bytes": 6291456,
+      "sha256": "6a330397bfc9192862a13a91a240425ec61da24885f6f8aa2109bc4ad3dbd543",
+      "git_blob_sha": "a5c49c60f8ece13469bff1e90d47979a385a5712"
+    },
+    {
+      "name": "art-delta.bundle.part-003",
+      "bytes": 6291456,
+      "sha256": "4613976395d3250259239537fa70b829d76014316380ae1ee6f68cb9a7a35172",
+      "git_blob_sha": "577ed94b3da95273a279736f57e03bd35dc8e0f9"
+    },
+    {
+      "name": "art-delta.bundle.part-004",
+      "bytes": 6291456,
+      "sha256": "3c64b3a6be8db32cfc6fb7076eb80de54b9432fa374d33561518bbaf4963688b",
+      "git_blob_sha": "2fa131fcfcc5fdb805787dd7fd598799d2e4c300"
+    },
+    {
+      "name": "art-delta.bundle.part-005",
+      "bytes": 6291456,
+      "sha256": "455bb6221505a39a9977b909bcaccea5ca51631bb08b1854f0012cd650de2fbc",
+      "git_blob_sha": "852b26e25aaed128fd94236f17a52f740af0f2ae"
+    },
+    {
+      "name": "art-delta.bundle.part-006",
+      "bytes": 3853301,
+      "sha256": "c9c8198112e836e8a6334aade68806e74796524104944484b517d109e33a1082",
+      "git_blob_sha": "6957de8251f041a98a2d9ef29140886144858912"
+    }
+  ],
+  "verification": "Local base import, prerequisite ancestry, delta verify/fetch, fsck and target commit/tree verified; no UE/render claim."
+}
