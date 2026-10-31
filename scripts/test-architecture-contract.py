@@ -23,9 +23,15 @@ for path in (ROOT / 'Source/DywxCore').rglob('*'):
     for include in re.findall(r'#include\s+"([^"]+)"', source):
         if path.name == 'Export.h' and include == 'HAL/Platform.h':
             continue
-        check(include.startswith('MVP/') and (ROOT / 'Source/DywxCore/Public' / include).is_file(), f'core-only include: {path.name} -> {include}')
+        public_header = ROOT / 'Source/DywxCore/Public' / include
+        private_root = ROOT / 'Source/DywxCore/Private'
+        local_header = (path.parent / include).resolve()
+        private_include = (path.is_relative_to(private_root) and
+                           local_header.is_relative_to(private_root) and local_header.is_file())
+        check((include.startswith('MVP/') and public_header.is_file()) or private_include,
+              f'core-only include: {path.name} -> {include}')
     check(not re.search(r'\b(?:UCLASS|USTRUCT|UPROPERTY|UFUNCTION|UObject|FString|TArray)\b', source), f'no UE types: {path.name}')
-    if path.suffix == '.h' and path.name != 'Export.h':
+    if path.suffix == '.h' and path.name != 'Export.h' and path.is_relative_to(ROOT / 'Source/DywxCore/Public'):
         check('#include "MVP/Export.h"' in source, f'explicit export contract: {path.name}')
         for line in source.splitlines():
             if re.match(r'^(?:class|struct) ', line) and line != 'class SaveArchive;':

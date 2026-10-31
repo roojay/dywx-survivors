@@ -15,6 +15,10 @@ add_library(DywxCore STATIC
 add_library(Dywx::Core ALIAS DywxCore)
 target_compile_features(DywxCore PUBLIC cxx_std_20)
 target_compile_definitions(DywxCore PUBLIC DYWXCORE_STANDALONE=1)
+if(MSVC)
+    # Core and its consumers contain UTF-8 Chinese text, independent of host locale.
+    target_compile_options(DywxCore PUBLIC /utf-8)
+endif()
 target_include_directories(DywxCore PUBLIC "${DYWX_ROOT}/Source/DywxCore/Public")
 set_target_properties(DywxCore PROPERTIES CXX_EXTENSIONS OFF)
 

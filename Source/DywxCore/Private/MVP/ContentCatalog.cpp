@@ -237,7 +237,7 @@ const std::array<PassiveConfig, kPassiveCount> &PassiveCatalog() {
   return a;
 }
 const std::array<RelicConfig, kRelicCount> &RelicCatalog() {
-  static const auto a=[] { std::array<RelicConfig, kRelicCount> a{
+  static const auto catalog=[] { std::array<RelicConfig, kRelicCount> a{
       {{0, "护心铜镜", Rarity::Common},
        {1, "桃木符牌", Rarity::Common},
        {2, "云纹草履", Rarity::Common},
@@ -325,7 +325,7 @@ const std::array<RelicConfig, kRelicCount> &RelicCatalog() {
     for(const auto& item:additions)a[item.id]=item;
     return a;
   }();
-  return a;
+  return catalog;
 }
 std::string_view RarityName(Rarity r) {
   static constexpr std::array<std::string_view, 4> a{"凡品", "灵品", "仙品",

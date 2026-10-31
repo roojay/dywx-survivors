@@ -242,7 +242,7 @@ void ADywxMVPWorld::BuildScene()
     }
     MakeBatch(TEXT("HeroSword"),TEXT("hero_sword"),FLinearColor::White);
     const TCHAR* Roles[]={TEXT("swarm"),TEXT("exploder"),TEXT("charger"),TEXT("rangedbird"),TEXT("supporttotem"),TEXT("summoner"),TEXT("boss"),TEXT("spirit")};
-    for(auto Role:Roles) MakeBatch(FName(*FString::Printf(TEXT("Enemy_%s"),Role)),FName(*FString::Printf(TEXT("enemy_%s"),Role)),FLinearColor::White);
+    for(auto EnemyRoleName:Roles) MakeBatch(FName(*FString::Printf(TEXT("Enemy_%s"),EnemyRoleName)),FName(*FString::Printf(TEXT("enemy_%s"),EnemyRoleName)),FLinearColor::White);
     MakeBatch(TEXT("Shadow"),TEXT("unit_disc"),FLinearColor(.008,.012,.02));
     MakeBatch(TEXT("PlayerRing"),TEXT("unit_ring"),FLinearColor(.35,.25,.07),true,true);
     MakeBatch(TEXT("Invulnerable"),TEXT("unit_ring"),FLinearColor(.4,.9,1),true,true);

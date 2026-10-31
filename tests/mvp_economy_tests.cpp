@@ -62,6 +62,12 @@ int main() {
   auto saved=e.ExportState();Economy resumed;assert(resumed.RestoreState(saved,p));
   assert(resumed.Stones()==e.Stones());assert(resumed.ReforgePrice(id)==e.ReforgePrice(id));
   auto bad=saved;bad.rng="not a generator";int balance=resumed.Stones();assert(!resumed.RestoreState(bad,p));assert(resumed.Stones()==balance);
+  for(const auto& invalidRng : {std::string{}, saved.rng.substr(0,saved.rng.find(' ')),
+      std::string("-1 ")+saved.rng, std::string("18446744073709551616 ")+saved.rng,
+      std::string("4294967296")+saved.rng.substr(saved.rng.find(' ')), saved.rng+" 0", saved.rng+" garbage"}) {
+    bad=saved;bad.rng=invalidRng;
+    assert(!resumed.RestoreState(bad,p));assert(resumed.Stones()==balance);
+  }
   bad=saved;bad.stones=-1;assert(!resumed.RestoreState(bad,p));
   auto pcopy=p;assert(e.Refresh(p));assert(resumed.Refresh(pcopy));
   for(std::size_t i=0;i<e.Shop().size();++i){assert(e.Shop()[i].token==resumed.Shop()[i].token);assert(e.Shop()[i].relic.catalogId==resumed.Shop()[i].relic.catalogId);}

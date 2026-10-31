@@ -1,4 +1,5 @@
 #include "MVP/SaveCodec.h"
+#include "RandomState.h"
 #include <algorithm>
 #include <cmath>
 #include <cstring>
@@ -123,7 +124,7 @@ void SaveCodec::ProgressionFields(SaveArchive& a,Progression& p){
   std::string rng;if(!a.reading){std::ostringstream ss;ss.imbue(std::locale::classic());ss<<p.rng_;rng=ss.str();}
   a(p.state_,rng,p.fullGame_,p.permanentBase_,p.dropRiskWeight_,p.spellPoolUnlocked_,p.relicPoolUnlocked_,p.preferredRelics_,p.lastBossOrdinal_,p.nextRelic_,p.formResonance_,p.resting_,p.immortalThisWave_,p.bossRewardsGenerated_,p.pityWaves_,p.pendingRefineXp_,p.consumed_);
   auto n=a.Count(p.undo_.size(),100000);if(a.reading)p.undo_.resize(n);for(auto& u:p.undo_)a(u.relics,u.xp);
-  if(a.reading&&a.ok){std::istringstream ss(rng);ss.imbue(std::locale::classic());if(rng.size()>20000||!(ss>>p.rng_)){a.ok=false;return;}ss>>std::ws;if(!ss.eof())a.ok=false;}
+  if(a.reading&&a.ok&&!ReadRandomState(rng,p.rng_))a.ok=false;
 }
 void SaveCodec::AnomalyFields(SaveArchive& a,AnomalySystem& s){
   a(s.layout_,s.config_,s.state_,s.order_,s.cycle_,s.clock_,s.nextStart_,s.nextPulse_,s.strikeAt_,s.endAt_,s.thunderUntil_);

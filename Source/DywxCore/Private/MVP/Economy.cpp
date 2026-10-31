@@ -1,4 +1,5 @@
 #include "MVP/Economy.h"
+#include "RandomState.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -268,9 +269,8 @@ bool Economy::RestoreState(const EconomyState& s,const Progression& p) {
        !equal(found->affixes[r.index],r.oldAffix)||!ValidReplacement(*found,r.index,r.newAffix))return false;
   }
   for(auto id:s.freeTreasures)if(id==0||id>s.restId)return false;
-  std::istringstream rng(s.rng);rng.imbue(std::locale::classic());std::mt19937 parsed;
-  if(!(rng>>parsed))return false;
-  rng>>std::ws;if(!rng.eof())return false;
+  std::mt19937 parsed;
+  if(!ReadRandomState(s.rng,parsed))return false;
   Economy next;next.config_=s.config;next.rng_=parsed;next.quick_=s.quick;next.layer2_=s.layer2;next.layer3_=s.layer3;
   next.active_=s.active;next.cave_=s.cave;next.freeRefresh_=s.freeRefresh;next.restId_=s.restId;next.token_=s.token;
   next.stones_=s.stones;next.pendingXp_=s.pendingXp;next.paidTreasure_=s.paidTreasure;next.shop_=s.shop;next.hidden_=s.hidden;

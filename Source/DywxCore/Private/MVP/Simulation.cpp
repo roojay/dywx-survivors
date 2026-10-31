@@ -812,8 +812,8 @@ void Simulation::SpawnWave(float dt) {
     float budget = float(fullGame_ ? schedule.roleCounts[role] : budgets[effective][role]);
     if (fullGame_) budget *= trials.population * modifiers.spawn * CaveCatalog()[int(arena_.cave)].roleWeights[role == 1 ? 3 : role == 2 ? 1 : role == 3 ? 2 : role] *
         (role == int(EnemyRole::Charger) ? modifiers.chargers : role == int(EnemyRole::Ranged) ? modifiers.ranged : 1);
-    int desired = int(budget * progress);
-    while (waveSpawned_[role] < desired && int(state_.enemies.size()) < cap &&
+    int desiredForRole = int(budget * progress);
+    while (waveSpawned_[role] < desiredForRole && int(state_.enemies.size()) < cap &&
            remaining-- > 0) {
       if(!Spawn(EnemyRole(role), Edge(),
             role >= 2 ? EnemyTier::Variant : EnemyTier::Normal)) break;

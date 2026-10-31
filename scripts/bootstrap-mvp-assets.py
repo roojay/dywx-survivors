@@ -46,7 +46,8 @@ def build(name, vfx):
     tint.set_editor_property('parameter_name', 'Tint')
     tint.set_editor_property('default_value', unreal.LinearColor(1, 1, 1, 1))
     multiply = node(material, unreal.MaterialExpressionMultiply, -350, 0)
-    connect(color, 'RGB', multiply, 'A')
+    # VertexColor exposes combined RGB as the unnamed first output in UE 5.8.
+    connect(color, '', multiply, 'A')
     connect(tint, 'RGB', multiply, 'B')
     if vfx:
         glow = node(material, unreal.MaterialExpressionScalarParameter, -350, 200)
