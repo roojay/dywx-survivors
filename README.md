@@ -1,34 +1,25 @@
-# 道衍万象
+# 一次性可恢复源码检查点 / Recoverable source checkpoint
 
-东方神话风格的 UE5 原生界面原型。
+**这是 GitHub 源码灾备，不是 EXE、Release 或正常源码分支；main 尚未同步。不要将此归档分支合并到 main。**
 
-## 当前交付
+完整源码及所有已提交资源、字体和 feat/playable-mvp 可达历史，封装在自包含 Git bundle 中；没有删除或替换游戏资源。源码目标 commit `ff3452e1f697a43c434844e284dd864eea404395`，tree `388fcac0c0f86996c1b8f38abb58c6ae73f5be41`。manifest.json 记录总大小、SHA256、每块 SHA256 和 Git blob SHA。此方式仅用于一次性恢复，不作为常规开发流程。
 
-`DywxSurvivors.uproject` 包含主菜单、角色选择、洞天／模式选择、战斗 HUD 的 C++ Slate 实现。控件、中文文本、导航、弹窗与状态绑定独立于背景图；背景、头像、金色按钮与六枚 Blender 图标均随工程提供。
+Standalone sanitized gate、natural normal/sanitized、CMake 通过（执行记录由主任务提供）；归档另经过空仓导入、git fsck、commit/tree 对比。**UE 尚未编译，未证明 Windows EXE/GPU 性能。**
 
-**当前是可打包的原生界面演示，不是完整战斗游戏。** win-dev 已用 UE 5.8.4 完成 UHT、编辑器/游戏 UBT 编译和 Windows Development Cook、Stage、Archive。完整包中的 15 个 UI 图片/字体/许可文件已逐字节校验；独立启动、实际界面、焦点、分辨率与性能仍待运行验收。战斗页明确展示静态 HUD 示例，通过接口接入真实玩法后才隐藏预览背景。
+## 恢复（Git + Python 3，无额外 Python 依赖）
 
-- [启动、构建与玩法接口](docs/UE-UI-IMPLEMENTATION.md)
-- [Windows 演示包运行说明与构建证据](docs/WINDOWS-DEMO.md)
-- [验证记录与待验收项目](docs/UI-VALIDATION.md)
-- [资源来源与许可](Art/ASSET-PROVENANCE.md)
-- [Blender 图标源文件与复现](Art/Blender/README.md)
-- [原有设计文档](docs/README.md)
-
-## dot 可执行检查
+使用全新的目录，避免影响任何现有开发仓库。在 Windows 可将 python3 改为 py -3。
 
 ```sh
-bash scripts/test-ui-state.sh
-python3 scripts/validate_assets.py
+git clone --single-branch --branch checkpoint/20261031-playtest-ff3452e https://github.com/roojay/dywx-survivors.git dywx-checkpoint
+cd dywx-checkpoint
+python3 restore.py
+git bundle verify source.bundle
+git clone --branch feat/playable-mvp source.bundle ../dywx-restored
+git -C ../dywx-restored fsck --full
+git -C ../dywx-restored rev-parse HEAD HEAD^{tree}
 ```
 
-独立状态测试与 UE 工程均使用 C++20；资源检查需要 Python、Pillow 与 fontTools。当前 dot 已具备这些检查依赖；工程运行时不依赖 Python。
+最后两项应为上面的目标 commit/tree。restore.py 只检查/拼接固定名称文件，不运行 shell/Git，不修改用户仓库，不覆盖不同的已有 source.bundle；如果中途失败留下不完整文件，检查后手工移走再重试。不要以 python -O 运行（校验使用 assert）。
 
-已有 Linux UE5 安装时：
-
-```sh
-UE_ROOT=/absolute/path/to/UnrealEngine bash scripts/build-ui.sh --check
-UE_ROOT=/absolute/path/to/UnrealEngine bash scripts/build-ui.sh
-```
-
-脚本不会下载引擎、改变系统配置或将缺少引擎伪装为构建通过。完整启动方式见实施说明。
+恢复之后先审核源码、编译和测试，再手动添加 GitHub remote、获取最新 main，确认兼容且为 fast-forward 后做正常推送。**此脚本不自动推送、不强制更新、不改变 main。** 不要将归档分支本身推到 main。
