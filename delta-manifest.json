@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "base_commit": "ff3452e1f697a43c434844e284dd864eea404395",
+  "target_commit": "803e9d19772d87290842aadf2aea791bba673e7a",
+  "target_tree": "51ff5aa217931196f9f6f237bdfe3491c11187cf",
+  "source_ref": "refs/heads/feat/playable-mvp",
+  "prerequisites": [
+    "ff3452e1f697a43c434844e284dd864eea404395"
+  ],
+  "bundle_name": "delta.bundle",
+  "bytes": 45703,
+  "sha256": "fc9a1a768e245521f7e7b3848c4cfd02303017452f5fb66a01a47d7cfa60522f",
+  "git_blob_sha": "10db95e1dcdddb189becdf267435ad62ef055724",
+  "base_bundle_sha256": "f2a39e36c995912a063efa0659d5c6137a197ae1609c373981553b363a748670",
+  "inherited_archive_commit": "70e64df4150fcb2cca35b501f6f7e83aff11c934",
+  "inherited_archive_tree": "8a402281b4de07eb23055fde0c4aeac050f945f7",
+  "verification": "Base full restore then delta verify/fetch, fsck and target commit/tree comparison passed. UE build not implied."
+}
