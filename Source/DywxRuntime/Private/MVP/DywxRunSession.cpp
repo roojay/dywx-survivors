@@ -1,6 +1,7 @@
 #include "MVP/DywxRunSession.h"
 #include "MVP/SaveCodec.h"
 #include "Engine/World.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 using namespace dywx::mvp;
 DEFINE_LOG_CATEGORY_STATIC(LogDywxRunSession, Log, All);
 
@@ -116,6 +117,7 @@ bool UDywxRunSession::ResumeRun(int32 Hero)
 }
 bool UDywxRunSession::SaveProfile()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(DywxSession_SaveProfile);
     if (!IsStandaloneSession()) return false;
     if(!bProfileLoaded || !Profile.IsWritable()) return false;
     if(GetSnapshot().phase==RunPhase::Title) return true; // No run discoveries/pity to observe yet.
@@ -159,7 +161,10 @@ void UDywxRunSession::Tick(float Dt)
     BeforeSimulationTick.ExecuteIfBound();
     if (!IsRunActive()) return;
     // One fixed-step owner; no Actor/Controller/UI is permitted to integrate combat.
-    Simulation.Step(FMath::Clamp(Dt,0.f,.1f),Input);
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(DywxSession_SimulationStep);
+        Simulation.Step(FMath::Clamp(Dt,0.f,.1f),Input);
+    }
     const auto& S=GetSnapshot();
     ProfileElapsed+=FMath::Clamp(Dt,0.f,.1f);
     if(ProfileElapsed>=10 || ProfileWave!=S.wave || ProfilePhase!=S.phase) SaveProfile();

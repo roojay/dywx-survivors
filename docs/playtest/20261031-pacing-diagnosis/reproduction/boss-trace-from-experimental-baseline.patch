@@ -1,0 +1,19 @@
+--- a/tests/full_game_playthrough.cpp
++++ b/tests/full_game_playthrough.cpp
+@@ -293,6 +293,8 @@
+   if(tick%6==0)input=decide(s.GetSnapshot(),s.GetArena(),policy);
+   s.Step(1.f/60,input);const auto& n=s.GetSnapshot();float t=n.statistics.elapsed;
+   peak=std::max(peak,int(n.enemies.size()));
++  if(tick%1800==0 && n.phase==RunPhase::Boss){for(const auto&e:n.enemies)if(e.role==EnemyRole::Boss)std::cerr<<ordinal<<','<<t<<','<<e.bossPhase<<','<<e.hp<<','<<e.shield<<','<<len(e.position-n.player.position)<<','<<n.statistics.damageDealt<<','<<n.statistics.kills<<','<<n.progression.level<<','<<n.enemies.size()<<",\""<<build(n.progression.build)<<"\"\n";}
++
+   if(firstUpgrade<0&&n.progression.level>1)firstUpgrade=t;
+   if(firstDamage<0&&n.statistics.damageTaken>0)firstDamage=t;
+   for(auto sp:n.progression.build.spells){if(firstFive<0&&sp.rank>=5)firstFive=t;for(auto f:FusionCatalog())if(sp.id==f.result&&firstFusion<0)firstFusion=t;}
+@@ -315,6 +317,5 @@
+  std::ofstream events(argc>3?argv[3]:"/tmp/pacing-events.csv");
+  events<<"sample,elapsed,wave,level,hp,kills,uncollected_xp,build,choices\n";
+  std::cout<<"sample,seed,hero,cave,profile,policy,boss_scale,outcome,elapsed,wave,hp,level,kills,peak,first_upgrade,first_rank5,first_fusion,first_2_element,first_damage,wave2_hp,boss_enter,boss_seconds,damage_taken,uncollected_xp,build\n";
+- int ordinal=0;for(bool novice:{true,false})if(onlyProfile<0||int(novice)==onlyProfile)for(int hero=0;hero<3;++hero)for(unsigned seed:{11,29,73,101})for(int policy:{0,10})run(seed,HeroId(hero),CaveId::ThunderMarsh,novice,policy,scale,++ordinal,events);
+- if(onlyProfile!=1)for(int policy:{0,10})run(73,HeroId::Beast,CaveId::MistForest,false,policy,scale,++ordinal,events);
++ int ordinal=0;for(unsigned seed:{11,73})for(int policy:{0,10})run(seed,HeroId::Beast,CaveId::ThunderMarsh,false,policy,scale,++ordinal,events);
+ }catch(const std::exception&e){std::cerr<<e.what()<<'\n';return 1;}}

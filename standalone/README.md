@@ -18,7 +18,17 @@ Visual Studio 等多配置生成器的可执行文件位于 `build/standalone/Re
 - `DywxCore`：纯 C++20 静态库（别名 `Dywx::Core`）。
 - `core_command_tests`：复用 `tests/core_command_tests.cpp` 的 CTest 测试；Release 也保持 `assert` 启用。默认 CTest 不运行较慢的自然演练。
 - `dywx_headless`：直接复用 `tests/full_game_playthrough.cpp`，不是另一份策略或规则实现。首个位置参数为轨迹 CSV 路径；父目录必须存在。请显式传路径，既有源码的缺省值是 `/tmp/dywx-full-natural-trace.csv`。
-- 标准输出是每场一行的结果 CSV（含表头），轨迹文件按约30模拟秒及波次/阶段变化记录。异常写标准错误并返回1；正常完成返回0。`won`、`dead`、`sample_bound` 都是有效观测，返回0不代表全部通关。输出路径会被覆盖，不要复用需要保留的证据文件。
+- 标准输出是每场一行的结果 CSV（含表头），轨迹文件按约30模拟秒、波次/阶段、升级与选择变化记录，并包含地面未拾经验。异常写标准错误并返回1；正常完成返回0。`won`、`dead`、`sample_bound` 都是有效观测，返回0不代表全部通关。输出路径会被覆盖，不要复用需要保留的证据文件。
+
+## 首轮新号快速演练
+
+在轨迹路径后追加 `--quick-onboarding`，只运行两位初始修士 × 四个固定 seed（11/29/73/101），全部为雷泽、快速、新号第一层。
+
+```sh
+./build/standalone/dywx_headless ./build/standalone/onboarding-trace.csv --quick-onboarding > ./build/standalone/onboarding-results.csv
+```
+
+当前输出保留 `policy=0` 的原升级选择策略，并用独立 `harness_revision=pickup-distance-v1` 标记拾取走位修正。`first_upgrade` 指首次观测等级大于1，不是选择卡片的时间；负值表示观察期间未发生。策略修正前后的胜负不能当作生产玩法增强或回归。实验及失败样例见 [节奏诊断](../docs/playtest/20261031-pacing-diagnosis/README.md)。
 
 ## 其他表现层链接同一库
 

@@ -1,0 +1,16 @@
+2026-10-31 ordinary local verification, isolated copy with unchanged 2e5 core.
+Applied production harness SHA256:
+4e9ac2ce444a4cfda6f38bdfe332972bb884e5f57113b1538db02dcd8c58126d tests/full_game_playthrough.cpp
+
+Frozen harness compiled with:
+g++ -std=c++20 -DDYWXCORE_STANDALONE=1 -O2 -Wall -Wextra -Werror -ISource/DywxCore/Public Source/DywxCore/Private/MVP/{Simulation,Progression,ContentCatalog,Campaign,Economy,Arena,SaveCodec}.cpp tests/minimal_full_game_playthrough.cpp -o evidence/minimal-frozen
+Compile exit0; --quick-onboarding exit0 (8 died); default exit0 (1 won/8 died/1 sample_bound).
+Results/traces byte-identical to previous corrected-format run, which differed only by absent argc>3 rejection.
+Policy is0 throughout; harness_revision=pickup-distance-v1. No production rule/balance changes.
+Invalid argc test: exit1, stderr 'natural-smoke-error: too many arguments', trace not created.
+
+git diff --check -- tests/full_game_playthrough.cpp: exit0.
+Existing scripts run in isolated source copy (normal, NOT sanitizer):
+bash scripts/test-core-commands.sh: exit0, 'core command regressions passed'
+bash scripts/test-full-game-integration.sh: exit0, 'full_game_integration_tests: campaign layers, 10-wave/endless bosses, settlement, economy and layout passed'
+Root owns final same-source sanitizer, gate, CMake verification. These ordinary tests do not prove human playability, graphics, UE packaging, or multiplayer readiness.

@@ -1,5 +1,7 @@
 # 完整模式自然操作烟测
 
+> **历史证据提示（2026-10-31）：** 下文是较早冻结批次的原始记录，其中“当前”“最终”均指当时批次，不代表仓库最新实现；旧数字与失败证据原样保留。后续分层版本请先看[验证摘要](../architecture/validation/RESULTS.md)及其[自然操作结果](../architecture/validation/natural/results.csv)、[轨迹](../architecture/validation/natural/trace.csv)、[源码清单](../architecture/validation/natural/source-sha256.txt)。各批次仅为对应源码背书，源码或策略变更后需重新验证；这些自动样例都不证明真人体验或 UE 实机验收通过。
+
 ## 当前证据状态
 
 **冻结后普通构建10例已完成，源码hash核对通过。** 结果为2胜、6死、2到样本上限，无崩溃或无法解释的调息/模拟停滞。ASan/UBSan同10例亦已完成，结果与trace逐字节一致，源码hash核对通过。

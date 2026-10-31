@@ -17,6 +17,7 @@
 #include "Misc/FileHelper.h"
 #include "HAL/FileManager.h"
 #include "Misc/Paths.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -130,6 +131,7 @@ UStaticMesh* ADywxMVPWorld::BuildMesh(FName Name,const TArray<FVector3f>& V,cons
 }
 void ADywxMVPWorld::LoadGeometry()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(DywxWorld_LoadGeometry);
     FString Data; TSharedPtr<FJsonObject> Root;
     const FString Path=FPaths::ProjectContentDir()/TEXT("MVP/Geometry/scene.json");
     const int64 FileBytes=IFileManager::Get().FileSize(*Path);
@@ -195,6 +197,7 @@ void ADywxMVPWorld::Add(FName Name,const FVector& P,const FVector& Scale,float Y
 }
 void ADywxMVPWorld::Flush()
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(DywxWorld_Flush);
     for(auto& Pair:Batches) {
         auto& B=Pair.Value; if(!B.Dynamic && B.Pending.IsEmpty()) continue;
         const int32 Count=B.Pending.Num();
@@ -324,6 +327,7 @@ FName ADywxMVPWorld::ElementBatch(Element E,const TCHAR* Suffix)
 }
 void ADywxMVPWorld::Render(float Dt)
 {
+    TRACE_CPUPROFILER_EVENT_SCOPE(DywxWorld_Render);
     const auto& Simulation=*Session->GetSimulation();
     const auto& S=GetSnapshot();
     if(S.generation!=LastGeneration) { PreviousEnemies.Reset(); PreviousPickups.Reset(); Transients.Reset(); PreviousPickupGrades.Reset(); LastEffect=0; LastShots=S.statistics.shots; LastHP=S.player.hp; LastDash=S.player.dashCooldown; LastLevel=S.progression.level; LastPhase=RunPhase::Title; LastGeneration=S.generation; bHavePreviousPlayer=false; HeroWalkPhase=0; SwarmWalkPhases.Reset(); }

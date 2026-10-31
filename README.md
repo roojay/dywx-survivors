@@ -19,6 +19,10 @@
 
 [完整设计交接](docs/full-game/HANDOFF.md) · [逐条需求复核](docs/full-game/REQUIREMENTS-COVERAGE-FINAL.md) · [UE官方资料审查](docs/full-game/UE-OFFICIAL-REVIEW.md) · [新自然操作样例](docs/full-game/NATURAL-PLAY-CHECK.md)
 
+## 下一次可玩验证的范围
+
+先验收两位初始修士、雷泽、快速模式、新号内容的完整闭环，不再以增加框架或内容数量代替试玩。已实现的其它模式与内容不删除，暂不阻塞这轮体验判断。见 [两局真人试玩与记录](docs/playtest/FIRST-PLAYABLE.md)、[实际复用决策](docs/playtest/REUSE-DECISIONS.md) 和 [自动节奏诊断](docs/playtest/20261031-pacing-diagnosis/README.md)。
+
 ## 当前代码分层
 
 - `Source/DywxCore`：纯 C++ 规则与校验，可独立编译测试。

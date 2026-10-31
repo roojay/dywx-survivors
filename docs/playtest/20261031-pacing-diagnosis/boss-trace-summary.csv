@@ -1,0 +1,5 @@
+sample,seed,hero,cave,profile,policy,boss_scale,outcome,elapsed,wave,hp,level,kills,peak,first_upgrade,first_rank5,first_fusion,first_2_element,first_damage,wave2_hp,boss_enter,boss_seconds,damage_taken,uncollected_xp,build
+1,11,2,0,all_content_zero_stats,0,1,bound,1200.39,4,162.127,5,133,130,100.007,-1,-1,-1,245.601,100.013,519.934,680.461,136.96,0,"26:4;27:1;P5;"
+2,11,2,0,all_content_zero_stats,10,1,bound,1200.39,4,162.127,4,118,130,100.007,-1,-1,-1,245.601,100.013,519.934,680.461,287.117,0,"26:4;P5;"
+3,73,2,0,all_content_zero_stats,0,1,dead,899.491,4,0,17,1520,130,89.2046,515.318,-1,465.83,127.496,100.013,519.934,379.557,859.313,101.35,"26:5;4:3;9:5;18:1;6:1;P5;2;3;"
+4,73,2,0,all_content_zero_stats,10,1,bound,1200.39,4,124.202,4,114,130,89.2046,-1,-1,-1,127.496,100.013,519.934,680.461,377.346,0,"26:4;P5;"
