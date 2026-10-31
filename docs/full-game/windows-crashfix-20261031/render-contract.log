@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "mesh_count": 31,
+  "triangles": 43066,
+  "scope": "JSON + staging + source contracts only",
+  "ue_compile": "not_run",
+  "ue_render": "not_run"
+}
+PASS: 10 case-insensitive mesh/batch ID overlaps use independent UObject component names; packaged entry must also be tested
+PASS: full-game world, persistence ordering, seeded arena and bounded six-element/companion presentation source contracts
+PASS: six-color low-priority anomaly halos gated by actual modifiers/roles; no fictitious lightning/array enemy buffs

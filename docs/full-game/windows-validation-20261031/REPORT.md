@@ -1,3 +1,5 @@
+> Superseded for runtime interaction and package delivery by [battle-entry crash fix validation](../windows-crashfix-20261031/REPORT.md). The original 739466 package crashes on first battle entry.
+
 # Windows UE 验证记录（2026-10-31）
 
 恢复源码为 `6a1031d38b2e1246bc97ec3600c5159ca41b7bbf`，树为 `73e913a3615cbc8484164944939d87c0d2438d1d`。从检查点 `d295df6fd8634afe7b99d0d524111da96a976ba5` 按 full → 803e → 6a 顺序恢复；分卷、bundle 哈希、依赖和 `git fsck --full` 全部通过。归档分支没有当作游戏源码编译。

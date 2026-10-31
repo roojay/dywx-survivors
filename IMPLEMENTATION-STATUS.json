@@ -1,8 +1,8 @@
 {
   "artifact": "UE5 full-design gameplay prototype source and original resources",
-  "status": "windows_build_packaged_and_startup_verified; interactive_and_human_acceptance_pending",
+  "status": "windows_crashfix_build_packaged_and_interaction_smoke_verified; full_campaign_human_acceptance_pending",
   "source_baseline": "6a1031d38b2e1246bc97ec3600c5159ca41b7bbf",
-  "remote_last_verified": "7394661062b11c7083a9066066b048ca3b1eb94c",
+  "remote_last_verified": "f92a037cbbcb897d11a0cc945e06a470c34433dc",
   "gameplay_reference": [
     "docs/gameplay-design-v0.1.md",
     "docs/mvp-prototype-config-v0.1.md"
@@ -54,10 +54,11 @@
     "natural_report": "docs/full-game/NATURAL-PLAY-CHECK.md"
   },
   "not_run": [
-    "packaged Slate interaction and visual layout acceptance",
-    "foreground/minimized/combat GPU and frame pacing acceptance",
-    "real file-replacement/power-loss tests",
-    "human playability and balance acceptance",
+    "complete natural packaged campaign and all hero/cave/boss combinations",
+    "sustained hold-input validation",
+    "large-wave and long-duration performance acceptance",
+    "real file-replacement failure/power-loss tests",
+    "human playability, art and balance acceptance",
     "LeakSanitizer (historical dot host ptrace limitation)"
   ],
   "known_limits": [
@@ -75,21 +76,23 @@
     "docs/full-game/UE-OFFICIAL-REVIEW.md",
     "docs/full-game/SAVE.md",
     "docs/full-game/FINAL-OFFLINE-VALIDATION.md",
-    "docs/full-game/windows-validation-20261031/REPORT.md"
+    "docs/full-game/windows-validation-20261031/REPORT.md",
+    "docs/full-game/windows-crashfix-20261031/REPORT.md"
   ],
   "delivery": {
     "new_exe": true,
     "remote_push_verified": true,
-    "source_commit_verified": "7394661062b11c7083a9066066b048ca3b1eb94c",
+    "source_commit_verified": "f92a037cbbcb897d11a0cc945e06a470c34433dc",
     "package_local_only": true,
-    "package_file": "dywx-survivors-fullgame-win64-20261031.zip",
-    "package_bytes": 372915633,
-    "package_sha256": "70ff2bd156849f0c3803e94befb33297f261de42875088a065d83afcc4c17f04",
-    "blocker": "CUA approval for the newly built game window timed out; interaction and screenshots not executed"
+    "package_file": "dywx-survivors-fullgame-win64-crashfix-f92a037.zip",
+    "package_bytes": 372916730,
+    "package_sha256": "7ec2f06430ba8a5cc22602b2f9d1761997270195f9549eb18891af94b7dbfe24",
+    "blocker": null,
+    "publication_state": "source commit f92a037 verified on main; this evidence-only commit is published separately"
   },
   "windows_validation": {
-    "report": "docs/full-game/windows-validation-20261031/REPORT.md",
-    "build_source_commit": "7394661062b11c7083a9066066b048ca3b1eb94c",
+    "report": "docs/full-game/windows-crashfix-20261031/REPORT.md",
+    "build_source_commit": "f92a037cbbcb897d11a0cc945e06a470c34433dc",
     "engine": "5.8.4-58902052",
     "uht_ubt_dll_bootstrap_cook_archive": "PASS",
     "cmake_ctest": "22/22 PASS",
@@ -97,6 +100,39 @@
     "packaged_startup": "PASS: two isolated captures, normal exit",
     "background_menu_fps": 15.0,
     "lower_process_cap_fps": 10.0,
-    "interactive_visual_acceptance": "NOT_RUN: CUA app approval timed out"
+    "interactive_visual_acceptance": "PASS sampled menu/battle/death/retry/layout; fixture upgrade/equipment/save/restart/resume; full human acceptance pending",
+    "minimized_fps": 5,
+    "foreground_fps": 60,
+    "performance_sample": {
+      "scope": "1920x1080 foreground capture includes pause, active combat and death result; not an isolated stress benchmark",
+      "file": "Profile(20261031_193837).csv",
+      "metrics": {
+        "FrameTime": {
+          "n": 3733,
+          "mean_ms": 16.6742,
+          "p95_ms": 16.6707,
+          "max_ms": 41.4793
+        },
+        "GPUTime": {
+          "n": 3733,
+          "mean_ms": 2.547,
+          "p95_ms": 3.1861,
+          "max_ms": 3.7745
+        },
+        "GPU/SlateUI": {
+          "n": 3733,
+          "mean_ms": 0.0692,
+          "p95_ms": 0.1504,
+          "max_ms": 0.5434
+        },
+        "GPU/Postprocessing": {
+          "n": 3733,
+          "mean_ms": 0.3452,
+          "p95_ms": 0.7056,
+          "max_ms": 1.2309
+        }
+      },
+      "gpu": "NVIDIA GeForce RTX 3080"
+    }
   }
 }
