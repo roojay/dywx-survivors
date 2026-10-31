@@ -54,6 +54,10 @@ ADywxMVPWorld::ADywxMVPWorld()
     Camera->bConstrainAspectRatio=false;
     Camera->PostProcessSettings.bOverride_AutoExposureMethod=true;
     Camera->PostProcessSettings.AutoExposureMethod=EAutoExposureMethod::AEM_Manual;
+    // The stylized scene uses authored relative light/emissive values, not lux
+    // calibrated for the default physical camera (f/4, 1/60 s, ISO 100).
+    Camera->PostProcessSettings.bOverride_AutoExposureApplyPhysicalCameraExposure=true;
+    Camera->PostProcessSettings.AutoExposureApplyPhysicalCameraExposure=false;
     Camera->PostProcessSettings.bOverride_AutoExposureBias=true;
     Camera->PostProcessSettings.AutoExposureBias=0;
     Camera->PostProcessSettings.bOverride_BloomIntensity=true;
@@ -123,7 +127,11 @@ UStaticMesh* ADywxMVPWorld::BuildMesh(FName Name,const TArray<FVector3f>& V,cons
     }
     if(D.Triangles().Num()==0) { UE_LOG(LogDywxMVPWorld,Error,TEXT("Rejected empty/degenerate mesh: %s"),*Name.ToString()); return nullptr; }
     UStaticMesh* Mesh=NewObject<UStaticMesh>(this,Name,RF_Transient);
-    Mesh->GetStaticMaterials().Add(FStaticMaterial(nullptr,TEXT("Surface")));
+    FStaticMaterial Surface(nullptr,TEXT("Surface"));
+    // These vertex-colored meshes have zero UVs and no sampled textures. Fast
+    // runtime builds skip editor UV-density generation; streaming still reads it.
+    Surface.UVChannelData=FMeshUVChannelInfo(0.f);
+    Mesh->GetStaticMaterials().Add(Surface);
     UStaticMesh::FBuildMeshDescriptionsParams Params; Params.bFastBuild=true; Params.bBuildSimpleCollision=false; Params.bAllowCpuAccess=false;
     TArray<const FMeshDescription*> Descriptions{&D};
     if(!Mesh->BuildFromMeshDescriptions(Descriptions,Params)) { UE_LOG(LogDywxMVPWorld,Error,TEXT("Runtime static mesh build failed: %s"),*Name.ToString()); return nullptr; }
@@ -178,7 +186,10 @@ void ADywxMVPWorld::LoadGeometry()
 void ADywxMVPWorld::MakeBatch(FName Name,FName MeshName,FLinearColor Tint,bool Dynamic,bool Emissive)
 {
     UStaticMesh* Mesh=Meshes.FindRef(MeshName); if(!Mesh) { UE_LOG(LogDywxMVPWorld,Error,TEXT("Missing authored MVP mesh %s: diagnostic silhouette only, not visual acceptance."),*MeshName.ToString()); Mesh=Meshes.FindRef(TEXT("unit_diamond")); }
-    auto* Component=NewObject<UInstancedStaticMeshComponent>(this,Name);
+    // Logical batch keys can equal mesh keys (Rock/rock, Pillar/pillar).
+    // UObject names share one case-insensitive namespace within this actor.
+    // Keep Name in Batches, but let Unreal allocate a unique component name.
+    auto* Component=NewObject<UInstancedStaticMeshComponent>(this,NAME_None,RF_Transient);
     Component->SetupAttachment(RootComponent); Component->SetMobility(EComponentMobility::Movable);
     Component->SetCollisionEnabled(ECollisionEnabled::NoCollision); Component->SetGenerateOverlapEvents(false);
     Component->SetCastShadow(false); Component->bReceivesDecals=false; Component->SetStaticMesh(Mesh);
@@ -274,6 +285,7 @@ void ADywxMVPWorld::BuildScene()
     auto* Fill=NewObject<UDirectionalLightComponent>(this,TEXT("WarmRim")); Fill->SetupAttachment(RootComponent); AddInstanceComponent(Fill);
     Fill->SetMobility(EComponentMobility::Movable); Fill->SetRelativeRotation(FRotator(-25,140,0)); Fill->SetIntensity(1.5f); Fill->SetLightColor(FLinearColor(1,.68,.38)); Fill->SetCastShadows(false); Fill->RegisterComponent();
     Flush(); bSceneBuilt=true;
+    UE_LOG(LogDywxMVPWorld,Display,TEXT("Runtime scene ready: meshes=%d batches=%d"),Meshes.Num(),Batches.Num());
 }
 void ADywxMVPWorld::RebuildArena()
 {

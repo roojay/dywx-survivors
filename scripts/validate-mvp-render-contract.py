@@ -2,6 +2,7 @@
 """Data/contract checks only. This does not compile UE or certify GPU rendering."""
 import json
 import math
+import re
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 scene = json.loads((ROOT/'Content/MVP/Geometry/scene.json').read_text())
@@ -62,6 +63,19 @@ def function(name, source=cpp):
         depth += (source[end] == '{') - (source[end] == '}')
         end += 1
     return source[brace:end]
+# Mesh resource IDs and batch lookup IDs intentionally overlap. FName is
+# case-insensitive: assigning either ID as a component UObject name would
+# collide with an existing mesh under the same actor (fatal in a packaged run).
+mesh_names = {m['name'].casefold() for m in scene['meshes']}
+batch_names = set(re.findall(r'MakeBatch\(TEXT\("([^"]+)"\)', cpp))
+role_block = re.search(r'const TCHAR\* Roles\[\]=\{([^}]+)\}', cpp).group(1)
+batch_names.update('Enemy_' + role for role in re.findall(r'TEXT\("([^"]+)"\)', role_block))
+overlap = mesh_names & {name.casefold() for name in batch_names}
+assert {'rock', 'pillar', 'enemy_swarm', 'enemy_boss'} <= overlap
+batch = function('void ADywxMVPWorld::MakeBatch')
+assert 'NewObject<UInstancedStaticMeshComponent>(this,NAME_None,RF_Transient)' in batch
+assert 'Batches.Add(Name,MoveTemp(Batch))' in batch
+print(f'PASS: {len(overlap)} case-insensitive mesh/batch ID overlaps use independent UObject component names; packaged entry must also be tested')
 for api in ('InitializeProfile', 'StartFullRun', 'GetCampaignProfile', 'PurchaseLegacy',
             'PurchasePermanent', 'SaveRun', 'ResumeRun', 'HasSavedRun'):
     assert api in runtime_header and api not in header
