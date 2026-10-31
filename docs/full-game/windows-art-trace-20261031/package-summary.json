@@ -1,0 +1,238 @@
+{
+  "build_content_commit": "acf43552a1b40f8ace1a789abc0958d081c8b48c",
+  "compiled_code_commit": "1e65b528234aacd59b8ba32d27abbc502439139d",
+  "archive": "D:\\dev\\Codex\\2026-10-30\\task-2\\deliverables\\dywx-survivors-win64-art-notrace-acf4355.zip",
+  "bytes": 337816444,
+  "sha256": "a6de330d77e1c700f50f8542fa309fef2b431d8c53e032bc912b4c20c95fc71f",
+  "zip_crc": "PASS",
+  "package_file_count": 45,
+  "package_bytes": 518030954,
+  "fixed_runtime_matches_archive": true,
+  "files": [
+    {
+      "path": "DywxSurvivors/Binaries/Win64/D3D12/x64/D3D12Core.dll",
+      "bytes": 4831768,
+      "sha256": "f0cbdba3043bc30e2a17dfd7d6c05e61c9c4098eb1d5ee8ccd2ab3f4696e8e20"
+    },
+    {
+      "path": "DywxSurvivors/Binaries/Win64/D3D12/x64/d3d12SDKLayers.dll",
+      "bytes": 4943344,
+      "sha256": "180a630861dc88d26db517da787009edf75e4c83309b819814b84b86f8db36c1"
+    },
+    {
+      "path": "DywxSurvivors/Binaries/Win64/DML/x64/DirectML.dll",
+      "bytes": 18538488,
+      "sha256": "4e357e48c3fb00e5ac868f2b33ba5576873c013349e2cc1d7a9be0071253ac62"
+    },
+    {
+      "path": "DywxSurvivors/Binaries/Win64/DywxSurvivors-Win64-Shipping.exe",
+      "bytes": 166437376,
+      "sha256": "c34752cdeedff62fbe5fa3dc18689d7c2841dae3f33e884d986e8f6d9729cb15"
+    },
+    {
+      "path": "DywxSurvivors/Binaries/Win64/tbb12.dll",
+      "bytes": 342456,
+      "sha256": "c489b6bd4dd2be18d4f8778e3f86caa7672ec8a206c9a54228b3bb60e2923f76"
+    },
+    {
+      "path": "DywxSurvivors/Binaries/Win64/tbbmalloc.dll",
+      "bytes": 117176,
+      "sha256": "aca208101bba1e440e6fae6580eedd45508ec405c9674063baf7ca23d29316bd"
+    },
+    {
+      "path": "DywxSurvivors/Content/MVP/Geometry/scene.json",
+      "bytes": 16550621,
+      "sha256": "b1ebc67c1667ba554f3ad0c0350dd6846ee03e664a9d315865cc89e9c63a1f0d"
+    },
+    {
+      "path": "DywxSurvivors/Content/Paks/DywxSurvivors-Windows.pak",
+      "bytes": 21683321,
+      "sha256": "0085932ef6ec52f3b32402a67fe67d30dc16bec13a7379c55fafd97e50e2ec8c"
+    },
+    {
+      "path": "DywxSurvivors/Content/Paks/DywxSurvivors-Windows.ucas",
+      "bytes": 152697584,
+      "sha256": "9e12c337e36475ea138060bf8b5977634965a2baabb92eeba19b968f2f03672b"
+    },
+    {
+      "path": "DywxSurvivors/Content/Paks/DywxSurvivors-Windows.utoc",
+      "bytes": 132352,
+      "sha256": "1bc0ab4448325a7b929d49577b73fd9179fe24a853a0cf2e83c1873c62e5d7f0"
+    },
+    {
+      "path": "DywxSurvivors/Content/Paks/global.ucas",
+      "bytes": 3208224,
+      "sha256": "f3a8dfe45781f671deb4b0b258c8f1ebc95303aab6fc63bc9aaf931537ccdb67"
+    },
+    {
+      "path": "DywxSurvivors/Content/Paks/global.utoc",
+      "bytes": 782,
+      "sha256": "633dc965bd2350000eca10f0f9df410ef50e7d4d69299bffcceb76ad8a21e196"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Fonts/SARASA-OFL.txt",
+      "bytes": 4703,
+      "sha256": "41b97900effcb7fefb581f28090ba6dbcb53048f0b481188a2509a530640c46b"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Fonts/SarasaUiSC-Bold.ttf",
+      "bytes": 23896256,
+      "sha256": "d1e3628a5d78a2b15c8b4f361872cb2ec7df3f73bd14aabb1565a817684596ad"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Fonts/SarasaUiSC-Regular.ttf",
+      "bytes": 24049996,
+      "sha256": "a50953ae631ba84ca5902b1c46463ce83068a37ea721131c025136e59174b68f"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/battle-background.png",
+      "bytes": 3051247,
+      "sha256": "b627787f193ae430e2ed2edfad37caf35e8ed27620619568169dde814912da9d"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/button-gold.png",
+      "bytes": 1279049,
+      "sha256": "d64d61a1816ec765be2f589f4a4e5ae478fa22cccc2fa80e6fa0486909bb1a87"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/character-background.png",
+      "bytes": 2633628,
+      "sha256": "8a6e0d66af0c3da21614c2dfe1739ba3c60b3c883c81a16f49a7003f0e3c2dc2"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/character-portraits.png",
+      "bytes": 2807709,
+      "sha256": "abf9f34707a52a05859f788d7067b4de92d45007517941d6f29ac6f19165c9ca"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/hud-skills.png",
+      "bytes": 3067403,
+      "sha256": "68468aea9575e58edd4371e6eee071f78336c46583bfe5383a628e5c457e7a61"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-arrow.png",
+      "bytes": 135530,
+      "sha256": "cee6576a038c9f0679de9280de800d645d2c1a496991833bfd2770be416a7810"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-dash.png",
+      "bytes": 137015,
+      "sha256": "3b98c7582b6aa6a75e18a84852dff9d0c50f94cd85d72ceeaecb8cd3b2265e38"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-mirror.png",
+      "bytes": 209480,
+      "sha256": "5f97e8b2938701591dd3ecd67f4ea67421e51c96a421cfdf15aa789136dbf660"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-orbit.png",
+      "bytes": 145182,
+      "sha256": "24e4b65d1ad7fc20f91ae72ed407e3a037e090a4d35cefd323b94d965d37ca5a"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-slash.png",
+      "bytes": 118371,
+      "sha256": "f80a352385a84e787e63c65fb104d1ae17391c1b63756dc18d311fcfbe47897b"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/icon-stone.png",
+      "bytes": 133295,
+      "sha256": "c4f8004dc5cb3ec28c81116349c34de680669f2590548fee0ecb7cdd78ecbbb8"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/main-background.png",
+      "bytes": 2329238,
+      "sha256": "26d17c49a3487a0ca5d93006d83289d45975eb8d6b77250539bae35e6188d576"
+    },
+    {
+      "path": "DywxSurvivors/Content/UI/Images/map-background.png",
+      "bytes": 2747908,
+      "sha256": "a38d7279c78a42b3157a78d4ea96d19cc9bd28d560b3dfe50d0dbeae6ca5120c"
+    },
+    {
+      "path": "DywxSurvivors.exe",
+      "bytes": 171520,
+      "sha256": "fee2831bbc5b41e0abb2fd2c044c30a19aa680dcefaca4123e7ac7bfbe732a3c"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/DbgHelp/dbghelp.dll",
+      "bytes": 2232688,
+      "sha256": "441a7ccee2f854352366e783fcb79fe895d09ad4c577689319e1a664f296c4a3"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/MsQuic/v220/win64/msquic.dll",
+      "bytes": 2547080,
+      "sha256": "27c231d80310ea9005a6b0c17054f28887272723477e7292a7f9d63b6d1579ee"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/NVIDIA/NVaftermath/Win64/GFSDK_Aftermath_Lib.x64.dll",
+      "bytes": 5799016,
+      "sha256": "ce49be4194706417ccdc57833aec478faa1e08646157688c879fe616d43abd65"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/Ogg/Win64/VS2015/libogg_64.dll",
+      "bytes": 59832,
+      "sha256": "c719a5f165e4afe29e92a7eee9762c2e9f301a177885ab1ab8d2c7f57d4a86bf"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/Vorbis/Win64/VS2015/libvorbis_64.dll",
+      "bytes": 1724856,
+      "sha256": "b8a3e31a6c2d401809bae7aa0fd29f49c2114eeccfba4dc5c7ac8eddbd4b7a98"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/Vorbis/Win64/VS2015/libvorbisfile_64.dll",
+      "bytes": 48568,
+      "sha256": "6d0e4395bc4d0ef501c3f7f7b4e63fa0cf2ab2ca80328560b7cb10e6d5a171cf"
+    },
+    {
+      "path": "Engine/Binaries/ThirdParty/Windows/XAudio2_9/x64/xaudio2_9redist.dll",
+      "bytes": 858152,
+      "sha256": "e6ae545b31a5453f1b1002d434cc802a6088cf05c5faa414d7ebe00264161506"
+    },
+    {
+      "path": "Engine/Config/StagedBuild_DywxSurvivors.ini",
+      "bytes": 3,
+      "sha256": "f1945cd6c19e56b3c1c78943ef5ec18116907a4ca1efc40a57d48ab1db7adfc5"
+    },
+    {
+      "path": "Engine/Content/Renderer/TessellationTable.bin",
+      "bytes": 259568,
+      "sha256": "edc4f3b628a139c5e185bbaeca661c95c1f427368d3b92892c5cff36c56dd941"
+    },
+    {
+      "path": "Engine/Content/Slate/Cursor/invisible.cur",
+      "bytes": 326,
+      "sha256": "fef3980fa567e9c45d5d8dcaa432a2c1a3f3bb17fe67d7ab198164f56c142aa1"
+    },
+    {
+      "path": "Engine/Extras/Redist/en-us/vc_redist.arm64.exe",
+      "bytes": 11751688,
+      "sha256": "ebc1b8dc6731b2c7e791dd619aba19d5554b9e678364f3c2a35f125baafc0f54"
+    },
+    {
+      "path": "Engine/Extras/Redist/en-us/vc_redist.x64.exe",
+      "bytes": 18569648,
+      "sha256": "6ffdeeff6aae9f5dcd52217571b2c2a47de367af8aa3db953542bf25c4c29a0d"
+    },
+    {
+      "path": "Engine/Plugins/NNE/NNERuntimeORT/Binaries/ThirdParty/Onnxruntime/Win64/onnxruntime.dll",
+      "bytes": 17339384,
+      "sha256": "eacc4d935137d67ab0cc1b896472d1de551dfc6545ed9ad74ab842400272e036"
+    },
+    {
+      "path": "Manifest_NonUFSFiles_Win64.txt",
+      "bytes": 2920,
+      "sha256": "c188cfae4a9b06e503a5b85bdf54a238ee9adadfd473f65eb375b6dc4cc7201d"
+    },
+    {
+      "path": "Manifest_UFSFiles_Win64.txt",
+      "bytes": 436092,
+      "sha256": "63e87004dfc608f40e4c1553ea655e0133c5601120303da5e74e24bbd6ce14b8"
+    },
+    {
+      "path": "NOTICES.txt",
+      "bytes": 111,
+      "sha256": "ba49ae5586f817b36a2772269f71f899cb1f54b5f2720fad951319edd5e140b8"
+    }
+  ]
+}
