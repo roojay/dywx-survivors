@@ -4,9 +4,9 @@
 
 ## 当前状态，请先读
 
-**当前交付是已实现并做过离线验证的完整功能原型源码与资源，不是已验收的 Windows 游戏包。**
+**当前已有 UE 5.8.4 Windows 构建及实机冒烟验证；完整长局、全部角色地图和人类玩法/美术验收仍待完成。**
 
-历史提交 `8ef559d` 只有四界面演示，曾通过 Windows 编译，但用户实际运行发现截字和 GPU 高占用。此后字体、布局、帧率预算已经重写，且加入了真正的战斗与成长系统。当前新源码尚未在 UE 重新编译、启动、烹饪或测试 GPU。旧 EXE 不包含这些修复，也不是本 MVP。
+历史提交 `8ef559d` 只有四界面演示，曾通过 Windows 编译，但用户实际运行发现截字和 GPU 高占用。此后字体、布局、帧率预算已经重写，且加入了真正的战斗与成长系统。最新 Windows 修复版已完成原生编译、打包、入场、战斗、死亡重试及独立存档续接验证；旧 UI 包与曾发生入场闪退的 739466 包均不可代表当前版本。见 [Windows 闪退修复验收](docs/full-game/windows-crashfix-20261031/REPORT.md)。
 
 本分支当前已扩展到完整设计的功能原型：
 - 快速、传统、无尽三种模式；四/六波快速配置、传统十波、无尽每五波洞主与本地排名。
@@ -44,7 +44,7 @@ ASAN_OPTIONS=detect_leaks=0 bash scripts/test-full-game-all.sh --sanitize
 
 需要 C++20 编译器、Python、Pillow 与 fontTools；当前 dot 已有。宿主 ptrace 导致 LeakSanitizer 无法使用，关闭泄漏检测不等于证明无泄漏。所有这些检查仍不是 Unreal 编译或实机画面证明。
 
-新完整模式的固定样例有胜利、死亡与采样上限，见新报告；不能引用旧 MVP 通关轨迹证明当前全部模式或三位修士已平衡。实际 UE 编译、画面、GPU与人类试玩仍未验证。
+新完整模式的固定样例有胜利、死亡与采样上限，见新报告；不能引用旧 MVP 通关轨迹证明当前全部模式或三位修士已平衡。已完成部分 UE 实机与 GPU 冒烟取样；完整自然通关与人类试玩仍未验收。
 
 ## 在已有 UE 5.8 工具链的 Windows 构建
 
@@ -52,7 +52,7 @@ ASAN_OPTIONS=detect_leaks=0 bash scripts/test-full-game-all.sh --sanitize
 powershell -File scripts/package-windows.ps1 -EngineRoot 'D:\UE_5.8' -ArchiveDirectory 'D:\dywx-package' -EvidenceDirectory 'D:\dywx-build-evidence'
 ```
 
-路径按实际安装修改。脚本先编译 Editor 模块，再生成必需材质、导入音频，最后 Cook/Stage/Archive；任何前置资源门禁失败都不应发包。当前新增流程尚待首次 UE 运行验证。不要只拷贝 EXE，须保留完整运行目录。
+路径按实际安装修改。脚本先编译 Editor 模块，再生成必需材质、导入音频，最后 Cook/Stage/Archive；任何前置资源门禁失败都不应发包。默认输出 Shipping 游戏包，关闭 UE Trace 性能跟踪及其控制监听，直接启动顶层 EXE 即可。Editor 构建保留诊断能力；仅内部诊断需要时显式传 `-Configuration Development`，该配置会启用 Trace。安装版 UE 不支持在共享 Development 引擎上单独修改此构建特性，脚本不绕过 UBT 检查。不要只拷贝 EXE，须保留完整运行目录。
 
 ## Linux 原生构建入口
 
