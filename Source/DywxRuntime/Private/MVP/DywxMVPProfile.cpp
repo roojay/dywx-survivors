@@ -53,7 +53,7 @@ bool FDywxMVPProfile::Load(){
   // Keep the legacy file untouched; the first successful save creates version 2.
   bWritable=true;return true;
 }
-void FDywxMVPProfile::Apply(dywx::mvp::Progression& P)const{P.SetPityWaves(GetKnown().pityWaves);P.MergeDiscoveries(GetKnown());}
+void FDywxMVPProfile::Apply(dywx::mvp::Progression& P)const{P.ImportAccountProgress(GetKnown());}
 void FDywxMVPProfile::Observe(const dywx::mvp::ProgressionState& S){Store.Observe(S);}
 bool FDywxMVPProfile::Save(){return bWritable&&Store.Save();}
 std::uint64_t FDywxMVPProfile::AllocateRunId(){return bWritable?Store.AllocateRunId():0;}

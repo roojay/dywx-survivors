@@ -178,7 +178,9 @@ bool Economy::OpenTreasure(Progression& p,bool paid,bool encounter) {
   for(;rarity<3&&roll>=probs[rarity];++rarity)roll-=probs[rarity];
   if(paid){stones_-=TreasurePrice();++paidTreasure_;}else freeTreasures_.insert(restId_);
   treasure_=p.GenerateRelic(Rarity(rarity));
-  if(rarity==2){p.SetPityWaves(0);p.immortalThisWave_=true;}
+  // OpenTreasure is rest-only. This reset belongs to the completed wave,
+  // not to the next combat wave, which must accumulate pity normally.
+  if(rarity==2)p.SetPityWaves(0);
   return true;
 }
 std::optional<Relic> Economy::RevealTreasure(Progression& p) {

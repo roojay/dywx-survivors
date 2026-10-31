@@ -99,7 +99,10 @@ bool UDywxRunSession::SaveRun()
     // or consume pending choices in the live, possibly paused intermission.
     RunCheckpoint Checkpoint; std::string Bytes;
     if(!Simulation.PrepareCheckpoint(Checkpoint) || !SaveCodec::EncodeCheckpoint(Checkpoint,Bytes)) return false;
-    return Profile.SaveCheckpoint(HeroId(Checkpoint.campaign.hero),Bytes);
+    auto CandidateProfile=Profile;
+    ObserveRunInto(CandidateProfile);
+    if(!CandidateProfile.SaveCheckpoint(HeroId(Checkpoint.campaign.hero),Bytes)) return false;
+    Profile=MoveTemp(CandidateProfile); return true;
 }
 bool UDywxRunSession::ResumeRun(int32 Hero)
 {
@@ -110,18 +113,16 @@ bool UDywxRunSession::ResumeRun(int32 Hero)
     if(!Profile.GetCheckpoint(HeroId(Hero),Bytes) || !SaveCodec::DecodeCheckpoint(Bytes,Checkpoint)) return false;
     dywx::mvp::Simulation Candidate;
     if(!Candidate.RestoreCheckpoint(Checkpoint,Profile.GetCampaign())) return false;
+    // The account may have advanced/reset pity or discovered content with another hero.
+    // Import on the candidate only; a failed consume leaves the live run untouched.
+    Profile.Apply(Candidate.GetProgression()); Candidate.RefreshProgression();
     // Consumption is durable before activation: one checkpoint cannot duplicate rewards.
     std::string Consumed;
     if(!Profile.ConsumeCheckpoint(HeroId(Hero),Consumed)) return false;
     Simulation=MoveTemp(Candidate); ActivateRun(); return true;
 }
-bool UDywxRunSession::SaveProfile()
+void UDywxRunSession::ObserveRunInto(FDywxMVPProfile& CandidateProfile) const
 {
-    TRACE_CPUPROFILER_EVENT_SCOPE(DywxSession_SaveProfile);
-    if (!IsStandaloneSession()) return false;
-    if(!bProfileLoaded || !Profile.IsWritable()) return false;
-    if(GetSnapshot().phase==RunPhase::Title) return true; // No run discoveries/pity to observe yet.
-    auto CandidateProfile=Profile;
     CandidateProfile.Observe(GetSnapshot().progression);
     if(Simulation.IsCampaign()) {
         const auto& Seen=Simulation.GetAnomalies().State().encountered;
@@ -131,6 +132,15 @@ bool UDywxRunSession::SaveProfile()
         const int32 Cave=static_cast<int32>(Simulation.GetArena().cave);
         if(BossEncountered && Cave>=0 && Cave<3) CandidateProfile.MutableCampaign().seenBosses[static_cast<std::size_t>(Cave)]=true;
     }
+}
+bool UDywxRunSession::SaveProfile()
+{
+    TRACE_CPUPROFILER_EVENT_SCOPE(DywxSession_SaveProfile);
+    if (!IsStandaloneSession()) return false;
+    if(!bProfileLoaded || !Profile.IsWritable()) return false;
+    if(GetSnapshot().phase==RunPhase::Title) return true; // No run discoveries/pity to observe yet.
+    auto CandidateProfile=Profile;
+    ObserveRunInto(CandidateProfile);
     auto CandidateSimulation=Simulation;
     const bool Settled=CandidateSimulation.IsCampaign() && CandidateSimulation.SettleCampaign(CandidateProfile.MutableCampaign());
     if(!CandidateProfile.Save()) {

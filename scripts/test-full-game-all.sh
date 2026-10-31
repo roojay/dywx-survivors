@@ -21,5 +21,8 @@ bash scripts/test-core-commands.sh
 python3 scripts/test-architecture-contract.py
 bash scripts/test-combat-boundaries.sh
 bash scripts/test-save-economy-boundaries.sh
+bash scripts/test-simulation-design.sh
+bash scripts/test-opportunity-flow.sh
+bash scripts/test-account-pity.sh
 sha256sum --status -c "$SOURCE_MANIFEST" || { echo 'Sources changed during this run; this is intermediate evidence, not a final full pass.' >&2; exit 2; }
 printf '\nFull-design offline gates passed; UE compile/cook/runtime/performance remain NOT_RUN.\n'

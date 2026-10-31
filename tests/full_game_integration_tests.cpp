@@ -7,12 +7,16 @@ using namespace dywx::mvp;
 static RunConfig Fast() { RunConfig c;c.spawning=false;c.automaticSpells=false;c.waveDurations.fill(.1f);c.bossHp1=c.bossHp2=1;return c; }
 static CampaignConfig FastCampaign() { CampaignConfig c;c.traditionalWaveSeconds=c.endlessWaveSeconds=.1f;return c; }
 static void Rest(Simulation& s) { for(int i=0;i<20 && s.GetSnapshot().phase==RunPhase::Wave;++i)s.Step(.1f);assert(s.GetSnapshot().phase==RunPhase::Rest); }
+static void DrainUpgrades(Simulation& s) {
+  for(int limit=0;s.GetSnapshot().progression.pendingUpgrades>0;++limit){assert(limit<100);assert(s.ChooseUpgrade(0));}
+}
 static void ResolveOpportunity(Simulation& s) {
   auto c=s.GetCampaign().GetState();
   if(!c.opportunityResolved) {
     unsigned index=0;while(index<c.offerCount && (c.offers[index]==OpportunityKind::Elite || c.offers[index]==OpportunityKind::Chest))++index;
     assert(index<c.offerCount);assert(s.ChooseOpportunity(index));assert(!s.ChooseOpportunity(index));
   }
+  DrainUpgrades(s); // Explicitly resolve event upgrades before the next-wave command.
 }
 static void Boss(Simulation& s) {
   assert(s.GetSnapshot().phase==RunPhase::Boss);
@@ -21,6 +25,7 @@ static void Boss(Simulation& s) {
   s.TestDamageEnemy(boss,1e9f);assert(s.GetSnapshot().enemies.empty());
   assert(s.GetSnapshot().progression.bossRewards.size()==3);
   assert(s.ChooseBossReward(0));assert(!s.ChooseBossReward(0));
+  if(s.GetSnapshot().phase==RunPhase::Rest)DrainUpgrades(s);
 }
 static std::string Fingerprint(const Simulation& s) {
   std::ostringstream o;const auto& x=s.GetSnapshot();const auto& p=x.progression;
@@ -86,9 +91,11 @@ int main(){
   Rest(elite);offers=elite.GetCampaign().GetState();unsigned eliteIndex=0;
   while(eliteIndex<offers.offerCount&&offers.offers[eliteIndex]!=OpportunityKind::Elite)++eliteIndex;
   if(eliteIndex<offers.offerCount){
-    assert(elite.ChooseOpportunity(eliteIndex));assert(!elite.BeginNextWave());
+    assert(elite.ChooseOpportunity(eliteIndex));
+    assert(elite.GetSnapshot().phase==RunPhase::Rest);assert(elite.GetSnapshot().enemies.empty());
+    assert(elite.BeginNextWave());assert(!elite.BeginNextWave());
     while(!elite.GetSnapshot().enemies.empty()){auto id=elite.GetSnapshot().enemies.front().id;elite.TestDamageEnemy(id,1e9f);}
-    assert(elite.GetSnapshot().phase==RunPhase::Rest);assert(elite.BeginNextWave());
+    assert(elite.GetSnapshot().phase==RunPhase::Rest);DrainUpgrades(elite);assert(elite.BeginNextWave());
   }
   // Checkpoint stores the next-wave entrance, preserving build and RNG without replaying rewards.
   Simulation saved;assert(saved.StartCampaign(p,GameMode::Traditional,HeroId::Body,246,600,CaveId::ThunderMarsh,0,slow,FastCampaign()));

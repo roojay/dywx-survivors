@@ -89,6 +89,11 @@ bool Progression::SkipUpgrade(){
   state_.offers.clear();AddRawXp(4);if(state_.pendingUpgrades>0)MakeOffers();return true;
 }
 int Progression::TakeSkipStones(){int n=state_.skipSpiritStones;state_.skipSpiritStones=0;return n;}
+void Progression::ImportAccountProgress(const ProgressionState &known) {
+  SetPityWaves(known.pityWaves);
+  immortalThisWave_ = false;
+  MergeDiscoveries(known);
+}
 void Progression::MergeDiscoveries(const ProgressionState &previous) {
   for (std::size_t i = 0; i < state_.seenSpells.size(); ++i)
     state_.seenSpells[i] = state_.seenSpells[i] || previous.seenSpells[i];
@@ -622,6 +627,9 @@ void Progression::EndRest() {
   if (!resting_)
     return;
   resting_ = false;
+  // Rest closes the preceding combat segment, including elite opportunities and
+  // endless bosses. Their immortal reset must not suppress the next wave count.
+  immortalThisWave_ = false;
   const int amount = pendingRefineXp_;
   pendingRefineXp_ = 0;
   state_.pendingRefineXp = 0;

@@ -80,10 +80,15 @@ start = function('bool UDywxRunSession::StartFullRun', runtime)
 assert start.index('AllocateRunId()') < start.index('Simulation=MoveTemp(Candidate)')
 assert 'if(!RunId) return false;' in start
 settle = function('bool UDywxRunSession::SaveProfile', runtime)
-assert 'seenAnomalies[I]=true' in settle
+observe = function('void UDywxRunSession::ObserveRunInto', runtime)
+assert 'CandidateProfile.Observe(GetSnapshot().progression)' in observe
+assert 'seenAnomalies[I]=true' in observe and 'seenBosses[' in observe
+assert settle.index('ObserveRunInto(CandidateProfile)') < settle.index('CandidateProfile.Save()')
 assert settle.index('CandidateProfile.Save()') < settle.index('Simulation=MoveTemp(CandidateSimulation)')
+checkpoint = function('bool UDywxRunSession::SaveRun', runtime)
+assert checkpoint.index('ObserveRunInto(CandidateProfile)') < checkpoint.index('CandidateProfile.SaveCheckpoint') < checkpoint.index('Profile=MoveTemp(CandidateProfile)')
 resume = function('bool UDywxRunSession::ResumeRun', runtime)
-assert resume.index('RestoreCheckpoint') < resume.index('ConsumeCheckpoint') < resume.index('Simulation=MoveTemp(Candidate)')
+assert resume.index('RestoreCheckpoint') < resume.index('Profile.Apply(Candidate.GetProgression())') < resume.index('ConsumeCheckpoint') < resume.index('Simulation=MoveTemp(Candidate)')
 for element in ('Metal', 'Wood', 'Water', 'Earth', 'Fire', 'Thunder'):
     assert f'Element::{element}' in cpp + vfx
 assert 'E.form==Form::Beast' in vfx and 'HeroId::Beast' in render

@@ -86,7 +86,7 @@ void Simulation::Start(std::uint64_t seed, HeroId hero,
   lowHpUsed_ = lowHpActive_ = false;
   eliteSpawned_ = 0;
   waveSpawned_.fill(0);
-  beastRolled_ = false;
+  beastRolled_ = beastPending_ = false;
   damageDepth_ = 0;
   progression_.Reset(seed ^ 0x9e3779b97f4a7c15ULL, hero, config_.formResonance);
   state_.wave = 1;
@@ -254,11 +254,8 @@ bool Simulation::ChooseOpportunity(unsigned index) {
   if (result.openCave) economy_.EnterCave(progression_,
       campaignProfile_.unlocks[unsigned(LegacyUnlock::FreeCaveRefresh)]);
   if (result.openChest) economy_.OpenTreasure(progression_, false, true);
-  if (result.eliteEncounter) {
-    economy_.EndRest(progression_); progression_.EndRest();
-    state_.phase = RunPhase::Wave;
-    opportunityEnemy_ = Spawn(EnemyRole::Charger, Edge(), EnemyTier::Elite);
-  }
+  // An elite choice reserves the encounter; inventory remains editable until
+  // the player's explicit BeginNextWave command starts that fight.
   Sync(); return true;
 }
 bool Simulation::ChooseBossReward(std::size_t index) {
@@ -386,8 +383,8 @@ bool Simulation::SortBag() {
 bool Simulation::CanFuse(SpellId result) const {
   if (state_.paused || (state_.phase != RunPhase::Wave &&
       state_.phase != RunPhase::Boss && state_.phase != RunPhase::Rest)) return false;
-  // A pending upgrade freezes combat without setting the explicit pause flag.
-  // Match Progression's rest/offer gate as well as the authoritative run phase.
+  // Upgrades do not pause combat. Match Progression's rest/offer eligibility
+  // as well as the authoritative run phase and explicit pause flag.
   return (state_.phase == RunPhase::Rest || !progression_.GetState().offers.empty()) &&
       (progression_.IsResting() || !progression_.GetState().offers.empty()) &&
       progression_.CanFuse(result);
@@ -426,14 +423,48 @@ bool Simulation::Reroll() {
   return ok;
 }
 bool Simulation::BeginNextWave() {
-  if (state_.paused || state_.phase != RunPhase::Rest)
+  if (state_.paused || state_.phase != RunPhase::Rest ||
+      progression_.GetState().pendingUpgrades > 0)
     return false;
-  if (fullGame_) {
-    if (!state_.progression.bossRewards.empty() || economy_.HasTreasureToReveal() ||
-        economy_.PendingReforge() || !campaign_.BeginNextWave()) return false;
-    economy_.EndRest(progression_);
+  Campaign next = campaign_;
+  const bool eliteEncounter = fullGame_ &&
+      campaign_.GetState().phase == CampaignPhase::OpportunityCombat &&
+      !opportunityEnemy_;
+  if (fullGame_ && (!progression_.GetState().bossRewards.empty() ||
+      economy_.HasTreasureToReveal() || economy_.PendingReforge() ||
+      (!eliteEncounter && !next.BeginNextWave()))) return false;
+
+  // Project deferred refinement XP before leaving rest. If it creates choices,
+  // commit only the XP boundary and keep the inventory/encounter open.
+  Progression prepared = progression_;
+  Economy preparedEconomy = economy_;
+  if (fullGame_) preparedEconomy.CommitRestExperience(prepared);
+  else prepared.EndRest();
+  if (prepared.GetState().pendingUpgrades > 0) {
+    if (!fullGame_) prepared.BeginRest();
+    progression_ = std::move(prepared);
+    if (fullGame_) economy_ = std::move(preparedEconomy);
+    Sync();
+    return false;
   }
-  progression_.EndRest();
+  if (eliteEncounter) {
+    // Do not commit EndRest on a failed spawn. A retry must remain possible.
+    opportunityEnemy_ = Spawn(EnemyRole::Charger, Edge(), EnemyTier::Elite);
+    if (!opportunityEnemy_) return false;
+  }
+  if (fullGame_) preparedEconomy.EndRest(prepared);
+  prepared.EndRest();
+  progression_ = std::move(prepared);
+  if (fullGame_) { economy_ = std::move(preparedEconomy); campaign_ = std::move(next); }
+  if (eliteEncounter) {
+    // The selected encounter is still part of this wave. No normal wave reset,
+    // additional opportunity, or checkpoint advancement is permitted yet.
+    progression_.RecordEncounter(EnemyRole::Charger, state_.enemies.back().mutations);
+    state_.phase = RunPhase::Wave;
+    accumulator_ = 0;
+    Sync();
+    return true;
+  }
   Sync();
   lowHpUsed_ = lowHpActive_ = false;
   eliteSpawned_ = 0;
@@ -446,7 +477,7 @@ bool Simulation::BeginNextWave() {
     state_.wave = campaign_.GetState().wave;
     state_.waveDuration = ScheduleWave(campaign_.GetState().mode, state_.wave, campaign_.GetConfig()).seconds;
     if (campaign_.GetState().mode == GameMode::Quick) state_.waveDuration = config_.waveDurations[state_.wave-1];
-    state_.phase = RunPhase::Wave; beastRolled_ = false; return true;
+    state_.phase = RunPhase::Wave; beastRolled_ = beastPending_ = false; return true;
   }
   if (state_.wave >= state_.waveCount) {
     StartBoss();
@@ -741,6 +772,28 @@ void Simulation::SpawnWave(float dt) {
     cap = std::min(int(config_.maxEnemies), int(schedule.enemyCap * trials.population));
   }
   float f = state_.waveElapsed / state_.waveDuration;
+  // A won spirit-beast draw owns a pending spawn, not a second lottery.
+  // Retry before ordinary mobs consume newly released capacity.
+  if (beastPending_ && int(state_.enemies.size()) < cap &&
+      Spawn(EnemyRole::SpiritBeast, Edge(), EnemyTier::Variant))
+    beastPending_ = false;
+  int desired = effective == 2 ? (f > .65f ? 1 : 0)
+                : effective == 3 ? (f > .8f ? 2 : f > .5f ? 1 : 0) : 0;
+  if (fullGame_) {
+    const int total = int(schedule.eliteCount * trials.elite);
+    desired = 0;
+    for (int i = 0; i < total; ++i) {
+      const float entry = total == 1 ? .65f : .5f + .3f * i / (total - 1);
+      if (f > entry) ++desired;
+    }
+  }
+  // Due elites get the next free slot before ordinary catch-up spawns. Their
+  // scheduled entry times are mid/late-wave rather than the cleanup boundary.
+  while (eliteSpawned_ < desired && int(state_.enemies.size()) < cap) {
+    if (!Spawn(eliteSpawned_ == 1 ? EnemyRole::Ranged : EnemyRole::Charger,
+               Edge(), EnemyTier::Elite)) break;
+    ++eliteSpawned_;
+  }
   // Per-role budgets are distributed over six opening segments, not weighted
   // away.
   static constexpr int budgets[4][6] = {{240, 10, 0, 0, 0, 0},
@@ -767,24 +820,13 @@ void Simulation::SpawnWave(float dt) {
       ++waveSpawned_[role];
     }
   }
-  int desired = effective == 2   ? (f > .65f ? 1 : 0)
-                : effective == 3 ? (f > .8f   ? 2
-                                    : f > .5f ? 1
-                                              : 0)
-                                 : 0;
-  if (fullGame_) desired = int(schedule.eliteCount * trials.elite * f);
-  while (eliteSpawned_ < desired && int(state_.enemies.size()) < cap) {
-    Spawn(eliteSpawned_ == 1 ? EnemyRole::Ranged : EnemyRole::Charger, Edge(),
-          EnemyTier::Elite);
-    ++eliteSpawned_;
-  }
   if (!beastRolled_ && (fullGame_ || effective == 1) && f > .6f) {
     beastRolled_ = true;
     float luck =
         40 * (1 - std::exp(-std::max(0.f, state_.progression.build.stats.luck) /
                            30));
     if (Random() < (fullGame_ ? .12f : .4f) * (1 + luck * .015f) * modifiers.beasts)
-      Spawn(EnemyRole::SpiritBeast, Edge(), EnemyTier::Variant);
+      beastPending_ = !Spawn(EnemyRole::SpiritBeast, Edge(), EnemyTier::Variant);
   }
 }
 bool Simulation::AddEffect(EffectState e) {
@@ -1476,7 +1518,7 @@ void Simulation::Cast(SpellState spell) {
   }
   if (spell.id == SpellId::FlameSword || spell.id == SpellId::ThunderSword ||
       spell.id == SpellId::FusionSwords) {
-    auto *target = Target(spell.id != SpellId::ThunderSword);
+    auto *target = Target(spell.id != SpellId::ThunderSword, c.radius);
     if (!target) {
       spellCooldowns_[Index(spell.id)] = .15f;
       --casts_[Index(spell.id)];
@@ -1491,7 +1533,8 @@ void Simulation::Cast(SpellState spell) {
         EnemyState *alternative = nullptr;
         float near = 1e9f;
         for (auto &e : state_.enemies)
-          if (e.hp > 0 && e.id != target->id && Len2(e.position - at) < near) {
+          if (e.hp > 0 && e.id != target->id &&
+              Len2(e.position - at) <= c.radius * c.radius && Len2(e.position - at) < near) {
             near = Len2(e.position - at);
             alternative = &e;
           }
@@ -1859,6 +1902,7 @@ void Simulation::CollectPickups(bool all) {
   Sync();
 }
 void Simulation::EndWave() {
+  beastPending_ = false;
   anomalyWarningShown_=false;
   CollectPickups(true);
   state_.enemies.clear();

@@ -67,6 +67,8 @@ public:
   void Step(float dt, const InputState &input = {});
   bool ChooseUpgrade(std::size_t index);
   bool Reroll();
+  // False means combat did not start. Deferred refinement XP may be committed
+  // while retaining Rest, so its newly-created upgrade choices can be resolved.
   bool BeginNextWave();
   void Pause(bool paused);
   void Restart();
@@ -121,7 +123,7 @@ private:
   bool lowHpUsed_ = false, lowHpActive_ = false;
   std::array<int, 6> waveSpawned_{};
   int eliteSpawned_ = 0;
-  bool beastRolled_ = false;
+  bool beastRolled_ = false, beastPending_ = false;
   int damageDepth_ = 0;
   SpellId currentSource_ = SpellId::Count;
   float Random();

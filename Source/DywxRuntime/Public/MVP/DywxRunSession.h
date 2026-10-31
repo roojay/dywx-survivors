@@ -66,6 +66,7 @@ public:
 private:
     void ActivateRun();
     bool SaveProfile();
+    void ObserveRunInto(FDywxMVPProfile& CandidateProfile) const;
     FSimpleDelegate BeforeSimulationTick;
     dywx::mvp::Simulation Simulation;
     dywx::mvp::InputState Input;

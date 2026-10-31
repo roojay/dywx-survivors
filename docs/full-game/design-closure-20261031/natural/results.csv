@@ -1,0 +1,11 @@
+seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build,first_upgrade,first_fusion,uncollected_xp,harness_revision
+11,0,0,0,veteran_unlocks_zero_stats,0,1200,dead,246.434,3,0,353,8,70,0,2,0,0,0,0,0,1,3,-1,0,0,6,0,0,2,"0:5;1:2;P0;2;",47.0661,-1,10,pickup-distance-v1
+29,0,1,1,veteran_unlocks_zero_stats,0,1200,dead,704.589,4,0,1636,23,130,0,4,0,0,6,2,0,1,4,519.934,2,3817.07,6,1,0,4,"2:5;7:2;9:2;11:1;4:1;6:1;P1;2;3;",55.016,359.973,73.5,pickup-distance-v1
+73,0,2,2,veteran_unlocks_zero_stats,0,1200,dead,512.169,4,0,359,7,130,0,3,0,0,0,0,0,1,4,-1,0,0,4,0,0,3,"26:3;4:2;2:1;1:1;P5;",98.0731,-1,72,pickup-distance-v1
+11,1,0,1,veteran_unlocks_zero_stats,0,2400,dead,391.015,2,0,267,8,31,1,0,0,0,0,0,0,1,4,-1,0,0,5,0,0,1,"0:4;1:4;P0;",48.8828,-1,28,pickup-distance-v1
+29,1,1,2,veteran_unlocks_zero_stats,0,2400,won,2098.1,10,100,4381,45,160,10,3,2,2,11,11,3,1,20,2025.35,2,73.4537,6,0,1,4,"3:5;4:5;7:5;24:5;19:5;6:5;P1;2;4;6;",68.8336,-1,0,pickup-distance-v1
+73,1,2,0,veteran_unlocks_zero_stats,0,2400,dead,1245.35,6,0,1248,17,130,5,1,0,0,0,1,1,1,12,-1,0,0,6,0,0,5,"4:5;32:1;P5;2;7;",78.4023,827.492,76.7,pickup-distance-v1
+11,2,0,2,veteran_unlocks_zero_stats,0,1200,dead,200.662,1,0,121,4,30,1,0,0,0,0,0,0,1,2,-1,0,0,1,0,0,1,"0:1;1:2;4:1;P0;",49.0161,-1,0,pickup-distance-v1
+29,2,1,0,veteran_unlocks_zero_stats,0,1200,dead,913.055,5,0,1155,19,77,4,1,1,0,4,3,1,1,10,-1,0,0,6,1,0,4,"2:5;11:1;7:2;P1;2;9;",98.4065,528.898,210,pickup-distance-v1
+73,2,2,1,veteran_unlocks_zero_stats,0,1200,sample_bound,1200.39,5,164.246,978,17,110,5,1,0,0,2,1,1,0,0,987.136,1,15937.8,6,0,0,5,"7:1;4:2;21:1;2:3;32:1;P5;",101.124,987.136,15.35,pickup-distance-v1
+11,0,0,0,fresh_tier1_no_unlocks,0,1200,dead,710.554,4,0,1471,19,91,0,0,0,0,0,0,0,1,4,519.934,2,591.8,6,0,0,4,"4:1;7:1;2:3;9:3;10:1;P0;2;",100.007,519.934,78,pickup-distance-v1

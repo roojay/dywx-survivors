@@ -27,6 +27,9 @@ public:
   const ProgressionState &GetState() const { return state_; }
   // Imports discovery flags only; never run power, inventory, XP or pity.
   void MergeDiscoveries(const ProgressionState &previous);
+  // New-run/resume boundary only: account pity is authoritative (including resets),
+  // discoveries are a union, and an old run cannot replay a prior wave's reset.
+  void ImportAccountProgress(const ProgressionState &known);
   // An enemy entering the active arena counts as encountered, even off camera.
   // Discovery metadata only: no RNG draws or changes to combat state.
   void RecordEncounter(EnemyRole role, int mutations);

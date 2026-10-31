@@ -264,6 +264,11 @@ TSharedRef<SWidget> SDywxRoot::LiveText(TFunction<FString()> Value, int32 Size, 
 }
 void SDywxRoot::BattleScreen()
 {
+    auto IsOpportunityCombat=[this] {
+        const auto* Sim=Owner.IsValid()?Owner->Simulation():nullptr;
+        return Sim && Sim->IsCampaign() && Run.phase==RunPhase::Wave
+            && Sim->GetCampaign().GetState().phase==CampaignPhase::OpportunityCombat;
+    };
     const float Xs[]={20,1570,800,800},Ys[]={500,500,240,800};
     const TCHAR* Arrows[]={TEXT("←"),TEXT("→"),TEXT("↑"),TEXT("↓")};
     for(int I=0;I<4;++I)At(Xs[I],Ys[I],330,45,LiveText([this,I,Arrow=FString(Arrows[I])]{
@@ -274,11 +279,11 @@ void SDywxRoot::BattleScreen()
     At(30,25,500,100,Panel(SNew(SVerticalBox)
         +SVerticalBox::Slot().AutoHeight()[LiveText([this]{return FString::Printf(TEXT("气血 %.0f / %.0f   护盾 %.0f"),HUD.Health,HUD.MaxHealth,Run.player.shield);},24,Paper)]
         +SVerticalBox::Slot().FillHeight(1).Padding(0,12,0,0)[SNew(SProgressBar).Style(&ProgressStyle).FillColorAndOpacity(FLinearColor(.85f,.12f,.035f)).Percent_Lambda([this]{return TOptional<float>(dywx::SafeFraction(HUD.Health,HUD.MaxHealth));})],Ink,12));
-    At(580,25,750,90,Panel(LiveText([this]{return FString::Printf(TEXT("第 %d / %d 波    %02d:%02d    斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},26,Paper),Ink,15));
+    At(580,25,750,90,Panel(LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("机缘 · 大妖    第 %d 波    %02d:%02d"),Run.wave,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60);return FString::Printf(TEXT("第 %d / %d 波    %02d:%02d    斩妖 %llu"),Run.wave,Run.waveCount,int(HUD.ElapsedSeconds)/60,int(HUD.ElapsedSeconds)%60,static_cast<unsigned long long>(Run.statistics.kills));},26,Paper),Ink,15));
     At(1640,35,230,65,Button(TEXT("暂停  Esc"),[this]{return Pause();}));
     At(35,140,1100,45,LiveText([this]{const auto& R=Run.progression.build.resonance;return FString::Printf(TEXT("道象 火%d 雷%d 金%d 木%d 水%d 土%d · 体%d 剑%d 阵%d 兽%d 符%d"),R.fire,R.thunder,R.metal,R.wood,R.water,R.earth,R.body,R.sword,R.array,R.beast,R.talisman);},22,Gold));
     At(35,185,800,40,Label(TEXT("同道象达到 2 / 4 点共鸣 · 破境继承道象 · C 打开道典"),18,Muted));
-    At(35,230,900,40,LiveText([this]{return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    妖潮余时 %.0f 秒"),Run.statistics.damageDealt,Run.statistics.damageTaken,FMath::Max(0.f,Run.waveDuration-Run.waveElapsed));},20,Paper));
+    At(35,230,900,40,LiveText([this,IsOpportunityCombat]{if(IsOpportunityCombat())return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    击败后继续整理"),Run.statistics.damageDealt,Run.statistics.damageTaken);return FString::Printf(TEXT("累计伤害 %.0f    承伤 %.0f    妖潮余时 %.0f 秒"),Run.statistics.damageDealt,Run.statistics.damageTaken,FMath::Max(0.f,Run.waveDuration-Run.waveElapsed));},20,Paper));
     if(Run.phase==RunPhase::Boss)
     {
         At(580,700,750,45,SNew(SBox).ToolTip(SNew(SToolTip)[Paragraph(Owner.IsValid()&&Owner->Simulation()?CN(Owner->Simulation()->DescribeBossMechanics()):TEXT(""),570,20,Paper)])[LiveText([this]{auto* S=Owner.IsValid()?Owner->Simulation():nullptr;const FString Name=S?CN(CaveCatalog()[int(S->GetArena().cave)].bossName):TEXT("洞主");return (Run.statistics.elapsed<BossChangeUntil?FString(TEXT("洞主破相！ ")):FString())+FString::Printf(TEXT("%s · 第 %d 相   %.0f / %.0f"),*Name,Run.bossPhase,BossHP,BossMaxHP);},22,Gold)]);
@@ -324,7 +329,7 @@ void SDywxRoot::BattleScreen()
         const bool CanFuseNow = Sim && !Run.paused && Sim->CanFuse(Fusion)
             && (Run.phase == RunPhase::Rest || !Run.progression.offers.empty());
         const FString Recipe=CN(DescribeFusion(FusionRecipe));
-        Fusions->AddSlot().Padding(0,2)[SNew(SBox).HeightOverride(80)[Button(TEXT("破境 · ")+CN(GetSpellConfig(Fusion).name),
+        Fusions->AddSlot().Padding(0,2)[SNew(SBox).HeightOverride(80)[Button((CanFuseNow?TEXT("可破境 · "):TEXT("破境 · "))+CN(GetSpellConfig(Fusion).name),
             [this,Fusion,Generation=Run.generation] {
                 return RunCommand([this,Fusion,Generation] {
                     auto* S = Owner->Simulation();
@@ -334,7 +339,7 @@ void SDywxRoot::BattleScreen()
                         (Now.phase != RunPhase::Wave && Now.phase != RunPhase::Boss && Now.phase != RunPhase::Rest)) return;
                     if (auto* Commands = Owner->Session()) Commands->Fuse(Fusion);
                 });
-            },true,CanFuseNow,Recipe+TEXT("。仅调息或有待选顿悟时可破境；暂停时不可用。破境继承道象，消耗配方指定的术法。"))]];
+            },CanFuseNow,CanFuseNow,Recipe+TEXT("。仅调息或有待选顿悟时可破境；暂停时不可用。破境继承道象，消耗配方指定的术法。"))]];
         }
         At(1360,120,510,100,Fusions);
     }
@@ -394,6 +399,24 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         Add(Button(TEXT("确认退出"),[this]{if (Owner.IsValid()) Owner->ConfirmQuit();return FReply::Handled();}),65);
         break;
     case dywx::Modal::Pause:
+    {
+        // Read-only presentation guard. SaveRun/PrepareCheckpoint still authorizes
+        // and persists the actual boundary; pending upgrades are intentionally allowed.
+        const auto* SaveSim=Owner.IsValid()?Owner->Simulation():nullptr;
+        const FString SaveBlockReason=[SaveSim]() -> FString {
+            if(!SaveSim || !SaveSim->IsCampaign())return TEXT("当前没有可保存的完整修行。");
+            const auto& C=SaveSim->GetCampaign().GetState();
+            if(C.mode==GameMode::Quick)return TEXT("快速模式不支持中途存档。");
+            if(C.phase==CampaignPhase::OpportunityCombat)return TEXT("大妖机缘尚未完成：请迎战并击败大妖，回到整理后再保存。");
+            if(SaveSim->GetSnapshot().phase!=RunPhase::Rest)return TEXT("仅传统、无尽的波间整理可以保存。");
+            if(C.phase!=CampaignPhase::Intermission || !C.opportunityResolved)return TEXT("请先选择并完成本波机缘，再保存。");
+            if(!SaveSim->GetSnapshot().progression.bossRewards.empty())return TEXT("请先领取洞主赠宝，再保存。");
+            if(SaveSim->GetEconomy().HasTreasureToReveal())return TEXT("请先揭示匣中法宝，再保存。");
+            if(SaveSim->GetEconomy().PendingReforge())return TEXT("请先选择保留新纹或旧纹，完成重铸后再保存。");
+            return FString();
+        }();
+        const bool CanSaveRun=SaveBlockReason.IsEmpty();
+        const FString SaveHint=CanSaveRun?TEXT("待选顿悟可以保存；保存成功才离开，续接时原样保留候选。") : SaveBlockReason;
         Add(Label(TEXT("暂停菜单"),40,Paper,true),80);
         Add(Label(TEXT("妖潮已停，继续后恢复斗法。"),22,Muted),55);
         Add(Button(TEXT("保存并离开"),[this]{
@@ -405,11 +428,13 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
                 Rebuild();
             }
             return FReply::Handled();
-        },false,Run.phase==RunPhase::Rest&&Nav.mode!=dywx::Mode::Quick,TEXT("保存成功才离开本局；失败保持当前暂停。待选顿悟原样保留，不重复领取机缘奖励。")),65);
+        },false,CanSaveRun,SaveHint),65);
+        Add(Paragraph(SaveHint,596,20,Muted),85);
         Add(Paragraph(RunNotice,596,20,Gold),55);
         Add(Button(TEXT("继续"),[this]{return CloseModal();},true),72);
         Add(Button(TEXT("返回主菜单"),[this]{if(Owner.IsValid()) Owner->ShowMainMenu();else ReturnToMenu();return FReply::Handled();}),70);
         break;
+    }
     case dywx::Modal::Codex:
     {
         Add(Label(TEXT("道典"),42,Paper,true),85);
@@ -705,7 +730,8 @@ void SDywxRoot::RestPanel()
         Choices->AddSlot()[Button(bRefineStones?TEXT("炼化所得：灵石（点击切换）"):TEXT("炼化所得：修为（点击切换）"),[this]{bRefineStones=!bRefineStones;bRefinePreview=false;Rebuild();return FReply::Handled();},false,HasFeature(Owner->CampaignProfile(),Feature::Economy))];
         At(1080,290,810,280,Choices);
         if(C.offerCount && C.selected<0) {
-            At(40,300,980,150,Panel(Paragraph(TEXT("波间机缘 · 三选一\n每三波至少遇见洞府与宝匣各一次；选择并解决机缘后整理法宝，再手动迎战。"),920,26,Gold),Ink,20));
+            const FString Guarantee=HasFeature(Owner->CampaignProfile(),Feature::Chest)?TEXT("每三波至少遇见洞府与宝匣各一次。"):TEXT("每三波至少遇见洞府一次；宝匣在传统首胜后开放。");
+            At(40,300,980,150,Panel(Paragraph(TEXT("波间机缘 · 三选一\n")+Guarantee+TEXT("选择后整理法宝，再手动迎战；大妖机缘须先击败大妖。"),920,26,Gold),Ink,20));
             return;
         }
     }
@@ -775,6 +801,10 @@ void SDywxRoot::RestPanel()
             Inspection->AddSlot().AutoHeight()[Comparison(Run.progression.build.stats,P.PreviewEquip(SelectedBag,SelectedSlot))];
         }
         At(1080,590,810,150,SNew(SScrollBox)+SScrollBox::Slot()[Inspection]);
-        At(1080,750,810,70,Button(Run.progression.pendingUpgrades>0?TEXT("先完成待选顿悟"):TEXT("迎战 · 炼化修为入账"),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation())RunNotice=Owner->Session()->BeginNextWave()?TEXT(""):TEXT("尚不能迎战：先完成机缘、顿悟、洞主赠宝或待选重铸/宝匣。");});},true,Run.progression.pendingUpgrades==0));
+        const auto& CampaignState=Sim->GetCampaign().GetState();
+        const bool EliteReady=CampaignState.phase==CampaignPhase::OpportunityCombat;
+        const bool BossReady=ScheduleWave(CampaignState.mode,CampaignState.wave,Sim->GetCampaign().GetConfig()).bossAfter
+            && (CampaignState.mode!=GameMode::Endless || CampaignState.bosses<CampaignState.wave/5);
+        At(1080,750,810,70,Button(Run.progression.pendingUpgrades>0?TEXT("先完成待选顿悟"):(EliteReady?TEXT("迎战大妖 · 炼化修为入账"):(BossReady?TEXT("迎战洞主 · 炼化修为入账"):TEXT("迎战下一波 · 炼化修为入账"))),[this]{return RunCommand([this]{if(auto*S=Owner->Simulation())RunNotice=Owner->Session()->BeginNextWave()?TEXT(""):TEXT("尚不能迎战：先完成机缘、顿悟、洞主赠宝或待选重铸/宝匣。");});},true,Run.progression.pendingUpgrades==0));
     }
 }
