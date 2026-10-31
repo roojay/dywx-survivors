@@ -1,0 +1,22 @@
+LogIoStore: Display: Output:      501 Imported package entries
+LogIoStore: Display: Output:      323 Packages without imports
+LogIoStore: Display: Output:        0 Public runtime script objects
+LogIoStore: Display: Output:     3.06 MiB InitialLoadData
+LogIoStore: Display:
+LogIoStore: Display: Success
+LogPakFile: Display: UnrealPak executed in 1.608956 seconds
+Took 2.37s to run UnrealPak.exe, ExitCode=0
+DumpManifest: D:\dev\Codex\2026-10-30\task-2\fullgame-build-winfix\UAT\FinalCopyWin64_UFSFiles.txt, NumItems: 5089
+DumpManifest: D:\dev\Codex\2026-10-30\task-2\fullgame-build-winfix\UAT\FinalCopyWin64_NonUFSFiles.txt, NumItems: 52
+DumpManifest: D:\dev\Codex\2026-10-30\task-2\fullgame-build-winfix\UAT\FinalCopyWin64_NonUFSFilesDebug.txt, NumItems: 6
+Copying NonUFSFiles to staging directory: D:\dev\Codex\2026-10-30\task-2\game-6a1031d\Saved\StagedBuilds\Windows
+Stage command time: 41.50 s
+********** STAGE COMMAND COMPLETED **********
+********** ARCHIVE COMMAND STARTED **********
+Archiving to D:\dev\Codex\2026-10-30\task-2\fullgame-package-winfix
+Archive command time: 0.36 s
+********** ARCHIVE COMMAND COMPLETED **********
+BuildCookRun time: 116.82 s
+BUILD SUCCESSFUL
+AutomationTool executed for 0h 1m 59s
+AutomationTool exiting with ExitCode=0 (Success)

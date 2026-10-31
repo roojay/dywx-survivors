@@ -1,5 +1,7 @@
 # 完整设计功能原型交接
 
+> Windows 最新状态（2026-10-31）：UE 5.8.4 的 Editor/DLL、游戏构建、材质音频、Cook/Package 和隔离启动已通过；22项Windows回归通过。源码提交7394661已推main，本地完整EXE ZIP已生成。交互和视觉验收因新游戏窗口应用审批超时仍未完成。详见 [Windows构建报告](windows-validation-20261031/REPORT.md)。下面旧阶段的dot限制是历史记录。
+
 2026-10-31（UTC+8）。最新指令是继续完善直到满足设计文档全部功能需求；不再以仅快速MVP范围作为缺口豁免。主依据为 `../gameplay-design-v0.1.md` 与 `../mvp-prototype-config-v0.1.md`，更早设计仅作历史参考，不混合冲突规则。
 
 ## 当前准确状态

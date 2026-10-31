@@ -1,8 +1,8 @@
 {
   "artifact": "UE5 full-design gameplay prototype source and original resources",
-  "status": "source_implemented_and_offline_verified; Unreal and human acceptance pending",
-  "source_baseline": "c77483eb59985fc344879c59fd40e239ab053ef2",
-  "remote_last_verified": "8ef559d0ca395e7d8baba6df8126bee9abceb830",
+  "status": "windows_build_packaged_and_startup_verified; interactive_and_human_acceptance_pending",
+  "source_baseline": "6a1031d38b2e1246bc97ec3600c5159ca41b7bbf",
+  "remote_last_verified": "7394661062b11c7083a9066066b048ca3b1eb94c",
   "gameplay_reference": [
     "docs/gameplay-design-v0.1.md",
     "docs/mvp-prototype-config-v0.1.md"
@@ -54,13 +54,11 @@
     "natural_report": "docs/full-game/NATURAL-PLAY-CHECK.md"
   },
   "not_run": [
-    "UE UHT/UBT for current source",
-    "UE bootstrap/import/cook/package",
-    "packaged launch and Slate interaction/layout",
-    "actual GPU/frame pacing/VRAM",
+    "packaged Slate interaction and visual layout acceptance",
+    "foreground/minimized/combat GPU and frame pacing acceptance",
     "real file-replacement/power-loss tests",
     "human playability and balance acceptance",
-    "LeakSanitizer (host ptrace limitation)"
+    "LeakSanitizer (historical dot host ptrace limitation)"
   ],
   "known_limits": [
     "new tuning and theme variations are provisional, not 80 independent relic mechanisms",
@@ -76,11 +74,29 @@
     "docs/full-game/CROSS-SYSTEM-REVIEW.md",
     "docs/full-game/UE-OFFICIAL-REVIEW.md",
     "docs/full-game/SAVE.md",
-    "docs/full-game/FINAL-OFFLINE-VALIDATION.md"
+    "docs/full-game/FINAL-OFFLINE-VALIDATION.md",
+    "docs/full-game/windows-validation-20261031/REPORT.md"
   ],
   "delivery": {
-    "new_exe": false,
-    "remote_push_verified": false,
-    "blocker": "GitHub connector 16MiB request cap cannot carry 24MB fonts; CLI lacks authentication and no connected executor"
+    "new_exe": true,
+    "remote_push_verified": true,
+    "source_commit_verified": "7394661062b11c7083a9066066b048ca3b1eb94c",
+    "package_local_only": true,
+    "package_file": "dywx-survivors-fullgame-win64-20261031.zip",
+    "package_bytes": 372915633,
+    "package_sha256": "70ff2bd156849f0c3803e94befb33297f261de42875088a065d83afcc4c17f04",
+    "blocker": "CUA approval for the newly built game window timed out; interaction and screenshots not executed"
+  },
+  "windows_validation": {
+    "report": "docs/full-game/windows-validation-20261031/REPORT.md",
+    "build_source_commit": "7394661062b11c7083a9066066b048ca3b1eb94c",
+    "engine": "5.8.4-58902052",
+    "uht_ubt_dll_bootstrap_cook_archive": "PASS",
+    "cmake_ctest": "22/22 PASS",
+    "msvc_asan": "economy regression only PASS",
+    "packaged_startup": "PASS: two isolated captures, normal exit",
+    "background_menu_fps": 15.0,
+    "lower_process_cap_fps": 10.0,
+    "interactive_visual_acceptance": "NOT_RUN: CUA app approval timed out"
   }
 }
