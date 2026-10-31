@@ -47,6 +47,7 @@ public:
   bool PrepareCheckpoint(RunCheckpoint &out) const;
   bool RestoreCheckpoint(const RunCheckpoint &checkpoint, const CampaignProfile &profile);
   bool BuyGood(std::uint64_t token);
+  bool DiscoverCurrentShop(); // UI open/refresh event only; queries remain pure.
   bool RefreshShop();
   bool BeginReforge(EntityId id, std::size_t affix);
   bool ResolveReforge(bool keepNew);

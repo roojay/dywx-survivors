@@ -1,0 +1,11 @@
+{
+  "baseline_commit": "8ffe36e6d98cd785f7fc8e7a672bb81d128732b6",
+  "completed_utc": "2026-10-31T15:40:38.509950+00:00",
+  "aggregate_exit_code": 0,
+  "supplemental_exit_code": 0,
+  "font_checks": 354,
+  "input_files_verified_unchanged": 14,
+  "native_ue_windows": "NOT_RUN",
+  "final_combined_sanitizer": "NOT_RUN",
+  "committed": false
+}

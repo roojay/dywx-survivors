@@ -7,10 +7,12 @@
 #include "Engine/Texture2D.h"
 #include "DywxHUDState.h"
 #include "DywxUIState.h"
+#include "DywxUIViewMemory.h"
 #include "MVP/Types.h"
 
 class ADywxUIPlayerController;
 class SConstraintCanvas;
+class SScrollBox;
 
 class SDywxRoot : public SCompoundWidget
 {
@@ -42,6 +44,16 @@ private:
     float BossChangeUntil = 0;
     float BossHP = 0, BossMaxHP = 1;
     uint64 UIEpoch = 0;
+    uint64 PresentationRunId = 0;
+    dywx::ViewMemory ViewMemory;
+    TMap<FString,TWeakPtr<SScrollBox>> ScrollTargets;
+    TMap<FString,TWeakPtr<SWidget>> FocusTargets;
+    TSet<FString> AmbiguousFocusKeys;
+    TSet<FString> PendingScrollRestore;
+    FString ViewContext() const;
+    TSharedRef<SScrollBox> RememberedScroll(const FString& Key);
+    void RestoreScrollAfterLayout();
+    TSharedRef<SWidget> FocusTarget(const FString& Key,TSharedRef<SWidget> Widget);
     uint64 SelectedBag = 0;
     int32 SelectedSlot = 0;
     int32 AspectFilter = -1, AffixFilter = -1;
@@ -78,7 +90,7 @@ private:
     TSharedRef<SWidget> CombatButton(const FString& Text, TFunction<FReply()> Action);
     TSharedRef<SWidget> Label(const FString& Text, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
     TSharedRef<SWidget> Paragraph(const FString& Text, float Width, int32 Size = 24, FLinearColor Color = FLinearColor::White, bool bTitle = false) const;
-    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""), bool bFramed = false, TSharedPtr<SWidget> TooltipContent = nullptr);
+    TSharedRef<SWidget> Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary = false, bool bEnabled = true, const FString& Tooltip = TEXT(""), bool bFramed = false, TSharedPtr<SWidget> TooltipContent = nullptr, const FString& FocusKey = TEXT(""));
     TSharedRef<SWidget> Comparison(const dywx::mvp::Stats& Before,const dywx::mvp::Stats& After,const FString& Description=TEXT("")) const;
     TSharedRef<SWidget> Panel(TSharedRef<SWidget> Content, FLinearColor Tint, float Padding = 24.0f) const;
     void At(float X, float Y, float W, float H, TSharedRef<SWidget> Widget);

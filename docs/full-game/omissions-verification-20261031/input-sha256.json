@@ -1,0 +1,20 @@
+{
+  "baseline_commit": "8ffe36e6d98cd785f7fc8e7a672bb81d128732b6",
+  "state": "uncommitted combined omission-fix tree",
+  "files": {
+    "Source/DywxCore/Private/MVP/Economy.cpp": "80d807c0f914984efb23f55f1d4fd8690c7dfee1ef8358e59859bf401c3edc3f",
+    "Source/DywxCore/Private/MVP/Simulation.cpp": "3bd9af69c21b811e1cb1bc791f8890b943e285afce4218aabdf643718b889ee7",
+    "Source/DywxCore/Public/MVP/Economy.h": "7a17d0d817780ede9b8e029651f1029cfa41ba35ffbfa491fcfd1fb72db451b9",
+    "Source/DywxCore/Public/MVP/Simulation.h": "e9a5fbed51ff8caa66bc7b29367e73102fe07b0cefd06d731379682d928cb16b",
+    "Source/DywxRuntime/Public/MVP/DywxRunSession.h": "0bbfa4b8e567a360ff850b869b87f1943d8cdd3e6047c0193cb0c985aa9e0076",
+    "Source/DywxUI/Private/SDywxRoot.cpp": "8bdafbf1c388a18876f0acdd50e200cb77c916d0b2d57bed5bdca0c1a565f34f",
+    "Source/DywxUI/Private/SDywxRoot.h": "1e8bf3cc4e24efed91c541406e6f99c2d551ea038b9b984a605f415b5103cf73",
+    "Source/DywxUI/Public/DywxUIViewMemory.h": "b352e92af53da75686f83bde92470057154e132aeab074659f07e5488c5d9e90",
+    "scripts/test-concept-ui-contract.py": "98233995ef9a28707c8603c6fb3e49b683cc750fa78719e1640a6003f1134cef",
+    "scripts/test-mvp-all.sh": "279367f93adba9e1fee8be98b8a9f0d4e548321af26fbf8720db088596b4c1c4",
+    "scripts/test-ui-view-memory-contract.py": "092063e992b98771052389aec4e39f8059eacd2695abf9b4fa22eb8f196fe802",
+    "scripts/test-ui-view-memory.sh": "f9a9b27b8f3211c2d0d1d6ca1af0673f60f2c888c5c02567305163b6e4297612",
+    "tests/full_game_integration_tests.cpp": "96b5bc31944eb54dbd367e58fb698c6a79d18b3e749bb00aba9fd91519b8c4e6",
+    "tests/ui_view_memory_test.cpp": "4597e552a82757c7958089b3a2468ccb1aaa2062bd224ff4b28e642a90963758"
+  }
+}

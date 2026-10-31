@@ -4,6 +4,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 bash scripts/test-ui-state.sh
 bash scripts/test-ui-layout-policy.sh
+bash scripts/test-ui-view-memory.sh
+python3 scripts/test-ui-view-memory-contract.py
 bash scripts/test-preview-budget.sh
 bash scripts/test-mvp-progression.sh
 bash scripts/test-mvp-discovery.sh

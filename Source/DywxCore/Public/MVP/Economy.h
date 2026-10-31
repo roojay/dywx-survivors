@@ -53,6 +53,7 @@ public:
   void CreditKill(EnemyTier);
   bool CreditStones(int amount); // Already-authorized event rewards only; layer gated.
   const std::vector<ShopGood>& Shop() const { return shop_; }
+  bool DiscoverCurrentShop(Progression&); // Explicit presentation command, never a read-side effect.
   bool Buy(Progression&, std::uint64_t token);
   bool Refresh(Progression&);
   EconomyRefinePreview PreviewRefine(const Progression&, const std::vector<EntityId>&, RefineReward) const;

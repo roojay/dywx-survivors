@@ -1,0 +1,506 @@
+full_game_integration_tests: campaign layers, 10-wave/endless bosses, settlement, economy and layout passed
+PASS: portable domain header: Types
+PASS: no shadow UI domain header: Types
+PASS: portable domain header: Simulation
+PASS: no shadow UI domain header: Simulation
+PASS: portable domain header: Progression
+PASS: no shadow UI domain header: Progression
+PASS: portable domain header: Campaign
+PASS: no shadow UI domain header: Campaign
+PASS: portable domain header: Economy
+PASS: no shadow UI domain header: Economy
+PASS: portable domain header: Arena
+PASS: no shadow UI domain header: Arena
+PASS: portable domain header: SaveCodec
+PASS: no shadow UI domain header: SaveCodec
+PASS: portable domain header: ContentCatalog
+PASS: no shadow UI domain header: ContentCatalog
+PASS: no UE types: Export.h
+PASS: core-only include: SaveCodec.h -> MVP/Export.h
+PASS: core-only include: SaveCodec.h -> MVP/Campaign.h
+PASS: core-only include: SaveCodec.h -> MVP/Economy.h
+PASS: core-only include: SaveCodec.h -> MVP/Arena.h
+PASS: no UE types: SaveCodec.h
+PASS: explicit export contract: SaveCodec.h
+PASS: exported domain type: CombatBoundaryState
+PASS: exported domain type: RunCheckpoint
+PASS: exported domain type: ProfileData
+PASS: exported domain type: SaveCodec
+PASS: exported domain type: ProfileStore
+PASS: core-only include: Types.h -> MVP/Export.h
+PASS: no UE types: Types.h
+PASS: explicit export contract: Types.h
+PASS: exported domain type: Vec2
+PASS: exported domain type: Stats
+PASS: exported domain type: SpellState
+PASS: exported domain type: Resonance
+PASS: exported domain type: BuildState
+PASS: exported domain type: Affix
+PASS: exported domain type: Relic
+PASS: exported domain type: UpgradeOffer
+PASS: exported domain type: ProgressionState
+PASS: exported domain type: PlayerState
+PASS: exported domain type: EnemyState
+PASS: exported domain type: ProjectileState
+PASS: exported domain type: EffectState
+PASS: exported domain type: PickupState
+PASS: exported domain type: DamageFeedback
+PASS: exported domain type: RunStatistics
+PASS: exported domain type: RunConfig
+PASS: exported domain type: InputState
+PASS: exported domain type: Snapshot
+PASS: exported domain type: ArenaObstacle
+PASS: core-only include: Simulation.h -> MVP/Export.h
+PASS: core-only include: Simulation.h -> MVP/Progression.h
+PASS: core-only include: Simulation.h -> MVP/Types.h
+PASS: core-only include: Simulation.h -> MVP/Campaign.h
+PASS: core-only include: Simulation.h -> MVP/Economy.h
+PASS: core-only include: Simulation.h -> MVP/Arena.h
+PASS: no UE types: Simulation.h
+PASS: explicit export contract: Simulation.h
+PASS: exported domain type: RunCheckpoint;
+PASS: exported domain type: CaveBossRules
+PASS: exported domain type: OpportunityDetails
+PASS: exported domain type: Simulation
+PASS: core-only include: ContentCatalog.h -> MVP/Export.h
+PASS: core-only include: ContentCatalog.h -> MVP/Types.h
+PASS: no UE types: ContentCatalog.h
+PASS: explicit export contract: ContentCatalog.h
+PASS: exported domain type: SpellConfig
+PASS: exported domain type: PassiveConfig
+PASS: exported domain type: RelicConfig
+PASS: exported domain type: FusionRecipe
+PASS: core-only include: Campaign.h -> MVP/Export.h
+PASS: core-only include: Campaign.h -> MVP/Types.h
+PASS: no UE types: Campaign.h
+PASS: explicit export contract: Campaign.h
+PASS: exported domain type: HeroRecord
+PASS: exported domain type: EndlessRecord
+PASS: exported domain type: CampaignProfile
+PASS: exported domain type: CampaignConfig
+PASS: exported domain type: WaveSchedule
+PASS: exported domain type: TrialEffects
+PASS: exported domain type: CampaignRunState
+PASS: exported domain type: OpportunityResolution
+PASS: exported domain type: Campaign
+PASS: core-only include: Progression.h -> MVP/Export.h
+PASS: core-only include: Progression.h -> MVP/ContentCatalog.h
+PASS: no UE types: Progression.h
+PASS: explicit export contract: Progression.h
+PASS: exported domain type: RefinePreview
+PASS: exported domain type: RelicFilter
+PASS: exported domain type: Progression
+PASS: core-only include: Economy.h -> MVP/Export.h
+PASS: core-only include: Economy.h -> MVP/Progression.h
+PASS: no UE types: Economy.h
+PASS: explicit export contract: Economy.h
+PASS: exported domain type: EconomyConfig
+PASS: exported domain type: ShopGood
+PASS: exported domain type: EconomyRefinePreview
+PASS: exported domain type: ReforgeOffer
+PASS: exported domain type: EconomyUndo
+PASS: exported domain type: EconomyState
+PASS: exported domain type: Economy
+PASS: core-only include: Arena.h -> MVP/Export.h
+PASS: core-only include: Arena.h -> MVP/Types.h
+PASS: no UE types: Arena.h
+PASS: explicit export contract: Arena.h
+PASS: exported domain type: CaveDefinition
+PASS: exported domain type: ArenaConfig
+PASS: exported domain type: ArenaLayout
+PASS: exported domain type: AnomalyConfig
+PASS: exported domain type: AnomalyModifiers
+PASS: exported domain type: ArenaHazardEvent
+PASS: exported domain type: AnomalyState
+PASS: exported domain type: AnomalySystem
+PASS: core-only include: SaveCodec.cpp -> MVP/SaveCodec.h
+PASS: core-only include: SaveCodec.cpp -> RandomState.h
+PASS: no UE types: SaveCodec.cpp
+PASS: core-only include: Economy.cpp -> MVP/Economy.h
+PASS: core-only include: Economy.cpp -> RandomState.h
+PASS: no UE types: Economy.cpp
+PASS: core-only include: Campaign.cpp -> MVP/Campaign.h
+PASS: no UE types: Campaign.cpp
+PASS: core-only include: Simulation.cpp -> MVP/Simulation.h
+PASS: core-only include: Simulation.cpp -> MVP/ContentCatalog.h
+PASS: core-only include: Simulation.cpp -> MVP/SaveCodec.h
+PASS: no UE types: Simulation.cpp
+PASS: no UE types: RandomState.h
+PASS: core-only include: ContentCatalog.cpp -> MVP/ContentCatalog.h
+PASS: no UE types: ContentCatalog.cpp
+PASS: core-only include: Arena.cpp -> MVP/Arena.h
+PASS: no UE types: Arena.cpp
+PASS: core-only include: Progression.cpp -> MVP/Progression.h
+PASS: no UE types: Progression.cpp
+PASS: domain module dependency direction
+PASS: runtime cannot depend on presentation
+PASS: presentation explicitly depends on core/runtime
+PASS: three registered runtime modules
+PASS: target modules: DywxSurvivors.Target.cs
+PASS: target modules: DywxSurvivorsEditor.Target.cs
+PASS: no presentation dependency: DywxRuntimeModule.cpp
+PASS: no presentation dependency: DywxMVPProfile.h
+PASS: no presentation dependency: DywxRunSession.h
+PASS: no presentation dependency: DywxRunSession.cpp
+PASS: no presentation dependency: DywxMVPProfile.cpp
+PASS: runtime exported adapter APIs
+PASS: runtime offers read-only simulation view
+PASS: runtime world/network whitelist
+PASS: world actor is presentation only
+PASS: single simulation integration owner
+NOT_RUN: UHT/UBT modular DLL exports, UE lifecycle ordering, packaged gameplay
+PASS 720p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 26.0px
+PASS 720p 100% fusion-action: 355.53/510 width; 59/80 height; ink 26.0px
+PASS 720p 100% main-help: 530.59/950 width; 35/44 height; ink 18.0px
+PASS 720p 100% main-footer: 253.06/420 width; 35/44 height; ink 18.0px
+PASS 720p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 28.0px
+PASS 720p 100% upgrade-pending: 304.41/900 width; 35/44 height; ink 18.0px
+PASS 720p 100% main-primary: 192.00/440 width; 57/80 height; ink 26.0px
+PASS 720p 100% main-continue: 160.00/440 width; 48/70 height; ink 20.7px
+PASS 720p 100% codex-button: 96.00/440 width; 48/70 height; ink 21.3px
+PASS 720p 100% legacy-button: 96.00/440 width; 48/70 height; ink 20.7px
+PASS 720p 100% settings-button: 96.00/440 width; 48/70 height; ink 20.0px
+PASS 720p 100% quit-button: 96.00/440 width; 48/70 height; ink 20.0px
+PASS 720p 100% back-button: 169.38/190 width; 48/60 height; ink 20.0px
+PASS 720p 100% map-mode: 72.00/150 width; 43/54 height; ink 17.3px
+PASS 720p 100% map-caption: 128.00/306 width; 39/52 height; ink 20.0px
+PASS 720p 100% hero-row: 128.00/258 width; 39/52 height; ink 20.7px
+PASS 720p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 26.0px
+PASS 720p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 26.0px
+PASS 720p 100% hud-xp: 197.52/320 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-level: 99.81/190 width; 35/44 height; ink 18.0px
+PASS 720p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 17.3px
+PASS 720p 100% passive-heading: 253.06/355 width; 35/45 height; ink 18.0px
+PASS 720p 100% upgrade-seal: 113.20/155 width; 39/48 height; ink 18.0px
+PASS 720p 100% dash-cooldown: 97.48/170 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-health: 381.88/600 width; 35/44 height; ink 18.0px
+PASS 720p 100% hud-spell-cooldown: 61.95/76 width; 35/44 height; ink 14.0px
+PASS 720p 100% hud-spell-rank: 70.00/82 width; 35/44 height; ink 9.3px
+PASS 720p 100% hud-portrait-name: 112.00/155 width; 35/44 height; ink 18.0px
+PASS 720p 100% dash-button: 156.97/205 width; 39/52 height; ink 20.0px
+PASS 720p 100% battle-pause: 121.12/170 width; 39/48 height; ink 18.0px
+PASS 720p 100% battle-codex: 93.97/160 width; 39/48 height; ink 18.0px
+PASS 720p 100% battle-wave: 521.47/700 width; 35/46 height; ink 18.0px
+PASS 720p 100% screen-heading: 224.00/450 width; 69/80 height; ink 36.0px
+PASS 720p 100% map-title: 224.00/450 width; 69/80 height; ink 36.0px
+PASS 720p 100% hud-resonance: 300.48/600 width; 35/48 height; ink 18.0px
+PASS 720p 100% rest-refine: 353.22/470 width; 48/60 height; ink 21.3px
+PASS 720p 100% rest-lock: 189.64/245 width; 48/60 height; ink 21.3px
+PASS 720p 100% rest-ready: 395.53/810 width; 59/70 height; ink 26.0px
+PASS 720p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 21.3px
+PASS 720p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 21.3px
+PASS 720p 100% save-exit: 192.00/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% saved-hero: 274.00/420 width; 59/80 height; ink 26.0px
+PASS 720p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 21.3px
+PASS 720p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 18.0px
+PASS 720p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 18.0px
+PASS 720p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 21.3px
+PASS 720p 100% opportunity-reward-line: 515.91/780 width; 35/55 height; ink 18.0px
+PASS 720p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 18.0px
+PASS 720p 100% boss-realm-title: 606.94/700 width; 35/44 height; ink 18.0px
+PASS 720p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 20.7px
+PASS 720p 100% local-ranking-line: 368.17/560 width; 35/55 height; ink 18.0px
+PASS 720p 100% anomaly-hud-header: 149.34/400 width; 35/44 height; ink 18.0px
+PASS 720p 100% anomaly-hud-numbers: 406.03/600 width; 35/48 height; ink 18.0px
+PASS 720p 100% hover-comparison-heading: 504.97/570 width; 35/48 height; ink 18.0px
+PASS 720p 100% rest-title: 619.47/980 width; 43/55 height; ink 23.3px
+PASS 720p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 28.7px
+PASS 720p 110% fusion-action: 387.69/510 width; 64/80 height; ink 28.7px
+PASS 720p 110% main-help: 587.53/950 width; 39/44 height; ink 19.3px
+PASS 720p 110% main-footer: 280.19/420 width; 39/44 height; ink 19.3px
+PASS 720p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 30.7px
+PASS 720p 110% upgrade-pending: 337.06/900 width; 39/44 height; ink 19.3px
+PASS 720p 110% main-primary: 208.00/440 width; 62/80 height; ink 28.7px
+PASS 720p 110% main-continue: 172.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% codex-button: 102.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% legacy-button: 102.00/440 width; 52/70 height; ink 22.7px
+PASS 720p 110% settings-button: 102.00/440 width; 52/70 height; ink 22.7px
+PASS 720p 110% quit-button: 102.00/440 width; 52/70 height; ink 23.3px
+PASS 720p 110% back-button: 182.27/190 width; 52/60 height; ink 22.7px
+PASS 720p 110% map-mode: 78.00/150 width; 47/54 height; ink 19.3px
+PASS 720p 110% map-caption: 140.00/306 width; 43/52 height; ink 22.7px
+PASS 720p 110% hero-row: 140.00/258 width; 43/52 height; ink 23.3px
+PASS 720p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 28.7px
+PASS 720p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 28.7px
+PASS 720p 110% hud-xp: 218.75/320 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-level: 110.53/190 width; 39/44 height; ink 19.3px
+PASS 720p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 18.7px
+PASS 720p 110% passive-heading: 280.19/355 width; 39/45 height; ink 19.3px
+PASS 720p 110% upgrade-seal: 124.28/155 width; 43/48 height; ink 19.3px
+PASS 720p 110% dash-cooldown: 107.97/170 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-health: 422.94/600 width; 39/44 height; ink 19.3px
+PASS 720p 110% hud-spell-cooldown: 68.62/76 width; 39/44 height; ink 14.7px
+PASS 720p 110% hud-spell-rank: 77.50/82 width; 39/44 height; ink 10.0px
+PASS 720p 110% hud-portrait-name: 124.00/155 width; 39/44 height; ink 19.3px
+PASS 720p 110% dash-button: 172.73/205 width; 43/52 height; ink 21.3px
+PASS 720p 110% battle-pause: 133.05/170 width; 43/48 height; ink 19.3px
+PASS 720p 110% battle-codex: 102.97/160 width; 43/48 height; ink 19.3px
+PASS 720p 110% battle-wave: 577.56/700 width; 39/46 height; ink 19.3px
+PASS 720p 110% screen-heading: 248.00/450 width; 76/80 height; ink 40.0px
+PASS 720p 110% map-title: 248.00/450 width; 76/80 height; ink 40.0px
+PASS 720p 110% hud-resonance: 332.72/600 width; 39/48 height; ink 19.3px
+PASS 720p 110% rest-refine: 383.34/470 width; 52/60 height; ink 23.3px
+PASS 720p 110% rest-lock: 204.42/245 width; 52/60 height; ink 23.3px
+PASS 720p 110% rest-ready: 431.69/810 width; 64/70 height; ink 28.7px
+PASS 720p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 23.3px
+PASS 720p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 23.3px
+PASS 720p 110% save-exit: 207.00/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% saved-hero: 298.00/420 width; 64/80 height; ink 28.7px
+PASS 720p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 23.3px
+PASS 720p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 19.3px
+PASS 720p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 19.3px
+PASS 720p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 23.3px
+PASS 720p 110% opportunity-reward-line: 571.25/780 width; 39/55 height; ink 20.7px
+PASS 720p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 19.3px
+PASS 720p 110% boss-realm-title: 672.12/700 width; 39/44 height; ink 19.3px
+PASS 720p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 22.7px
+PASS 720p 110% local-ranking-line: 407.72/560 width; 39/55 height; ink 19.3px
+PASS 720p 110% anomaly-hud-header: 165.38/400 width; 39/44 height; ink 19.3px
+PASS 720p 110% anomaly-hud-numbers: 449.62/600 width; 39/48 height; ink 19.3px
+PASS 720p 110% hover-comparison-heading: 559.16/570 width; 39/48 height; ink 19.3px
+PASS 720p 110% rest-title: 690.16/980 width; 48/55 height; ink 25.3px
+PASS 1080p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 39.0px
+PASS 1080p 100% fusion-action: 355.53/510 width; 59/80 height; ink 39.0px
+PASS 1080p 100% main-help: 511.70/950 width; 34/44 height; ink 26.0px
+PASS 1080p 100% main-footer: 216.91/420 width; 30/44 height; ink 23.0px
+PASS 1080p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 42.0px
+PASS 1080p 100% upgrade-pending: 293.56/900 width; 34/44 height; ink 26.0px
+PASS 1080p 100% main-primary: 192.00/440 width; 57/80 height; ink 39.0px
+PASS 1080p 100% main-continue: 160.00/440 width; 48/70 height; ink 31.0px
+PASS 1080p 100% codex-button: 96.00/440 width; 48/70 height; ink 32.0px
+PASS 1080p 100% legacy-button: 96.00/440 width; 48/70 height; ink 31.0px
+PASS 1080p 100% settings-button: 96.00/440 width; 48/70 height; ink 30.0px
+PASS 1080p 100% quit-button: 96.00/440 width; 48/70 height; ink 30.0px
+PASS 1080p 100% back-button: 169.38/190 width; 48/60 height; ink 30.0px
+PASS 1080p 100% map-mode: 70.00/150 width; 42/54 height; ink 25.0px
+PASS 1080p 100% map-caption: 128.00/306 width; 39/52 height; ink 30.0px
+PASS 1080p 100% hero-row: 128.00/258 width; 39/52 height; ink 31.0px
+PASS 1080p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 39.0px
+PASS 1080p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 39.0px
+PASS 1080p 100% hud-xp: 155.19/270 width; 28/40 height; ink 21.0px
+PASS 1080p 100% hud-level: 85.55/170 width; 30/38 height; ink 23.0px
+PASS 1080p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 26.0px
+PASS 1080p 100% passive-heading: 244.03/355 width; 34/45 height; ink 26.0px
+PASS 1080p 100% upgrade-seal: 91.09/155 width; 32/48 height; ink 21.0px
+PASS 1080p 100% dash-cooldown: 66.16/170 width; 24/34 height; ink 19.0px
+PASS 1080p 100% hud-health: 368.34/600 width; 34/44 height; ink 26.0px
+PASS 1080p 100% hud-spell-cooldown: 48.67/76 width; 28/34 height; ink 16.0px
+PASS 1080p 100% hud-spell-rank: 47.50/82 width; 24/32 height; ink 9.0px
+PASS 1080p 100% hud-portrait-name: 88.00/155 width; 28/36 height; ink 21.0px
+PASS 1080p 100% dash-button: 125.48/205 width; 32/52 height; ink 23.0px
+PASS 1080p 100% battle-pause: 97.31/120 width; 32/40 height; ink 21.0px
+PASS 1080p 100% battle-codex: 75.98/160 width; 32/48 height; ink 21.0px
+PASS 1080p 100% battle-wave: 503.00/700 width; 34/46 height; ink 26.0px
+PASS 1080p 100% screen-heading: 224.00/450 width; 69/80 height; ink 54.0px
+PASS 1080p 100% map-title: 224.00/450 width; 69/80 height; ink 54.0px
+PASS 1080p 100% hud-resonance: 257.55/600 width; 30/48 height; ink 24.0px
+PASS 1080p 100% rest-refine: 353.22/470 width; 48/60 height; ink 32.0px
+PASS 1080p 100% rest-lock: 189.64/245 width; 48/60 height; ink 32.0px
+PASS 1080p 100% rest-ready: 395.53/810 width; 59/70 height; ink 39.0px
+PASS 1080p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 32.0px
+PASS 1080p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 32.0px
+PASS 1080p 100% save-exit: 192.00/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% saved-hero: 274.00/420 width; 59/80 height; ink 39.0px
+PASS 1080p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 32.0px
+PASS 1080p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 27.0px
+PASS 1080p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 27.0px
+PASS 1080p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 32.0px
+PASS 1080p 100% opportunity-reward-line: 497.53/780 width; 34/55 height; ink 28.0px
+PASS 1080p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 27.0px
+PASS 1080p 100% boss-realm-title: 498.62/650 width; 29/40 height; ink 23.0px
+PASS 1080p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 31.0px
+PASS 1080p 100% local-ranking-line: 355.09/560 width; 34/55 height; ink 26.0px
+PASS 1080p 100% anomaly-hud-header: 117.34/400 width; 28/36 height; ink 21.0px
+PASS 1080p 100% anomaly-hud-numbers: 348.00/600 width; 30/48 height; ink 23.0px
+PASS 1080p 100% hover-comparison-heading: 432.80/570 width; 30/48 height; ink 23.0px
+PASS 1080p 100% rest-title: 619.47/980 width; 43/55 height; ink 35.0px
+PASS 1080p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 43.0px
+PASS 1080p 110% fusion-action: 387.69/510 width; 64/80 height; ink 43.0px
+PASS 1080p 110% main-help: 568.39/950 width; 38/44 height; ink 28.0px
+PASS 1080p 110% main-footer: 244.03/420 width; 34/44 height; ink 26.0px
+PASS 1080p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 46.0px
+PASS 1080p 110% upgrade-pending: 326.12/900 width; 38/44 height; ink 28.0px
+PASS 1080p 110% main-primary: 208.00/440 width; 62/80 height; ink 43.0px
+PASS 1080p 110% main-continue: 172.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% codex-button: 102.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% legacy-button: 102.00/440 width; 52/70 height; ink 34.0px
+PASS 1080p 110% settings-button: 102.00/440 width; 52/70 height; ink 34.0px
+PASS 1080p 110% quit-button: 102.00/440 width; 52/70 height; ink 35.0px
+PASS 1080p 110% back-button: 182.27/190 width; 52/60 height; ink 34.0px
+PASS 1080p 110% map-mode: 76.00/150 width; 46/54 height; ink 28.0px
+PASS 1080p 110% map-caption: 140.00/306 width; 43/52 height; ink 34.0px
+PASS 1080p 110% hero-row: 140.00/258 width; 43/52 height; ink 35.0px
+PASS 1080p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 43.0px
+PASS 1080p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 43.0px
+PASS 1080p 110% hud-xp: 169.28/270 width; 30/40 height; ink 24.0px
+PASS 1080p 110% hud-level: 96.27/170 width; 34/38 height; ink 26.0px
+PASS 1080p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 28.0px
+PASS 1080p 110% passive-heading: 271.12/355 width; 38/45 height; ink 28.0px
+PASS 1080p 110% upgrade-seal: 98.45/155 width; 34/48 height; ink 23.0px
+PASS 1080p 110% dash-cooldown: 69.61/170 width; 25/34 height; ink 20.0px
+PASS 1080p 110% hud-health: 409.11/600 width; 38/44 height; ink 28.0px
+PASS 1080p 110% hud-spell-cooldown: 53.09/76 width; 30/34 height; ink 17.0px
+PASS 1080p 110% hud-spell-rank: 50.00/82 width; 25/32 height; ink 9.0px
+PASS 1080p 110% hud-portrait-name: 96.00/155 width; 30/36 height; ink 23.0px
+PASS 1080p 110% dash-button: 135.95/205 width; 34/52 height; ink 26.0px
+PASS 1080p 110% battle-pause: 105.25/120 width; 34/40 height; ink 23.0px
+PASS 1080p 110% battle-codex: 81.97/160 width; 34/48 height; ink 23.0px
+PASS 1080p 110% battle-wave: 558.61/700 width; 38/46 height; ink 28.0px
+PASS 1080p 110% screen-heading: 248.00/450 width; 76/80 height; ink 60.0px
+PASS 1080p 110% map-title: 248.00/450 width; 76/80 height; ink 60.0px
+PASS 1080p 110% hud-resonance: 289.78/600 width; 34/48 height; ink 26.0px
+PASS 1080p 110% rest-refine: 383.34/470 width; 52/60 height; ink 35.0px
+PASS 1080p 110% rest-lock: 204.42/245 width; 52/60 height; ink 35.0px
+PASS 1080p 110% rest-ready: 431.69/810 width; 64/70 height; ink 43.0px
+PASS 1080p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 35.0px
+PASS 1080p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 35.0px
+PASS 1080p 110% save-exit: 207.00/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% saved-hero: 298.00/420 width; 64/80 height; ink 43.0px
+PASS 1080p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 35.0px
+PASS 1080p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 29.0px
+PASS 1080p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 29.0px
+PASS 1080p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 35.0px
+PASS 1080p 110% opportunity-reward-line: 552.75/780 width; 38/55 height; ink 29.0px
+PASS 1080p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 29.0px
+PASS 1080p 110% boss-realm-title: 563.64/650 width; 33/40 height; ink 25.0px
+PASS 1080p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 34.0px
+PASS 1080p 110% local-ranking-line: 394.44/560 width; 38/55 height; ink 28.0px
+PASS 1080p 110% anomaly-hud-header: 128.00/400 width; 30/36 height; ink 23.0px
+PASS 1080p 110% anomaly-hud-numbers: 391.59/600 width; 34/48 height; ink 26.0px
+PASS 1080p 110% hover-comparison-heading: 486.98/570 width; 34/48 height; ink 26.0px
+PASS 1080p 110% rest-title: 690.16/980 width; 48/55 height; ink 38.0px
+PASS 1440p 100% upgrade-passive-title: 207.38/535 width; 49/58 height; ink 52.0px
+PASS 1440p 100% fusion-action: 355.53/510 width; 59/80 height; ink 52.0px
+PASS 1440p 100% main-help: 511.70/950 width; 34/44 height; ink 34.7px
+PASS 1440p 100% main-footer: 216.91/420 width; 30/44 height; ink 30.7px
+PASS 1440p 100% map-detail-heading: 240.70/450 width; 53/65 height; ink 56.0px
+PASS 1440p 100% upgrade-pending: 293.56/900 width; 34/44 height; ink 34.7px
+PASS 1440p 100% main-primary: 192.00/440 width; 57/80 height; ink 52.0px
+PASS 1440p 100% main-continue: 160.00/440 width; 48/70 height; ink 41.3px
+PASS 1440p 100% codex-button: 96.00/440 width; 48/70 height; ink 42.7px
+PASS 1440p 100% legacy-button: 96.00/440 width; 48/70 height; ink 41.3px
+PASS 1440p 100% settings-button: 96.00/440 width; 48/70 height; ink 40.0px
+PASS 1440p 100% quit-button: 96.00/440 width; 48/70 height; ink 40.0px
+PASS 1440p 100% back-button: 169.38/190 width; 48/60 height; ink 40.0px
+PASS 1440p 100% map-mode: 70.00/150 width; 42/54 height; ink 33.3px
+PASS 1440p 100% map-caption: 128.00/306 width; 39/52 height; ink 40.0px
+PASS 1440p 100% hero-row: 128.00/258 width; 39/52 height; ink 41.3px
+PASS 1440p 100% upgrade-confirm: 192.00/430 width; 57/80 height; ink 52.0px
+PASS 1440p 100% upgrade-paused: 216.00/430 width; 65/75 height; ink 52.0px
+PASS 1440p 100% hud-xp: 155.19/270 width; 28/40 height; ink 28.0px
+PASS 1440p 100% hud-level: 85.55/170 width; 30/38 height; ink 30.7px
+PASS 1440p 100% upgrade-rank: 159.75/535 width; 38/44 height; ink 34.7px
+PASS 1440p 100% passive-heading: 244.03/355 width; 34/45 height; ink 34.7px
+PASS 1440p 100% upgrade-seal: 91.09/155 width; 32/48 height; ink 28.0px
+PASS 1440p 100% dash-cooldown: 66.16/170 width; 24/34 height; ink 25.3px
+PASS 1440p 100% hud-health: 368.34/600 width; 34/44 height; ink 34.7px
+PASS 1440p 100% hud-spell-cooldown: 48.67/76 width; 28/34 height; ink 21.3px
+PASS 1440p 100% hud-spell-rank: 47.50/82 width; 24/32 height; ink 12.0px
+PASS 1440p 100% hud-portrait-name: 88.00/155 width; 28/36 height; ink 28.0px
+PASS 1440p 100% dash-button: 125.48/205 width; 32/52 height; ink 30.7px
+PASS 1440p 100% battle-pause: 97.31/120 width; 32/40 height; ink 28.0px
+PASS 1440p 100% battle-codex: 75.98/160 width; 32/48 height; ink 28.0px
+PASS 1440p 100% battle-wave: 503.00/700 width; 34/46 height; ink 34.7px
+PASS 1440p 100% screen-heading: 224.00/450 width; 69/80 height; ink 72.0px
+PASS 1440p 100% map-title: 224.00/450 width; 69/80 height; ink 72.0px
+PASS 1440p 100% hud-resonance: 257.55/600 width; 30/48 height; ink 32.0px
+PASS 1440p 100% rest-refine: 353.22/470 width; 48/60 height; ink 42.7px
+PASS 1440p 100% rest-lock: 189.64/245 width; 48/60 height; ink 42.7px
+PASS 1440p 100% rest-ready: 395.53/810 width; 59/70 height; ink 52.0px
+PASS 1440p 100% upgrade-reroll: 263.11/430 width; 48/80 height; ink 42.7px
+PASS 1440p 100% refine-confirm: 160.00/395 width; 48/60 height; ink 42.7px
+PASS 1440p 100% save-exit: 192.00/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% saved-hero: 274.00/420 width; 59/80 height; ink 52.0px
+PASS 1440p 100% economy-refresh: 458.56/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% economy-reforge: 416.45/596 width; 48/65 height; ink 42.7px
+PASS 1440p 100% economy-relic-heading: 210.00/596 width; 35/55 height; ink 36.0px
+PASS 1440p 100% codex-numeric-line: 397.44/570 width; 35/55 height; ink 36.0px
+PASS 1440p 100% opportunity-title: 321.22/810 width; 48/65 height; ink 42.7px
+PASS 1440p 100% opportunity-reward-line: 497.53/780 width; 34/55 height; ink 37.3px
+PASS 1440p 100% anomaly-benefit-line: 392.00/570 width; 35/55 height; ink 36.0px
+PASS 1440p 100% boss-realm-title: 498.62/650 width; 29/40 height; ink 30.7px
+PASS 1440p 100% local-ranking-heading: 417.22/596 width; 39/55 height; ink 41.3px
+PASS 1440p 100% local-ranking-line: 355.09/560 width; 34/55 height; ink 34.7px
+PASS 1440p 100% anomaly-hud-header: 117.34/400 width; 28/36 height; ink 28.0px
+PASS 1440p 100% anomaly-hud-numbers: 348.00/600 width; 30/48 height; ink 30.7px
+PASS 1440p 100% hover-comparison-heading: 432.80/570 width; 30/48 height; ink 30.7px
+PASS 1440p 100% rest-title: 619.47/980 width; 43/55 height; ink 46.7px
+PASS 1440p 110% upgrade-passive-title: 228.11/535 width; 54/58 height; ink 57.3px
+PASS 1440p 110% fusion-action: 387.69/510 width; 64/80 height; ink 57.3px
+PASS 1440p 110% main-help: 568.39/950 width; 38/44 height; ink 37.3px
+PASS 1440p 110% main-footer: 244.03/420 width; 34/44 height; ink 34.7px
+PASS 1440p 110% map-detail-heading: 263.09/450 width; 58/65 height; ink 61.3px
+PASS 1440p 110% upgrade-pending: 326.12/900 width; 38/44 height; ink 37.3px
+PASS 1440p 110% main-primary: 208.00/440 width; 62/80 height; ink 57.3px
+PASS 1440p 110% main-continue: 172.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% codex-button: 102.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% legacy-button: 102.00/440 width; 52/70 height; ink 45.3px
+PASS 1440p 110% settings-button: 102.00/440 width; 52/70 height; ink 45.3px
+PASS 1440p 110% quit-button: 102.00/440 width; 52/70 height; ink 46.7px
+PASS 1440p 110% back-button: 182.27/190 width; 52/60 height; ink 45.3px
+PASS 1440p 110% map-mode: 76.00/150 width; 46/54 height; ink 37.3px
+PASS 1440p 110% map-caption: 140.00/306 width; 43/52 height; ink 45.3px
+PASS 1440p 110% hero-row: 140.00/258 width; 43/52 height; ink 46.7px
+PASS 1440p 110% upgrade-confirm: 208.00/430 width; 62/80 height; ink 57.3px
+PASS 1440p 110% upgrade-paused: 236.00/430 width; 70/75 height; ink 57.3px
+PASS 1440p 110% hud-xp: 169.28/270 width; 30/40 height; ink 32.0px
+PASS 1440p 110% hud-level: 96.27/170 width; 34/38 height; ink 34.7px
+PASS 1440p 110% upgrade-rank: 170.44/535 width; 39/44 height; ink 37.3px
+PASS 1440p 110% passive-heading: 271.12/355 width; 38/45 height; ink 37.3px
+PASS 1440p 110% upgrade-seal: 98.45/155 width; 34/48 height; ink 30.7px
+PASS 1440p 110% dash-cooldown: 69.61/170 width; 25/34 height; ink 26.7px
+PASS 1440p 110% hud-health: 409.11/600 width; 38/44 height; ink 37.3px
+PASS 1440p 110% hud-spell-cooldown: 53.09/76 width; 30/34 height; ink 22.7px
+PASS 1440p 110% hud-spell-rank: 50.00/82 width; 25/32 height; ink 12.0px
+PASS 1440p 110% hud-portrait-name: 96.00/155 width; 30/36 height; ink 30.7px
+PASS 1440p 110% dash-button: 135.95/205 width; 34/52 height; ink 34.7px
+PASS 1440p 110% battle-pause: 105.25/120 width; 34/40 height; ink 30.7px
+PASS 1440p 110% battle-codex: 81.97/160 width; 34/48 height; ink 30.7px
+PASS 1440p 110% battle-wave: 558.61/700 width; 38/46 height; ink 37.3px
+PASS 1440p 110% screen-heading: 248.00/450 width; 76/80 height; ink 80.0px
+PASS 1440p 110% map-title: 248.00/450 width; 76/80 height; ink 80.0px
+PASS 1440p 110% hud-resonance: 289.78/600 width; 34/48 height; ink 34.7px
+PASS 1440p 110% rest-refine: 383.34/470 width; 52/60 height; ink 46.7px
+PASS 1440p 110% rest-lock: 204.42/245 width; 52/60 height; ink 46.7px
+PASS 1440p 110% rest-ready: 431.69/810 width; 64/70 height; ink 57.3px
+PASS 1440p 110% upgrade-reroll: 284.80/430 width; 52/80 height; ink 46.7px
+PASS 1440p 110% refine-confirm: 172.00/395 width; 52/60 height; ink 46.7px
+PASS 1440p 110% save-exit: 207.00/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% saved-hero: 298.00/420 width; 64/80 height; ink 57.3px
+PASS 1440p 110% economy-refresh: 498.56/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% economy-reforge: 452.52/596 width; 52/65 height; ink 46.7px
+PASS 1440p 110% economy-relic-heading: 232.50/596 width; 39/55 height; ink 38.7px
+PASS 1440p 110% codex-numeric-line: 440.09/570 width; 39/55 height; ink 38.7px
+PASS 1440p 110% opportunity-title: 348.34/810 width; 52/65 height; ink 46.7px
+PASS 1440p 110% opportunity-reward-line: 552.75/780 width; 38/55 height; ink 38.7px
+PASS 1440p 110% anomaly-benefit-line: 434.00/570 width; 39/55 height; ink 38.7px
+PASS 1440p 110% boss-realm-title: 563.64/650 width; 33/40 height; ink 33.3px
+PASS 1440p 110% local-ranking-heading: 456.34/596 width; 43/55 height; ink 45.3px
+PASS 1440p 110% local-ranking-line: 394.44/560 width; 38/55 height; ink 37.3px
+PASS 1440p 110% anomaly-hud-header: 128.00/400 width; 30/36 height; ink 30.7px
+PASS 1440p 110% anomaly-hud-numbers: 391.59/600 width; 34/48 height; ink 34.7px
+PASS 1440p 110% hover-comparison-heading: 486.98/570 width; 34/48 height; ink 34.7px
+PASS 1440p 110% rest-title: 690.16/980 width; 48/55 height; ink 50.7px
+PASS 100% BodyScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 70px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 78px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 78px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 117px content, 95px scroll viewport
+PASS 100% BodyScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 114px content, 95px scroll viewport
+PASS 100% BodyScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% SwordScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 100% BeastScripture: 2 lines, 68px content, 95px scroll viewport
+PASS 110% BodyScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% SwordScripture: 2 lines, 76px content, 95px scroll viewport
+PASS 110% BeastScripture: 3 lines, 114px content, 95px scroll viewport
+PASS: 354 offline checks. UE/Slate runtime validation NOT RUN.

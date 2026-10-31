@@ -35,7 +35,143 @@ static std::string Fingerprint(const Simulation& s) {
   for(auto cd:x.spellCooldowns)o<<','<<cd;
   return o.str();
 }
+static void BossRuleDescriptions() {
+  const auto thunder=Simulation::DescribeBossMechanics(CaveId::ThunderMarsh);
+  assert(thunder.find("每15秒将全场其他妖魔的护盾重置为40（不叠加）")!=std::string::npos);
+  assert(thunder.find("入场携2护持")!=std::string::npos);
+  assert(thunder.find("破相时召4远程与6冲锋")!=std::string::npos);
+  const auto ember=Simulation::DescribeBossMechanics(CaveId::EmberMountain);
+  assert(ember.find("入场携2自爆")!=std::string::npos);
+  assert(ember.find("破相时召4自爆与2远程")!=std::string::npos);
+  std::ostringstream ring;ring<<"身周"<<Simulation::BossRules().ringRadius<<"格铺八处同等火域";
+  assert(ember.find(ring.str())!=std::string::npos);
+  const auto mist=Simulation::DescribeBossMechanics(CaveId::MistForest);
+  assert(mist.find("入场携1护持与1召唤")!=std::string::npos);
+  assert(mist.find("破相时召1护持、1召唤与4群行")!=std::string::npos);
+
+  // Verify the disclosed entry/transition entourage against actual boss creation.
+  // This deliberately shortened harness is a rule check, not balance evidence.
+  CampaignProfile profile;
+  profile.unlocks[unsigned(LegacyUnlock::RealmSecond)]=true;
+  profile.unlocks[unsigned(LegacyUnlock::RealmThird)]=true;
+  for(auto cave:{CaveId::ThunderMarsh,CaveId::EmberMountain,CaveId::MistForest}) {
+    Simulation sim;assert(sim.StartCampaign(profile,GameMode::Quick,HeroId::Body,93,1,cave,0,Fast()));
+    for(int wave=0;wave<4;++wave){Rest(sim);assert(sim.BeginNextWave());}
+    std::array<int,8> entry{},added{};EntityId boss=0;
+    for(const auto& enemy:sim.GetSnapshot().enemies){++entry[int(enemy.role)];if(enemy.role==EnemyRole::Boss)boss=enemy.id;}
+    assert(boss);
+    assert(entry[int(EnemyRole::Support)]==(cave==CaveId::ThunderMarsh?2:cave==CaveId::MistForest?1:0));
+    assert(entry[int(EnemyRole::Exploder)]==(cave==CaveId::EmberMountain?2:0));
+    assert(entry[int(EnemyRole::Summoner)]==(cave==CaveId::MistForest?1:0));
+    if(cave==CaveId::ThunderMarsh) {
+      std::vector<EntityId> supports;
+      for(const auto& enemy:sim.GetSnapshot().enemies)if(enemy.role==EnemyRole::Support)supports.push_back(enemy.id);
+      for(auto id:supports)sim.TestDamageEnemy(id,1e9f);
+      const auto witness=sim.TestSpawn(EnemyRole::Swarm,{-30,-10});
+      auto shield=[&](){for(const auto& enemy:sim.GetSnapshot().enemies)if(enemy.id==witness)return enemy.shield;return -1.f;};
+      for(int tick=0;tick<140;++tick){sim.TestSetPlayer({40,20},120);sim.Step(.1f);}
+      assert(shield()==0);
+      for(int tick=0;tick<20;++tick){sim.TestSetPlayer({40,20},120);sim.Step(.1f);}
+      assert(shield()==40);
+      // The 15-second rule must not refill the boss itself.
+      for(const auto& enemy:sim.GetSnapshot().enemies)if(enemy.id==boss)assert(enemy.shield==0);
+      continue;
+    }
+    sim.TestDamageEnemy(boss,1e9f);
+    for(const auto& enemy:sim.GetSnapshot().enemies)++added[int(enemy.role)];
+    for(std::size_t i=0;i<entry.size();++i)added[i]-=entry[i];
+    assert(added[int(EnemyRole::Exploder)]==(cave==CaveId::EmberMountain?4:0));
+    assert(added[int(EnemyRole::Ranged)]==(cave==CaveId::EmberMountain?2:0));
+    assert(added[int(EnemyRole::Support)]==(cave==CaveId::MistForest?1:0));
+    assert(added[int(EnemyRole::Summoner)]==(cave==CaveId::MistForest?1:0));
+    assert(added[int(EnemyRole::Swarm)]==(cave==CaveId::MistForest?4:0));
+  }
+  // Independent fresh Thunder encounter: no 16-second summons or shield fixture
+  // may obscure the exact phase-transition entourage advertised above.
+  Simulation thunderTransition;
+  assert(thunderTransition.StartCampaign(profile,GameMode::Quick,HeroId::Body,94,2,CaveId::ThunderMarsh,0,Fast()));
+  for(int wave=0;wave<4;++wave){Rest(thunderTransition);assert(thunderTransition.BeginNextWave());}
+  std::array<int,8> before{},after{};EntityId thunderBoss=0;
+  for(const auto& enemy:thunderTransition.GetSnapshot().enemies) {
+    ++before[int(enemy.role)];if(enemy.role==EnemyRole::Boss)thunderBoss=enemy.id;
+  }
+  assert(thunderBoss);thunderTransition.TestDamageEnemy(thunderBoss,1e9f);
+  assert(thunderTransition.GetSnapshot().bossPhase==2);
+  for(const auto& enemy:thunderTransition.GetSnapshot().enemies)++after[int(enemy.role)];
+  for(std::size_t role=0;role<before.size();++role) {
+    const int expected=role==unsigned(EnemyRole::Ranged)?4:role==unsigned(EnemyRole::Charger)?6:0;
+    assert(after[role]-before[role]==expected);
+  }
+}
+static void ShopDiscovery() {
+  CampaignProfile profile;profile.anyWin=true;
+  Simulation quick;
+  assert(quick.StartCampaign(profile,GameMode::Quick,HeroId::Body,103,1,CaveId::ThunderMarsh,0,Fast()));
+  assert(!quick.DiscoverCurrentShop()); // Combat cannot manufacture presentation discoveries.
+  Rest(quick);
+  const auto stock=quick.GetEconomy().ExportState();
+  auto expectedProgression=quick.GetProgression();
+  const auto before=Fingerprint(quick);
+  for(const auto& good:stock.shop)assert(!quick.GetSnapshot().progression.seenRelics[good.relic.catalogId]);
+  quick.Pause(true);assert(!quick.DiscoverCurrentShop());quick.Pause(false);
+  assert(quick.DiscoverCurrentShop());assert(quick.DiscoverCurrentShop());
+  assert(Fingerprint(quick)==before);
+  const auto after=quick.GetEconomy().ExportState();
+  assert(after.rng==stock.rng && after.token==stock.token && after.stones==stock.stones);
+  assert(after.shop.size()==stock.shop.size());
+  for(std::size_t i=0;i<stock.shop.size();++i) {
+    const auto& good=after.shop[i];const auto& old=stock.shop[i];
+    assert(good.token==old.token && good.price==old.price && good.sold==old.sold);
+    assert(good.relic.id==old.relic.id && good.relic.catalogId==old.relic.catalogId);
+    assert(good.relic.affixes.size()==old.relic.affixes.size());
+    for(std::size_t a=0;a<old.relic.affixes.size();++a) {
+      const auto& x=good.relic.affixes[a];const auto& y=old.relic.affixes[a];
+      assert(x.kind==y.kind && x.value==y.value && x.code==y.code);
+    }
+    assert(quick.GetSnapshot().progression.seenRelics[good.relic.catalogId]);
+  }
+  // Existing account observation/persistence, including no-purchase discoveries.
+  std::string bytes;ProfileStore store([&](const std::string& value){bytes=value;return true;});
+  store.Observe(quick.GetSnapshot().progression);assert(store.Save());
+  ProfileStore loaded;assert(loaded.Load(bytes));
+  assert(loaded.Data().known.seenRelics==quick.GetSnapshot().progression.seenRelics);
+  const auto expectedRoll=expectedProgression.GenerateRelic(Rarity::Spirit);
+  const auto actualRoll=quick.GetProgression().GenerateRelic(Rarity::Spirit);
+  assert(actualRoll.id==expectedRoll.id && actualRoll.catalogId==expectedRoll.catalogId);
+  assert(actualRoll.affixes.size()==expectedRoll.affixes.size());
+  for(std::size_t i=0;i<actualRoll.affixes.size();++i) {
+    const auto& x=actualRoll.affixes[i];const auto& y=expectedRoll.affixes[i];
+    assert(x.kind==y.kind && x.value==y.value && x.code==y.code);
+  }
+
+  Simulation locked;assert(locked.StartCampaign({},GameMode::Quick,HeroId::Body,104,1,CaveId::ThunderMarsh,0,Fast()));
+  Rest(locked);assert(!locked.DiscoverCurrentShop());
+  Simulation traditional;
+  assert(traditional.StartCampaign(profile,GameMode::Traditional,HeroId::Body,105,1,CaveId::ThunderMarsh,0,Fast(),FastCampaign()));
+  Rest(traditional);assert(!traditional.DiscoverCurrentShop());
+  const auto choices=traditional.GetCampaign().GetState();unsigned cave=0;
+  while(cave<choices.offerCount && choices.offers[cave]!=OpportunityKind::Cave)++cave;
+  assert(cave<choices.offerCount);assert(traditional.ChooseOpportunity(cave));
+  for(const auto& good:traditional.GetEconomy().Shop())assert(!traditional.GetSnapshot().progression.seenRelics[good.relic.catalogId]);
+  assert(traditional.DiscoverCurrentShop());
+  assert(traditional.GetEconomy().CreditStones(1000));
+  bool foundNew=false;
+  for(int attempt=0;attempt<20 && !foundNew;++attempt) {
+    const auto known=traditional.GetSnapshot().progression.seenRelics;
+    assert(traditional.RefreshShop());
+    for(const auto& good:traditional.GetEconomy().Shop()) {
+      foundNew|=!known[good.relic.catalogId];
+      assert(traditional.GetSnapshot().progression.seenRelics[good.relic.catalogId]==known[good.relic.catalogId]);
+    }
+    assert(traditional.DiscoverCurrentShop());
+    for(const auto& good:traditional.GetEconomy().Shop())assert(traditional.GetSnapshot().progression.seenRelics[good.relic.catalogId]);
+  }
+  assert(foundNew);
+  assert(traditional.BeginNextWave());assert(!traditional.DiscoverCurrentShop());
+}
 int main(){
+  BossRuleDescriptions();
+  ShopDiscovery();
   CampaignProfile p;
   Simulation s;
   assert(!s.StartCampaign(p,GameMode::Endless,HeroId::Body,5,1));

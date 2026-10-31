@@ -56,7 +56,7 @@ checks={
  'explicit padding styles used by image, mode and combat controls': 'Nav.character==I?&RowPrimaryButton:&RowNormalButton' in hero and 'Nav.map==I?&RowPrimaryButton:&RowNormalButton' in realm and 'int(Nav.mode)==I?&RowPrimaryButton:&RowNormalButton' in realm and 'SelectedUpgrade==I?&RowPrimaryButton:&RowNormalButton' in upgrade and 'SNew(SButton).ButtonStyle(&RowNormalButton).ContentPadding(FMargin(5,2))' in u,
  'passive wrap leaves dedicated scrollbar allowance': 'At(95,875,440,95,SNew(SScrollBox)' in hero and 'Paragraph(CN(Passive.description),410,20,Paper)' in hero and 440-410>=30,
  'passive description is independently scrollable': 'At(95,875,440,95,SNew(SScrollBox)' in hero and 'Paragraph(CN(Passive.description),410,20,Paper)' in hero,
- 'framed face rows and active stepper': 'FacePortrait(I)' in hero and 'Framed(SNew(SButton)' in hero and all(x in u for x in ['const int ActiveStep=Nav.screen==dywx::Screen::Character?0:1', 'const bool Active=I==ActiveStep', 'Framed(Steps)']),
+ 'framed face rows and active stepper': 'FacePortrait(I)' in hero and 'Framed(FocusTarget(FString::Printf(TEXT("hero:%d"),I),SNew(SButton)' in hero and all(x in u for x in ['const int ActiveStep=Nav.screen==dywx::Screen::Character?0:1', 'const bool Active=I==ActiveStep', 'Framed(Steps)']),
  'HUD uses real circular portrait atlas by selected hero': 'ConceptCell(TEXT("concept-portrait-medallions.png"),Nav.character)' in uncovered,
  'realm rows use actual thumbnail atlas thirds': 'ConceptCell(TEXT("concept-realm-thumbs.png"),I)' in realm and 'Index/3.f+U,V' in u and 'Nav.map==I' in realm,
  'upgrade identity art follows current hero': all(x in upgrade for x in ['concept-upgrade-body-bg.png','concept-upgrade-beast-bg.png','Nav.character==0','Nav.character==2']),

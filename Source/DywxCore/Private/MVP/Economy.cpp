@@ -97,6 +97,13 @@ bool Economy::Buy(Progression& p,std::uint64_t token) {
   if(it==shop_.end()||it->sold||stones_<it->price||Find(p,it->relic.id))return false;
   stones_-=it->price;it->sold=true;ReceiveRelic(p,it->relic,true);return true;
 }
+bool Economy::DiscoverCurrentShop(Progression& p) {
+  if(!Rest(p)||!layer2_||(!quick_&&!cave_)||shop_.empty())return false;
+  for(const auto& good:shop_)
+    if(good.relic.catalogId>=0 && good.relic.catalogId<int(kRelicCount))
+      p.state_.seenRelics[good.relic.catalogId]=true;
+  return true;
+}
 bool Economy::Refresh(Progression& p) {
   if(!Rest(p)||!layer2_||quick_||!cave_||token_>std::numeric_limits<std::uint64_t>::max()-unsigned(config_.traditionalGoods))return false;
   if(freeRefresh_)freeRefresh_=false;

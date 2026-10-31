@@ -109,6 +109,7 @@ void SDywxRoot::Construct(const FArguments& Args)
 void SDywxRoot::Tick(const FGeometry& Geometry,const double CurrentTime,const float DeltaTime)
 {
     SCompoundWidget::Tick(Geometry,CurrentTime,DeltaTime);
+    RestoreScrollAfterLayout();
     if(!Owner.IsValid())return;
     int32 Width=0,Height=0;Owner->GetViewportSize(Width,Height);
     if(Width<=0 || Height<=0)return; // Minimized / not yet created: retain presentation.
@@ -272,15 +273,12 @@ TSharedRef<SWidget> SDywxRoot::Panel(TSharedRef<SWidget> Content, FLinearColor T
     return SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
         .BorderBackgroundColor(Tint).Padding(Padding)[Content];
 }
-TSharedRef<SWidget> SDywxRoot::Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary, bool bEnabled, const FString& Tooltip, bool bFramed, TSharedPtr<SWidget> TooltipContent)
+TSharedRef<SWidget> SDywxRoot::Button(const FString& Text, TFunction<FReply()> Action, bool bPrimary, bool bEnabled, const FString& Tooltip, bool bFramed, TSharedPtr<SWidget> TooltipContent, const FString& FocusKey)
 {
     // Thin gold outline for compact selected controls; secondary controls have only
     // a bottom rule, not the opaque grey toolkit rectangles from the first build.
     const FMargin Rule = bFramed ? FMargin(0) : (bPrimary ? FMargin(1) : FMargin(0,0,0,1));
-    return SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-        .BorderBackgroundColor(bFramed ? FLinearColor::Transparent : FLinearColor(0.44f,0.35f,0.21f,bPrimary?0.9f:0.4f))
-        .Padding(Rule).HAlign(HAlign_Fill).VAlign(VAlign_Fill)
-        [SNew(SButton).ButtonStyle(bFramed ? &FramedButton : (bPrimary ? &PrimaryButton : &NormalButton))
+    auto Native=SNew(SButton).ButtonStyle(bFramed ? &FramedButton : (bPrimary ? &PrimaryButton : &NormalButton))
             .ButtonColorAndOpacity(FLinearColor::White).ForegroundColor(Paper)
             .IsEnabled(bEnabled).HAlign(HAlign_Fill).VAlign(VAlign_Center)
             .ToolTip(SNew(SToolTip)[TooltipContent.IsValid()?TooltipContent.ToSharedRef():Paragraph(Tooltip,650,18,Paper)])
@@ -288,7 +286,12 @@ TSharedRef<SWidget> SDywxRoot::Button(const FString& Text, TFunction<FReply()> A
             [SNew(STextBlock).Text(FText::FromString(Text)).Font(Font(bPrimary ? 30 : 24,true))
                 .AutoWrapText(false).Justification(ETextJustify::Center)
                 .ColorAndOpacity(bEnabled ? Paper : Muted)
-                .ShadowColorAndOpacity(FLinearColor(0,0,0,0.8f)).ShadowOffset(FVector2D(1,2))]];
+                .ShadowColorAndOpacity(FLinearColor(0,0,0,0.8f)).ShadowOffset(FVector2D(1,2))];
+    const FString Key=FocusKey.IsEmpty()?TEXT("label:")+Text:FocusKey;
+    FocusTarget(Key,Native);
+    return SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+        .BorderBackgroundColor(bFramed ? FLinearColor::Transparent : FLinearColor(0.44f,0.35f,0.21f,bPrimary?0.9f:0.4f))
+        .Padding(Rule).HAlign(HAlign_Fill).VAlign(VAlign_Fill)[Native];
 }
 TSharedRef<SWidget> SDywxRoot::CombatButton(const FString& Text, TFunction<FReply()> Action)
 {
@@ -302,8 +305,56 @@ void SDywxRoot::At(float X, float Y, float W, float H, TSharedRef<SWidget> Widge
     Canvas->AddSlot().Anchors(FAnchors(0,0)).Alignment(FVector2D::ZeroVector)
         .Offset(FMargin(X,Y,W,H))[Widget];
 }
+FString SDywxRoot::ViewContext() const
+{
+    return FString::Printf(TEXT("%d/%d/%d/%llu/%llu/%d/%d/%d"),int(Nav.screen),int(Nav.modal),int(Nav.liveBattle),
+        static_cast<unsigned long long>(PresentationRunId),static_cast<unsigned long long>(Run.generation),int(Run.phase),Run.wave,int(bFusionOpen));
+}
+TSharedRef<SWidget> SDywxRoot::FocusTarget(const FString& Key,TSharedRef<SWidget> Widget)
+{
+    // Duplicate visible labels are ambiguous, never guess which action to focus.
+    if(FocusTargets.Contains(Key)) { FocusTargets.Remove(Key);AmbiguousFocusKeys.Add(Key); }
+    else if(!AmbiguousFocusKeys.Contains(Key)) FocusTargets.Add(Key,Widget);
+    return Widget;
+}
+TSharedRef<SScrollBox> SDywxRoot::RememberedScroll(const FString& Key)
+{
+    auto Scroll=SNew(SScrollBox).OnUserScrolled_Lambda([this,Key,Epoch=UIEpoch](float Offset) {
+        if(Epoch!=UIEpoch)return;
+        ViewMemory.SaveScroll(TCHAR_TO_UTF8(*Key),Offset);
+        PendingScrollRestore.Remove(Key); // A newer user gesture beats deferred restoration.
+    });
+    ScrollTargets.Add(Key,Scroll);
+    Scroll->SetScrollOffset(float(ViewMemory.Scroll(TCHAR_TO_UTF8(*Key))));
+    PendingScrollRestore.Add(Key);
+    FocusTarget(TEXT("scroll:")+Key,Scroll);
+    return Scroll;
+}
+void SDywxRoot::RestoreScrollAfterLayout()
+{
+    TArray<FString> Done;
+    const TArray<FString> PendingKeys=PendingScrollRestore.Array();
+    for(const auto& Key:PendingKeys) {
+        const auto* Target=ScrollTargets.Find(Key);const auto Scroll=Target?Target->Pin():nullptr;
+        if(!Scroll.IsValid()) { Done.Add(Key);continue; }
+        if(Scroll->GetCachedGeometry().GetLocalSize().Y<=0)continue;
+        const double Offset=ViewMemory.Scroll(TCHAR_TO_UTF8(*Key),Scroll->GetScrollOffsetOfEnd());
+        Scroll->SetScrollOffset(float(Offset));ViewMemory.SaveScroll(TCHAR_TO_UTF8(*Key),Offset);Done.Add(Key);
+    }
+    for(const auto& Key:Done)PendingScrollRestore.Remove(Key);
+}
 void SDywxRoot::Rebuild()
 {
+    const std::string Context=TCHAR_TO_UTF8(*ViewContext());
+    if(ViewMemory.SameContext(Context)) {
+        for(const auto& Pair:ScrollTargets)if(!PendingScrollRestore.Contains(Pair.Key))if(auto Scroll=Pair.Value.Pin())
+            if(Scroll->GetCachedGeometry().GetLocalSize().Y>0)ViewMemory.SaveScroll(TCHAR_TO_UTF8(*Pair.Key),Scroll->GetScrollOffset(),Scroll->GetScrollOffsetOfEnd());
+        std::string Focus;
+        for(const auto& Pair:FocusTargets)if(auto Widget=Pair.Value.Pin())if(Widget->HasKeyboardFocus()) { Focus=TCHAR_TO_UTF8(*Pair.Key);break; }
+        ViewMemory.SaveFocus(Focus);
+    }
+    const bool SameContext=ViewMemory.Begin(Context);
+    ScrollTargets.Empty();FocusTargets.Empty();AmbiguousFocusKeys.Empty();PendingScrollRestore.Empty();
     ++UIEpoch;
     if (Owner.IsValid()) {
         const auto& Profile=Owner->CampaignProfile();
@@ -338,7 +389,16 @@ void SDywxRoot::Rebuild()
     }
     ChildSlot[SNew(SScaleBox).Stretch(EStretch::ScaleToFit).StretchDirection(EStretchDirection::Both)
         [SNew(SBox).WidthOverride(1920).HeightOverride(1080)[Overlay]]];
-    if (FSlateApplication::IsInitialized()) FSlateApplication::Get().SetKeyboardFocus(SharedThis(this), EFocusCause::SetDirectly);
+    if(FSlateApplication::IsInitialized()) {
+        std::vector<std::string> Available;
+        for(const auto& Pair:FocusTargets)if(auto Widget=Pair.Value.Pin())
+            if(Widget->IsEnabled() && Widget->SupportsKeyboardFocus())Available.emplace_back(TCHAR_TO_UTF8(*Pair.Key));
+        const FString Key=UTF8_TO_TCHAR(ViewMemory.Focus(Available).c_str());
+        const auto* Target=SameContext?FocusTargets.Find(Key):nullptr;
+        const auto Widget=Target?Target->Pin():nullptr;
+        FSlateApplication::Get().SetKeyboardFocus(Widget.IsValid()?Widget.ToSharedRef():StaticCastSharedRef<SWidget>(SharedThis(this)),EFocusCause::SetDirectly);
+        if(!Widget.IsValid())ViewMemory.SaveFocus("");
+    }
 }
 void SDywxRoot::SceneSidebar()
 {
@@ -390,7 +450,7 @@ void SDywxRoot::CharacterScreen()
     At(95,105,450,80,Label(TEXT("选择修士"),42,Paper,true));
     const TCHAR* Styles[]={TEXT("法体近战"),TEXT("飞剑远攻"),TEXT("御兽随行")};
     for(int I=0;I<3;++I) {
-        At(80,200+I*125,470,110,Framed(SNew(SButton).ButtonStyle(Nav.character==I?&RowPrimaryButton:&RowNormalButton)
+        At(80,200+I*125,470,110,Framed(FocusTarget(FString::Printf(TEXT("hero:%d"),I),SNew(SButton).ButtonStyle(Nav.character==I?&RowPrimaryButton:&RowNormalButton)
             .ContentPadding(FMargin(10,6)).HAlign(HAlign_Fill).IsEnabled(Nav.heroes[I])
             .ToolTipText(FText::FromString(Nav.heroes[I]?Styles[I]:TEXT("以道韵在传承中解锁修士。")))
             .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectCharacter(I);Rebuild();}return FReply::Handled();})
@@ -398,7 +458,7 @@ void SDywxRoot::CharacterScreen()
                 +SHorizontalBox::Slot().AutoWidth()[SNew(SBox).WidthOverride(152).HeightOverride(94)[SNew(SImage).Image(FacePortrait(I))]]
                 +SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(20,0)[SNew(SVerticalBox)
                     +SVerticalBox::Slot().AutoHeight()[Label(Names[I],24,Nav.heroes[I]?Paper:Muted,true)]
-                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.heroes[I]?Styles[I]:TEXT("传承解锁"),20,Muted)]]],Nav.character==I));
+                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.heroes[I]?Styles[I]:TEXT("传承解锁"),20,Muted)]]]),Nav.character==I));
     }
     // Use the same core initializer as a new run, not duplicated fictional loadouts.
     Progression Preview;Preview.Reset(1,HeroId(Nav.character));
@@ -424,7 +484,7 @@ void SDywxRoot::MapScreen()
     At(95,105,450,80,Label(TEXT("选择洞天"),42,Paper,true));
     for(int I=0;I<3;++I) {
         const auto& C=CaveCatalog()[I];
-        At(80,200+I*115,470,110,Framed(SNew(SButton).ButtonStyle(Nav.map==I?&RowPrimaryButton:&RowNormalButton)
+        At(80,200+I*115,470,110,Framed(FocusTarget(FString::Printf(TEXT("realm:%d"),I),SNew(SButton).ButtonStyle(Nav.map==I?&RowPrimaryButton:&RowNormalButton)
             .ContentPadding(FMargin(10,2)).HAlign(HAlign_Fill).IsEnabled(Nav.realms[I])
             .ToolTipText(FText::FromString(TEXT("未解锁洞天可在传承中购买。")))
             .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectMap(I);Rebuild();}return FReply::Handled();})
@@ -432,19 +492,19 @@ void SDywxRoot::MapScreen()
                 +SHorizontalBox::Slot().AutoWidth()[SNew(SBox).WidthOverride(100).HeightOverride(100)[SNew(SImage).Image(ConceptCell(TEXT("concept-realm-thumbs.png"),I))]]
                 +SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(20,0)[SNew(SVerticalBox)
                     +SVerticalBox::Slot().AutoHeight()[Label(CN(C.name),24,Nav.realms[I]?Paper:Muted,true)]
-                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.realms[I]?TEXT("进入此洞天  ›"):TEXT("传承解锁"),18,Muted)]]],Nav.map==I));
+                    +SVerticalBox::Slot().AutoHeight()[Label(Nav.realms[I]?TEXT("进入此洞天  ›"):TEXT("传承解锁"),18,Muted)]]]),Nav.map==I));
     }
     const auto& C=CaveCatalog()[Nav.map];
     At(95,560,450,2,Panel(SNew(SBox),Gold,0));
     At(95,570,450,65,Label(FString(TEXT("◇  "))+CN(C.name),32,Gold,true));
     At(95,640,440,130,Paragraph(TEXT("洞主 · ")+CN(C.bossName)+TEXT("\n妖魔 · ")+CN(C.enemies[0])+TEXT("、")+CN(C.enemies[3])+TEXT("\n机缘 · ")+CN(C.opportunities[0]),440,20,Paper));
     const TCHAR* Modes[]={TEXT("快速"),TEXT("传统"),TEXT("无尽")};
-    for(int I=0;I<3;++I) At(80+I*158,790,150,54,Framed(SNew(SButton)
+    for(int I=0;I<3;++I) At(80+I*158,790,150,54,Framed(FocusTarget(FString::Printf(TEXT("mode:%d"),I),SNew(SButton)
         .ButtonStyle(int(Nav.mode)==I?&RowPrimaryButton:&RowNormalButton).ContentPadding(FMargin(8,4))
         .HAlign(HAlign_Center).VAlign(VAlign_Center).IsEnabled(I<2||Nav.endlessUnlocked)
         .ToolTipText(FText::FromString(TEXT("传统首胜后解锁无尽；快速四波且无波间机缘、无劫数。")))
         .OnClicked_Lambda([this,I,Epoch=UIEpoch]{if(Epoch==UIEpoch){Nav.SelectMode(dywx::Mode(I));Rebuild();}return FReply::Handled();})
-        [Label(Modes[I],20,int(Nav.mode)==I?Gold:Paper,true)],int(Nav.mode)==I));
+        [Label(Modes[I],20,int(Nav.mode)==I?Gold:Paper,true)]),int(Nav.mode)==I));
     const auto& Profile=Owner->CampaignProfile();
     const int Layer=int(FeatureTier(Profile));
     At(95,850,450,45,Label(FString::Printf(TEXT("层级 %d · 已选风险 %u"),Layer,GetTrialEffects(Nav.riskMask).risk),22,Gold));
@@ -747,7 +807,7 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         Add(Label(TEXT("道典"),42,Paper,true),85);
         Add(Paragraph(TEXT("探索为引，认知为赏。洞天万象，皆有其律。"),596,26,Gold,true),100);
         Add(Paragraph(TEXT("自动施展术法，移动与遁术避险。\nWASD / 方向键移动，空格遁术。\n1 / 2 / 3 选择顿悟；顿悟选择期间自动暂停战斗。"),596,23,Paper),150);
-        auto Entries=SNew(SScrollBox);
+        auto Entries=RememberedScroll(TEXT("codex"));
         // Read the saved discoveries even before the first world/run is created.
         // Observe only merges into this local view: opening the Codex never saves.
         FDywxMVPProfile Codex;
@@ -806,11 +866,11 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         const auto& P=Owner->CampaignProfile();
         Add(Label(FString::Printf(TEXT("传承 · 道韵 %llu · 第 %u 层"),static_cast<unsigned long long>(P.daoYun),FeatureTier(P)),30,Gold),65);
         Add(Paragraph(TEXT("首胜开启第二层；传统首胜开启第三层与无尽。永久增益总计上限10%，气运不入传承。"),596,21,Paper),90);
-        auto List=SNew(SScrollBox);
+        auto List=RememberedScroll(TEXT("legacy"));
         const TCHAR* Unlocks[]={TEXT("巡星羽客"),TEXT("灵契山人"),TEXT("第二洞天"),TEXT("第三洞天"),TEXT("扩展术法候选"),TEXT("扩展法宝候选"),TEXT("额外重悟"),TEXT("每处洞府免费刷新")};
-        for(int I=0;I<int(LegacyUnlock::Count);++I) List->AddSlot().Padding(0,5)[Button(FString(Unlocks[I])+(I==int(LegacyUnlock::HeroSword)?TEXT(" · 初始开放"):(P.unlocks[I]?TEXT(" · 已解锁"):TEXT(" · 20道韵"))),[this,I]{RunNotice=Owner->PurchaseLegacy(LegacyUnlock(I))?TEXT("传承已解锁"):TEXT("未能购买：道韵不足、已解锁或资料保存失败。");Rebuild();return FReply::Handled();},false,I!=int(LegacyUnlock::HeroSword)&&!P.unlocks[I]&&P.daoYun>=20,TEXT("账号共享，影响后续新局。"))];
+        for(int I=0;I<int(LegacyUnlock::Count);++I) List->AddSlot().Padding(0,5)[Button(FString(Unlocks[I])+(I==int(LegacyUnlock::HeroSword)?TEXT(" · 初始开放"):(P.unlocks[I]?TEXT(" · 已解锁"):TEXT(" · 20道韵"))),[this,I]{RunNotice=Owner->PurchaseLegacy(LegacyUnlock(I))?TEXT("传承已解锁"):TEXT("未能购买：道韵不足、已解锁或资料保存失败。");Rebuild();return FReply::Handled();},false,I!=int(LegacyUnlock::HeroSword)&&!P.unlocks[I]&&P.daoYun>=20,TEXT("账号共享，影响后续新局。"),false,nullptr,FString::Printf(TEXT("legacy:unlock:%d"),I))];
         const TCHAR* Stats[]={TEXT("气血"),TEXT("护体"),TEXT("生机"),TEXT("威力"),TEXT("周天"),TEXT("范围"),TEXT("会心"),TEXT("身法"),TEXT("摄灵"),TEXT("遁息")};
-        for(int I=0;I<int(PermanentStat::Count);++I) List->AddSlot().Padding(0,5)[Button(FString::Printf(TEXT("%s · 当前 %.0f%% · 10道韵"),Stats[I],PermanentBonus(P,PermanentStat(I))*100),[this,I]{RunNotice=Owner->PurchasePermanent(PermanentStat(I))?TEXT("传承提升"):TEXT("购买失败：道韵不足、总增益达到上限或保存失败。");Rebuild();return FReply::Handled();},false,P.daoYun>=10)];
+        for(int I=0;I<int(PermanentStat::Count);++I) List->AddSlot().Padding(0,5)[Button(FString::Printf(TEXT("%s · 当前 %.0f%% · 10道韵"),Stats[I],PermanentBonus(P,PermanentStat(I))*100),[this,I]{RunNotice=Owner->PurchasePermanent(PermanentStat(I))?TEXT("传承提升"):TEXT("购买失败：道韵不足、总增益达到上限或保存失败。");Rebuild();return FReply::Handled();},false,P.daoYun>=10,TEXT(""),false,nullptr,FString::Printf(TEXT("legacy:stat:%d"),I))];
         for(const auto& H:P.heroes) List->AddSlot()[Label(FString::Printf(TEXT("修士 %d · 最佳 %d波 · 熟练度 %llu · 胜场 %llu"),H.hero+1,H.bestWave,static_cast<unsigned long long>(H.mastery),static_cast<unsigned long long>(H.wins)),20,Paper)];
         List->AddSlot().Padding(0,12)[Label(TEXT("无尽波数排行 · 本地，不联网"),24,Gold)];
         if(P.endlessRanking.empty())List->AddSlot()[Label(TEXT("尚无无尽结算记录"),20,Muted)];
@@ -831,7 +891,7 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         const bool Layer2=HasFeature(Owner->CampaignProfile(),Feature::Economy);
         const bool Layer3=HasFeature(Owner->CampaignProfile(),Feature::Reforge);
         Add(Label(FString::Printf(TEXT("洞府与宝匣 · 灵石 %d"),E.Stones()),30,Gold),65);
-        auto List=SNew(SScrollBox);
+        auto List=RememberedScroll(TEXT("economy"));
         if(!Layer2)List->AddSlot()[Paragraph(TEXT("洞府祭炼已开放；灵石商店与刷新须首胜开启第二层。"),560,20,Muted)];
         auto Action=[this](TFunction<bool(UDywxRunSession&)> Fn) {
             auto* Sim=Owner.IsValid()?Owner->Simulation():nullptr;
@@ -847,22 +907,22 @@ TSharedRef<SWidget> SDywxRoot::ModalContent()
         };
         for(const auto& G:E.Shop()) {
             FString Tip;for(const auto& A:G.relic.affixes)Tip+=CN(DescribeAffix(A))+TEXT("\n");
-            List->AddSlot().Padding(0,5)[Button(CN(RelicCatalog()[G.relic.catalogId].name)+FString::Printf(TEXT(" · %d灵石%s"),G.price,G.sold?TEXT(" · 售罄"):TEXT("")),[Action,Token=G.token]()mutable{return Action([Token](UDywxRunSession& Sim){return Sim.BuyGood(Token);});},false,Layer2&&!G.sold&&E.Stones()>=G.price,Tip)];
+            List->AddSlot().Padding(0,5)[Button(CN(RelicCatalog()[G.relic.catalogId].name)+FString::Printf(TEXT(" · %d灵石%s"),G.price,G.sold?TEXT(" · 售罄"):TEXT("")),[Action,Token=G.token]()mutable{return Action([Token](UDywxRunSession& Sim){return Sim.BuyGood(Token);});},false,Layer2&&!G.sold&&E.Stones()>=G.price,Tip,false,nullptr,FString::Printf(TEXT("economy:good:%llu"),static_cast<unsigned long long>(G.token)))];
         }
-        List->AddSlot().Padding(0,5)[Button(TEXT("刷新洞府 · 免费传承或15灵石"),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.RefreshShop();});},false,Layer2&&Cave,TEXT("第二层开启；仅洞府可用；快速不可刷新；每处免费一次需传承。"))];
+        List->AddSlot().Padding(0,5)[Button(TEXT("刷新洞府 · 免费传承或15灵石"),[Action]()mutable{return Action([](UDywxRunSession& Sim){const bool Refreshed=Sim.RefreshShop();if(Refreshed)Sim.DiscoverCurrentShop();return Refreshed;});},false,Layer2&&Cave,TEXT("第二层开启；仅洞府可用；快速不可刷新；每处免费一次需传承。"),false,nullptr,TEXT("economy:refresh"))];
         const auto Prob=E.TreasureProbabilities(S->GetProgression());
         List->AddSlot()[Paragraph(FString::Printf(TEXT("第三层开放重铸与宝匣。\n宝匣概率：凡 %.2f%% / 灵 %.2f%% / 仙 %.2f%% / 道 %.2f%%\n已额外开启 %d / 5，仙品受20波保底，道品无保底。"),Prob[0]*100,Prob[1]*100,Prob[2]*100,Prob[3]*100,E.PaidTreasureCount()),560,20,Gold)];
-        List->AddSlot()[Button(FString::Printf(TEXT("额外开匣 · %d灵石"),E.TreasurePrice()),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.OpenTreasure(true);});},false,Layer3&&E.Stones()>=E.TreasurePrice()&&E.PaidTreasureCount()<5,TEXT("第三层开放；余额须足够；每局额外开启最多五次。"))];
-        if(E.HasTreasureToReveal()) List->AddSlot()[Button(TEXT("揭示匣中法宝"),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.RevealTreasure();});},true)];
+        List->AddSlot()[Button(FString::Printf(TEXT("额外开匣 · %d灵石"),E.TreasurePrice()),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.OpenTreasure(true);});},false,Layer3&&E.Stones()>=E.TreasurePrice()&&E.PaidTreasureCount()<5,TEXT("第三层开放；余额须足够；每局额外开启最多五次。"),false,nullptr,TEXT("economy:open"))];
+        if(E.HasTreasureToReveal()) List->AddSlot()[Button(TEXT("揭示匣中法宝"),[Action]()mutable{return Action([](UDywxRunSession& Sim){return Sim.RevealTreasure();});},true,true,TEXT(""),false,nullptr,TEXT("economy:reveal"))];
         if(E.PendingReforge()) {
             const auto& R=*E.PendingReforge();
             List->AddSlot()[Paragraph(TEXT("已付费 · 旧纹：")+CN(DescribeAffix(R.oldAffix))+TEXT("\n新纹：")+CN(DescribeAffix(R.newAffix)),560,22,Gold)];
-            for(int I=0;I<2;++I)List->AddSlot()[Button(I?TEXT("保留新纹"):TEXT("保留旧纹（不退款）"),[Action,I]()mutable{return Action([I](UDywxRunSession& Sim){return Sim.ResolveReforge(I!=0);});})];
+            for(int I=0;I<2;++I)List->AddSlot()[Button(I?TEXT("保留新纹"):TEXT("保留旧纹（不退款）"),[Action,I]()mutable{return Action([I](UDywxRunSession& Sim){return Sim.ResolveReforge(I!=0);});},false,true,TEXT(""),false,nullptr,FString::Printf(TEXT("economy:resolve:%d"),I))];
         }
         auto Item=[&](const Relic& R) {
-            if(E.IsUnidentified(R.id)) { List->AddSlot()[Button(TEXT("祭炼 · ")+CN(RelicCatalog()[R.catalogId].name),[Action,Id=R.id]()mutable{return Action([Id](UDywxRunSession& Sim){return Sim.IdentifyRelic(Id);});},false,Cave,TEXT("仅所选洞府可祭炼；未祭炼灵纹不生效。"))];return; }
+            if(E.IsUnidentified(R.id)) { List->AddSlot()[Button(TEXT("祭炼 · ")+CN(RelicCatalog()[R.catalogId].name),[Action,Id=R.id]()mutable{return Action([Id](UDywxRunSession& Sim){return Sim.IdentifyRelic(Id);});},false,Cave,TEXT("仅所选洞府可祭炼；未祭炼灵纹不生效。"),false,nullptr,FString::Printf(TEXT("economy:identify:%llu"),static_cast<unsigned long long>(R.id)))];return; }
             List->AddSlot().Padding(0,8)[Label(CN(RelicCatalog()[R.catalogId].name),21,Gold)];
-            for(size_t I=0;I<R.affixes.size();++I)if(R.affixes[I].kind!=AffixKind::Mystery&&R.affixes[I].kind!=AffixKind::Unique)List->AddSlot()[Button(FString::Printf(TEXT("重铸 · %d灵石 · "),E.ReforgePrice(R.id))+CN(AffixName(R.affixes[I])),[Action,Id=R.id,I]()mutable{return Action([Id,I](UDywxRunSession& Sim){return Sim.BeginReforge(Id,I);});},false,Layer3&&Cave&&!R.locked&&!E.PendingReforge(),CN(DescribeAffix(R.affixes[I])))];
+            for(size_t I=0;I<R.affixes.size();++I)if(R.affixes[I].kind!=AffixKind::Mystery&&R.affixes[I].kind!=AffixKind::Unique)List->AddSlot()[Button(FString::Printf(TEXT("重铸 · %d灵石 · "),E.ReforgePrice(R.id))+CN(AffixName(R.affixes[I])),[Action,Id=R.id,I]()mutable{return Action([Id,I](UDywxRunSession& Sim){return Sim.BeginReforge(Id,I);});},false,Layer3&&Cave&&!R.locked&&!E.PendingReforge(),CN(DescribeAffix(R.affixes[I])),false,nullptr,FString::Printf(TEXT("economy:reforge:%llu:%llu"),static_cast<unsigned long long>(R.id),static_cast<unsigned long long>(I)))];
         };
         for(const auto& R:Run.progression.equipped)Item(R);for(const auto& R:Run.progression.bag)Item(R);
         Add(List,470);Add(Paragraph(RunNotice,596,19,Gold),70);Add(Button(TEXT("返回整理"),[this]{return CloseModal();}),65);break;
@@ -912,7 +972,11 @@ FReply SDywxRoot::OpenModal(dywx::Modal Modal)
     if (Nav.modal == dywx::Modal::None) {
         bModalPausedRun=Nav.liveBattle && Modal!=dywx::Modal::Economy && Owner.IsValid();
         if(bModalPausedRun)Owner->SetUIPaused(true);
-        Nav.modal=Modal;Rebuild();SyncInput();
+        Nav.modal=Modal;
+        // Visibility event, not rendering: only the accepted Economy transition
+        // discovers currently shown shop stock. Core validates service eligibility.
+        if(Modal==dywx::Modal::Economy && Owner.IsValid() && Owner->Session())Owner->Session()->DiscoverCurrentShop();
+        Rebuild();SyncInput();
     }
     return FReply::Handled();
 }
@@ -980,6 +1044,7 @@ void SDywxRoot::SetHUDState(const FDywxHUDState& State)
 }
 void SDywxRoot::BeginLiveHUD(const FDywxHUDState& State)
 {
+    ++PresentationRunId;
     Nav.screen=dywx::Screen::Battle;Nav.modal=dywx::Modal::None;Nav.liveBattle=true;bModalPausedRun=false;
     // Candidate simulations can restart their local generation counter. Clear all
     // presentation-only state explicitly rather than relying on generation changes.
@@ -1033,7 +1098,7 @@ void SDywxRoot::RestPanel()
     if(!Sim) return;
     auto& P=Sim->GetProgression();
     if(Run.progression.offers.empty()) {
-        auto Choices=SNew(SScrollBox);
+        auto Choices=RememberedScroll(TEXT("rest-choices"));
         const auto& C=Sim->GetCampaign().GetState();
         if(C.offerCount && C.selected<0) {
             for(unsigned I=0;I<C.offerCount;++I) {
@@ -1065,14 +1130,14 @@ void SDywxRoot::RestPanel()
     At(45,350,315,60,Button(RarityFilter<0?TEXT("品阶：全部"):TEXT("品阶：")+CN(RarityName(Rarity(RarityFilter))),[this]{RarityFilter=(RarityFilter+2)%5-1;bRefinePreview=false;Rebuild();return FReply::Handled();}));
     At(370,350,315,60,Button(Aspects[AspectFilter+1],[this]{AspectFilter=(AspectFilter+2)%(int(kResonanceCount)+1)-1;bRefinePreview=false;Rebuild();return FReply::Handled();}));
     At(695,350,325,60,Button(AffixFilter<0?TEXT("灵纹：全部"):TEXT("灵纹：")+CN(AffixName({AffixKind(AffixFilter),0,0})),[this]{AffixFilter=(AffixFilter+2)%(int(AffixKind::Count)+1)-1;bRefinePreview=false;Rebuild();return FReply::Handled();}));
-    auto Equipped=SNew(SScrollBox);
+    auto Equipped=RememberedScroll(TEXT("equipped"));
     for(int32 I=0;I<6;++I)
     {
         const auto& E=Run.progression.equipped;
         FString Name=I<int(E.size())?CN(RelicCatalog()[E[I].catalogId].name)+(E[I].locked?TEXT(" [锁]"):TEXT("")):TEXT("空槽");
-        Equipped->AddSlot().Padding(0,3)[SNew(SBox).HeightOverride(60)[Button(FString::Printf(TEXT("%d  "),I+1)+Name,[this,I]{SelectedSlot=I;SelectedBag=0;bRefinePreview=false;Rebuild();return FReply::Handled();},false,true,TEXT("选择装备槽，再从储物袋选择法宝；下方换装或卸下。"))]];
+        Equipped->AddSlot().Padding(0,3)[SNew(SBox).HeightOverride(60)[Button(FString::Printf(TEXT("%d  "),I+1)+Name,[this,I]{SelectedSlot=I;SelectedBag=0;bRefinePreview=false;Rebuild();return FReply::Handled();},false,true,TEXT("选择装备槽，再从储物袋选择法宝；下方换装或卸下。"),false,nullptr,FString::Printf(TEXT("equipped:%d"),I))]];
     }
-    auto Bag=SNew(SScrollBox);
+    auto Bag=RememberedScroll(TEXT("bag"));
     for(auto Id:Visible)
     {
         const Relic* Item=nullptr;for(const auto& R:Run.progression.bag)if(R.id==Id){Item=&R;break;}
@@ -1081,7 +1146,7 @@ void SDywxRoot::RestPanel()
         const auto Compare=P.PreviewEquip(Id,SelectedSlot);const auto Current=Run.progression.build.stats;
         Tip+=FString::Printf(TEXT("\n对比第 %d 槽：气血 %+.0f / 威力 %+.0f%% / 护体 %+.0f%% / 周天 %+.0f%%"),SelectedSlot+1,Compare.maxHp-Current.maxHp,(Compare.power-Current.power)*100,(Compare.armor-Current.armor)*100,(Compare.cooldownReduction-Current.cooldownReduction)*100);
         Tip+=FString::Printf(TEXT("\n生机 %.1f→%.1f · 范围 %.0f%%→%.0f%%\n会心 %.0f%%→%.0f%% · 会心伤害 %.0f%%→%.0f%%\n身法 %.1f→%.1f · 摄灵 %.1f→%.1f\n遁息 %.1f→%.1f秒 · 气运 %.1f→%.1f\n选择后查看红升绿降的完整逐项比较。"),Current.regen,Compare.regen,Current.area*100,Compare.area*100,Current.critChance*100,Compare.critChance*100,Current.critMultiplier*100,Compare.critMultiplier*100,Current.moveSpeed,Compare.moveSpeed,Current.pickupRadius,Compare.pickupRadius,Current.dashCooldown,Compare.dashCooldown,Current.luck,Compare.luck);
-        Bag->AddSlot().Padding(0,3)[SNew(SBox).HeightOverride(60)[Button(CN(RelicCatalog()[Item->catalogId].name)+(Item->locked?TEXT(" [锁]"):TEXT("")),[this,Id]{SelectedBag=Id;bRefinePreview=false;Rebuild();return FReply::Handled();},false,true,Tip,false,Comparison(Current,Compare,Tip))]];
+        Bag->AddSlot().Padding(0,3)[SNew(SBox).HeightOverride(60)[Button(CN(RelicCatalog()[Item->catalogId].name)+(Item->locked?TEXT(" [锁]"):TEXT("")),[this,Id]{SelectedBag=Id;bRefinePreview=false;Rebuild();return FReply::Handled();},false,true,Tip,false,Comparison(Current,Compare,Tip),FString::Printf(TEXT("bag:%llu"),static_cast<unsigned long long>(Id)))]];
     }
     if(Visible.empty())Bag->AddSlot()[Label(TEXT("储物袋 · 暂无法宝"),22,Muted)];
     At(45,420,475,275,Equipped);At(540,420,480,275,Bag);

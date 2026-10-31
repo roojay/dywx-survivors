@@ -190,20 +190,21 @@ std::string Simulation::DescribeBossMechanics(CaveId cave) {
   std::ostringstream text;
   const auto r=BossRules();
   if(cave==CaveId::ThunderMarsh)
-    return "流波夔君：一变每6秒三道引雷（预警1秒，35伤害），每5秒召20凡妖；二变每8秒火墙（预警1.5秒，每0.25秒5伤害），每10秒蓄力冲撞（预警1.2秒，45伤害），每8秒召4远程与6冲锋妖魔。";
+    return "流波夔君：入场携2护持妖魔；一变每6秒三道引雷（预警1秒，35伤害），每5秒召20凡妖，每15秒将全场其他妖魔的护盾重置为40（不叠加）。破相时召4远程与6冲锋妖魔；二变每8秒火墙（预警1.5秒，每0.25秒5伤害），每10秒蓄力冲撞（预警1.2秒，45伤害），每8秒再召4远程与6冲锋妖魔。随从数量受同屏上限限制。";
   if(cave==CaveId::EmberMountain) {
-    text<<"赤山离火君（初版数值）：一/二变每"<<r.flamePeriod[0]<<"/"<<r.flamePeriod[1]
+    text<<"赤山离火君（初版数值）：入场携2自爆妖魔；破相时召4自爆与2远程妖魔。一/二变每"<<r.flamePeriod[0]<<"/"<<r.flamePeriod[1]
         <<"秒在面前铺三道火浪，预警"<<r.flameWarning<<"秒，半径"<<r.flameRadius
         <<"，伤害"<<r.flameDamage[0]<<"/"<<r.flameDamage[1]<<"；二变每"<<r.ringPeriod
-        <<"秒铺八处环火。火域可被水象熄灭。每"<<r.flameSummon[0]<<"/"<<r.flameSummon[1]
+        <<"秒在身周"<<r.ringRadius<<"格铺八处同等火域。火域可被水象熄灭。每"<<r.flameSummon[0]<<"/"<<r.flameSummon[1]
         <<"秒召2自爆妖魔/2远程与2冲锋妖魔。";
   } else {
-    text<<"青岚蜃君（初版数值）：一/二变每"<<r.rootPeriod[0]<<"/"<<r.rootPeriod[1]
+    text<<"青岚蜃君（初版数值）：入场携1护持与1召唤妖魔；破相时召1护持、1召唤与4群行妖魔。一/二变每"<<r.rootPeriod[0]<<"/"<<r.rootPeriod[1]
         <<"秒布1/2处根缚区域，预警"<<r.rootWarning<<"秒，半径"<<r.rootRadius<<"，持续"
         <<r.rootDuration<<"秒，每"<<r.rootTick<<"秒伤害"<<r.rootDamage[0]<<"/"<<r.rootDamage[1]
         <<"；踏入后身法暂降"<<r.rootSlow*100<<"%，离开即恢复，遁术距离不变。每"
         <<r.mistSummon[0]<<"/"<<r.mistSummon[1]<<"秒召2群行与1护持/1护持与1召唤妖魔。";
   }
+  text<<"随从数量受同屏上限限制。";
   return text.str();
 }
 OpportunityDetails Simulation::DescribeOpportunity(unsigned index) const {
@@ -331,6 +332,10 @@ bool Simulation::SkipUpgrade() {
 }
 bool Simulation::BuyGood(std::uint64_t token) {
   bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.Buy(progression_,token); Sync(); return ok;
+}
+bool Simulation::DiscoverCurrentShop() {
+  if(!fullGame_ || state_.paused || state_.phase!=RunPhase::Rest)return false;
+  const bool ok=economy_.DiscoverCurrentShop(progression_);if(ok)Sync();return ok;
 }
 bool Simulation::RefreshShop() {
   bool ok=fullGame_ && !state_.paused && state_.phase==RunPhase::Rest && economy_.Refresh(progression_); Sync(); return ok;

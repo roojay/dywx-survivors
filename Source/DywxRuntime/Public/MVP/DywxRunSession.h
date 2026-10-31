@@ -45,6 +45,7 @@ public:
     bool ChooseBossReward(std::size_t Index) { return IsRunActive() && Simulation.ChooseBossReward(Index); }
     bool FinalizeRestExperience() { return IsRunActive() && Simulation.FinalizeRestExperience(); }
     bool BuyGood(std::uint64_t Token) { return IsRunActive() && Simulation.BuyGood(Token); }
+    bool DiscoverCurrentShop() { return IsRunActive() && Simulation.DiscoverCurrentShop(); }
     bool RefreshShop() { return IsRunActive() && Simulation.RefreshShop(); }
     bool BeginReforge(dywx::mvp::EntityId Id, std::size_t Affix) { return IsRunActive() && Simulation.BeginReforge(Id, Affix); }
     bool ResolveReforge(bool KeepNew) { return IsRunActive() && Simulation.ResolveReforge(KeepNew); }
