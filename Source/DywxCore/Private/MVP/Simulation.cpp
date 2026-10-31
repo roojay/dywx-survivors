@@ -611,7 +611,7 @@ void Simulation::Tick(float dt, const InputState &input) {
         fx.kind=EffectKind::Lightning; fx.warning=anomalies_.Config().warning; fx.life=.2f;fx.hostile=true;
         anomalyWarningShown_=AddEffect(fx);
       } else {
-        if (anomalyWarningShown_ && !event.absorbed && Len2(p.position-event.position) <= event.radius*event.radius) Hurt(event.damage);
+        if (anomalyWarningShown_ && !event.absorbed && Len2(p.position-event.position) <= event.radius*event.radius) Hurt(event.damage, event.anomaly == AnomalyId::Fissure ? DamageKind::Fissure : DamageKind::Lightning, 0, event.position);
         if (event.anomaly == AnomalyId::Fissure)
           Area(event.position,event.radius,event.damage,Element::None,Form::None,false);
       }
@@ -861,7 +861,11 @@ void Simulation::AddProjectile(ProjectileState p) {
   state_.projectiles.push_back(p);
   ++state_.statistics.shots;
 }
-void Simulation::Hurt(float d) {
+void Simulation::Hurt(float d, DamageKind kind, EntityId source, Vec2 position,
+                      EffectKind effectKind) {
+  // Empty warning visuals and exhausted one-shot effects are not hits. Nor may
+  // invalid external/test input heal the player or poison combat state.
+  if (!std::isfinite(d) || d <= 0) return;
   auto &p = state_.player;
   if (p.invulnerable > 0 || state_.phase == RunPhase::Dead ||
       state_.phase == RunPhase::Won) {
@@ -878,8 +882,11 @@ void Simulation::Hurt(float d) {
   float shield = std::min(p.shield, d);
   p.shield -= shield;
   d -= shield;
+  const float hpBefore = p.hp;
   p.hp = std::max(0.f, p.hp - d);
   state_.statistics.damageTaken += d;
+  state_.lastDamage = {kind, effectKind, source, position, state_.tick,
+                       hpBefore - p.hp, shield, p.hp <= 0};
   for (auto spell : state_.progression.build.spells)
     if (spell.id == SpellId::FlameBody && spell.rank == 5 &&
         procCooldowns_[0] <= 0) {
@@ -1086,7 +1093,7 @@ void Simulation::UpdateEnemies(float dt) {
         float a = state_.statistics.elapsed * 2 + orb * 2 * Pi / 3;
         Vec2 at = e.position + Vec2{std::cos(a), std::sin(a)} * 1.7f;
         if (Len(at - state_.player.position) < .65f && e.cooldown <= 0) {
-          Hurt(6);
+          Hurt(6, DamageKind::Orbit, e.id, at);
           e.cooldown = .8f;
         }
       }
@@ -1174,7 +1181,7 @@ void Simulation::UpdateEnemies(float dt) {
       if (e.windup == 0) {
         if (e.role == EnemyRole::Exploder) {
           if (distance < 2.5f + .4f)
-            Hurt(attackDamage);
+            Hurt(attackDamage, DamageKind::Explosion, e.id, e.position);
           e.hp = 0;
           e.burnRemaining = 0;
         } else if (e.role == EnemyRole::Charger || e.role == EnemyRole::Boss)
@@ -1214,7 +1221,7 @@ void Simulation::UpdateEnemies(float dt) {
       Down(e.chargeRemaining, dt);
       if (SegmentDistance(state_.player.position, old, e.position) <
           e.radius + .4f) {
-        Hurt(e.role == EnemyRole::Boss ? 45 : attackDamage);
+        Hurt(e.role == EnemyRole::Boss ? 45 : attackDamage, DamageKind::Charge, e.id, e.position);
         e.chargeRemaining = 0;
       }
       continue;
@@ -1240,7 +1247,7 @@ void Simulation::UpdateEnemies(float dt) {
     if (e.role == EnemyRole::Swarm) {
       e.position = Steer(e.position, toward, e.speed * (1-e.slowFraction) * dt, e.radius);
       if (distance < e.radius + .4f && e.cooldown <= 0) {
-        Hurt(attackDamage);
+        Hurt(attackDamage, DamageKind::Contact, e.id, e.position);
         e.cooldown = .8f;
       }
     }
@@ -1653,7 +1660,7 @@ void Simulation::UpdateProjectiles(float dt) {
       bool hit = SegmentDistance(state_.player.position, p.previous,
                                  p.position) < p.radius + .4f;
       if (hit) {
-        Hurt(p.damage);
+        Hurt(p.damage, DamageKind::Projectile, p.owner, p.position);
         p.life = 0;
       }
       if (p.life <= 0) {
@@ -1770,7 +1777,7 @@ void Simulation::UpdateEffects(float dt) {
         inside = Len2(state_.player.position - e.position) <
                  (e.radius + .4f) * (e.radius + .4f);
       if (inside)
-        Hurt(e.damage);
+        Hurt(e.damage, DamageKind::HostileArea, e.owner, e.position, e.kind);
     } else
       Area(e.position, e.radius, e.damage, e.element, e.form, true, e.burnDps,
            e.burnDuration, e.stun);

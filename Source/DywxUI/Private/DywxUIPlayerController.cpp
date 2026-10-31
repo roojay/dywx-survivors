@@ -107,7 +107,15 @@ void ADywxUIPlayerController::RequestRun(int32 CharacterIndex, int32 MapIndex, i
     if (!IsLocalController() || !GetWorld() || GetNetMode() != NM_Standalone || !Session() || !MVPWorld) return;
     if (Session() && Session()->HasSavedRun(CharacterIndex)) { if(RootWidget.IsValid())RootWidget->ShowNotice(TEXT("此修士已有进行中存档，请先续接；未覆盖任何存档。")); return; }
     if (!Session()->StartFullRun(CharacterIndex,MapIndex,ModeIndex,RiskMask))
-    { if (RootWidget.IsValid()) { RootWidget->ReturnToMenu(); RootWidget->ShowNotice(TEXT("无法开始：检查修士、洞天、模式、劫数解锁或存档状态。")); } StartPreviewBudget(); return; }
+    {
+        // A failed retry keeps the completed run and its pending settlement visible.
+        // Likewise a repeated start cannot navigate away from a still-active run.
+        if (RootWidget.IsValid()) {
+            if (!Session()->IsRunActive()) RootWidget->ReturnToMenu();
+            RootWidget->ShowNotice(TEXT("无法开始：检查修士、洞天、模式、劫数解锁或存档状态。原修行未被替换。"));
+        }
+        StartPreviewBudget(); return;
+    }
     MVPWorld->ActivateRun();
     LastHero=CharacterIndex; LastMap=MapIndex; LastMode=ModeIndex; LastRisk=RiskMask;
     BeginLiveHUD(FDywxHUDState()); RefreshRunUI();

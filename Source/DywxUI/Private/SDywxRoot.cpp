@@ -3,6 +3,7 @@
 #include "MVP/Simulation.h"
 #include "MVP/DywxRunSession.h"
 #include "MVP/ContentCatalog.h"
+#include "DywxCombatFeedback.h"
 #include "MVP/DywxMVPProfile.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Engine/Texture2D.h"
@@ -378,11 +379,18 @@ void SDywxRoot::ResultPanel()
         At(430+I*360,220,350,65,Button(CN(RelicCatalog()[R.catalogId].name),[this,I]{return RunCommand([this,I]{if(auto*S=Owner->Simulation()){Owner->Session()->ChooseBossReward(I);}});},false,true,Tip));
     }
     At(510,825,900,60,LiveText([this]{auto*S=Owner.IsValid()?Owner->Simulation():nullptr;return S?FString::Printf(TEXT("本局道韵 %llu · 账号道韵 %llu"),static_cast<unsigned long long>(S->GetCampaign().Reward()),static_cast<unsigned long long>(Owner->CampaignProfile().daoYun)):FString();},24,Gold));
-    At(510,300,900,500,Panel(SNew(SVerticalBox)
+    const FString DeathDetail=Run.phase==RunPhase::Dead && Run.lastDamage.lethal
+        ? FString::Printf(TEXT("致命一击：%s · 气血 -%.1f · 护盾 -%.1f\n%s"),
+            *CN(dywx::DamageLabel(Run.lastDamage)), Run.lastDamage.hpLost, Run.lastDamage.shieldLost,
+            *CN(dywx::DamageAdvice(Run.lastDamage)))
+        : (Run.phase==RunPhase::Dead ? TEXT("未记录到明确的致命来源。") : TEXT(""));
+    At(510,300,900,500,Panel(SNew(SScrollBox)+SScrollBox::Slot()[SNew(SVerticalBox)
         +SVerticalBox::Slot().AutoHeight()[Label(Run.phase==RunPhase::Won?TEXT("洞天已平 · 修行有成"):TEXT("道途未尽 · 再赴洞天"),40,Gold,true)]
         +SVerticalBox::Slot().AutoHeight().Padding(0,30)[Paragraph(FString::Printf(TEXT("历时 %02d:%02d   境界 %d\n斩妖 %llu   伤害 %.0f   承伤 %.0f\n本局法宝仅在局内生效。"),int(Run.statistics.elapsed)/60,int(Run.statistics.elapsed)%60,Run.progression.level,static_cast<unsigned long long>(Run.statistics.kills),Run.statistics.damageDealt,Run.statistics.damageTaken),800,26,Paper)]
+        +SVerticalBox::Slot().AutoHeight().Padding(0,8)[Paragraph(DeathDetail,800,21,Gold)]
+        +SVerticalBox::Slot().AutoHeight()[Paragraph(RunNotice,800,19,Gold)]
         +SVerticalBox::Slot().AutoHeight().Padding(0,10)[Button(TEXT("再次入洞天"),[this]{return RunCommand([this]{Owner->RetryRun();});},true)]
-        +SVerticalBox::Slot().AutoHeight().Padding(0,10)[Button(TEXT("返回主菜单"),[this]{if(Owner.IsValid())Owner->ShowMainMenu();return FReply::Handled();})],Ink,35));
+        +SVerticalBox::Slot().AutoHeight().Padding(0,10)[Button(TEXT("返回主菜单"),[this]{if(Owner.IsValid())Owner->ShowMainMenu();return FReply::Handled();})]],Ink,35));
 }
 TSharedRef<SWidget> SDywxRoot::ModalContent()
 {
@@ -611,8 +619,10 @@ FReply SDywxRoot::CloseModal()
 {
     const bool WasPause=Nav.modal==dywx::Modal::Pause || bModalPausedRun;
     bModalPausedRun=false;
-    Nav.modal=dywx::Modal::None; Rebuild(); SyncInput();
+    Nav.modal=dywx::Modal::None;
     if (WasPause && Owner.IsValid()) Owner->SetUIPaused(false);
+    // SyncInput rechecks native focus and may reopen Pause. Never undo that decision.
+    Rebuild(); SyncInput();
     return FReply::Handled();
 }
 void SDywxRoot::HandleFocusLoss()
@@ -670,6 +680,11 @@ void SDywxRoot::SetHUDState(const FDywxHUDState& State)
 void SDywxRoot::BeginLiveHUD(const FDywxHUDState& State)
 {
     Nav.screen=dywx::Screen::Battle;Nav.modal=dywx::Modal::None;Nav.liveBattle=true;bModalPausedRun=false;
+    // Candidate simulations can restart their local generation counter. Clear all
+    // presentation-only state explicitly rather than relying on generation changes.
+    Run=dywx::mvp::Snapshot{}; BossChangeUntil=0; BossHP=0; BossMaxHP=1;
+    bBeastVisible=false; BeastOffset={}; SelectedBag=0; SelectedSlot=0;
+    bRefinePreview=false; RunNotice.Empty();
     if(Owner.IsValid())if(auto* S=Owner->Simulation())if(S->IsCampaign()) {
         const auto& C=S->GetCampaign().GetState();Nav.character=C.hero;Nav.mode=dywx::Mode(int(C.mode));Nav.map=int(S->GetArena().cave);Nav.riskMask=C.riskMask;
     }
@@ -697,7 +712,7 @@ void SDywxRoot::SetSnapshot(const dywx::mvp::Snapshot& State)
     if(State.bossPhase>Run.bossPhase)BossChangeUntil=State.statistics.elapsed+4.f;
     Run.generation=State.generation;Run.phase=State.phase;Run.paused=State.paused;Run.player=State.player;
     Run.wave=State.wave;Run.waveCount=State.waveCount;Run.waveElapsed=State.waveElapsed;Run.waveDuration=State.waveDuration;Run.bossPhase=State.bossPhase;
-    Run.statistics=State.statistics;Run.progression=State.progression;Run.spellCooldowns=State.spellCooldowns;
+    Run.statistics=State.statistics;Run.progression=State.progression;Run.spellCooldowns=State.spellCooldowns;Run.lastDamage=State.lastDamage;
     bBeastVisible=false;for(const auto& E:State.enemies)if(E.role==EnemyRole::SpiritBeast){BeastOffset={E.position.x-State.player.position.x,E.position.y-State.player.position.y};bBeastVisible=true;break;}
     BossHP=0;BossMaxHP=1;for(const auto&E:State.enemies)if(E.role==EnemyRole::Boss){BossHP=E.hp;BossMaxHP=E.maxHp;break;}
     HUD.Health=State.player.hp;HUD.MaxHealth=State.progression.build.stats.maxHp;HUD.Experience=State.progression.xp;HUD.ExperienceToNext=State.progression.xpRequired;

@@ -151,7 +151,9 @@ private:
             float stun = 0);
   void Chain(EntityId start, int count, float damage, float scale, float radius,
              Form sourceForm, bool highest = false);
-  void Hurt(float damage);
+  void Hurt(float damage, DamageKind kind = DamageKind::Unknown,
+            EntityId source = 0, Vec2 position = {},
+            EffectKind effectKind = EffectKind::Circle);
   bool AddEffect(EffectState effect);
   void AddProjectile(ProjectileState projectile);
   void Cast(SpellState spell);

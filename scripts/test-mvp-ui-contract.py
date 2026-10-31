@@ -7,6 +7,9 @@ R=Path(__file__).resolve().parents[1]
 u=(R/'Source/DywxUI/Private/SDywxRoot.cpp').read_text()
 c=(R/'Source/DywxUI/Private/DywxUIPlayerController.cpp').read_text()
 for label,condition in {
+ 'new run clears transient old-run display':all(x in u for x in ['Run=dywx::mvp::Snapshot{}; BossChangeUntil=0;', 'bBeastVisible=false; BeastOffset={}; SelectedBag=0; SelectedSlot=0;', 'bRefinePreview=false; RunNotice.Empty();']),
+ 'death result consumes authoritative damage facts':all(x in u for x in ['Run.lastDamage=State.lastDamage', 'Run.phase==RunPhase::Dead && Run.lastDamage.lethal', 'dywx::DamageLabel(Run.lastDamage)', 'Run.lastDamage.hpLost, Run.lastDamage.shieldLost', 'dywx::DamageAdvice(Run.lastDamage)']),
+ 'failed retry retains current result':'if (!Session()->IsRunActive()) RootWidget->ReturnToMenu();' in c and 'Paragraph(RunNotice,800,19,Gold)' in u,
  'full game transactions':all(x in u for x in ['Sim.BuyGood','Sim.RefreshShop','Sim.BeginReforge','Sim.ResolveReforge','Sim.IdentifyRelic','Sim.RevealTreasure','ChooseOpportunity','SealUpgrade','SkipUpgrade','Owner->SaveRun','Owner->ResumeRun','Owner->PurchaseLegacy','Owner->PurchasePermanent']),
  'save and leave only after success':'if(Owner.IsValid()&&Owner->SaveRun())' in u and '保存并离开' in u and 'Nav.savedRuns[Nav.character]' in u and 'Session()->HasSavedRun(CharacterIndex)' in c,
  'pause save guard rejects unresolved encounters and transactions':all(x in u for x in ['if(C.phase==CampaignPhase::OpportunityCombat)return TEXT("大妖机缘尚未完成', 'C.phase!=CampaignPhase::Intermission || !C.opportunityResolved', '!SaveSim->GetSnapshot().progression.bossRewards.empty()', 'SaveSim->GetEconomy().HasTreasureToReveal()', 'SaveSim->GetEconomy().PendingReforge()', 'false,CanSaveRun,SaveHint', 'Add(Paragraph(SaveHint,596,20,Muted),85)']),
@@ -45,7 +48,8 @@ for path in ['Source/DywxUI/Private/SDywxRoot.cpp','Source/DywxUI/Private/DywxUI
   if char in '([{':stack.append(char)
   if char in ')]}':assert stack and stack.pop()=={')':'(',']':'[','}':'{'}[char],path
  assert not stack,path
-chars={x for x in u+c+(R/'Source/DywxCore/Private/MVP/ContentCatalog.cpp').read_text() if 0x3000<=ord(x)<=0x9fff}
+feedback=(R/'Source/DywxUI/Public/DywxCombatFeedback.h').read_text()
+chars={x for x in u+c+feedback+(R/'Source/DywxCore/Private/MVP/ContentCatalog.cpp').read_text() if 0x3000<=ord(x)<=0x9fff}
 for style in ['Regular','Bold']:
  font=TTFont(R/f'Content/UI/Fonts/SarasaUiSC-{style}.ttf');assert all(ord(x) in font.getBestCmap() for x in chars),style
 print(f'PASS: balanced source delimiters and {len(chars)} CJK glyphs in both actual Sarasa fonts')

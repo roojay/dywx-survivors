@@ -226,6 +226,21 @@ static InputState decide(const Snapshot &s, const ArenaLayout& arena, int policy
   }
   return result;
 }
+static const char* damageKindName(DamageKind kind) {
+  switch(kind) {
+    case DamageKind::None:return "none";
+    case DamageKind::Unknown:return "unknown";
+    case DamageKind::Contact:return "contact";
+    case DamageKind::Charge:return "charge";
+    case DamageKind::Explosion:return "explosion";
+    case DamageKind::Projectile:return "projectile";
+    case DamageKind::HostileArea:return "hostile_area";
+    case DamageKind::Orbit:return "orbit";
+    case DamageKind::Lightning:return "lightning";
+    case DamageKind::Fissure:return "fissure";
+  }
+  return "unknown";
+}
 struct Actions { int rest=0, opportunities=0, buys=0, reveals=0, identifies=0, equips=0, refines=0, reforges=0; };
 static void arrange(Simulation& s, Actions& a) {
   auto& p=s.GetProgression();
@@ -323,7 +338,7 @@ static void run(unsigned seed,HeroId hero,CaveId cave,GameMode mode,unsigned ord
   const auto& x=s.GetSnapshot();const char* outcome=x.phase==RunPhase::Won?"won":x.phase==RunPhase::Dead?"dead":"sample_bound";
   bool settled=s.SettleCampaign(profile);
   int immortal=0,dao=0;for(const auto& relic:x.progression.equipped){immortal+=relic.rarity==Rarity::Immortal;dao+=relic.rarity==Rarity::Dao;}
-  std::cout<<seed<<','<<int(mode)<<','<<int(hero)<<','<<int(cave)<<','<<(novice?"fresh_tier1_no_unlocks":"veteran_unlocks_zero_stats")<<",0,"<<bound<<','<<outcome<<','<<x.statistics.elapsed<<','<<x.wave<<','<<x.player.hp<<','<<x.statistics.kills<<','<<x.progression.level<<','<<peak<<','<<actions.opportunities<<','<<actions.buys<<','<<actions.reveals<<','<<actions.identifies<<','<<actions.equips<<','<<actions.refines<<','<<actions.reforges<<','<<settled<<','<<profile.daoYun<<','<<bossEntered<<','<<bossPhase<<','<<bossHp<<','<<x.progression.equipped.size()<<','<<immortal<<','<<dao<<','<<s.GetProgression().PityWaves()<<",\""<<build(x.progression.build)<<"\","<<firstUpgrade<<','<<firstFusion<<','<<groundXp(x)<<",pickup-distance-v1\n"<<std::flush;
+  std::cout<<seed<<','<<int(mode)<<','<<int(hero)<<','<<int(cave)<<','<<(novice?"fresh_tier1_no_unlocks":"veteran_unlocks_zero_stats")<<",0,"<<bound<<','<<outcome<<','<<x.statistics.elapsed<<','<<x.wave<<','<<x.player.hp<<','<<x.statistics.kills<<','<<x.progression.level<<','<<peak<<','<<actions.opportunities<<','<<actions.buys<<','<<actions.reveals<<','<<actions.identifies<<','<<actions.equips<<','<<actions.refines<<','<<actions.reforges<<','<<settled<<','<<profile.daoYun<<','<<bossEntered<<','<<bossPhase<<','<<bossHp<<','<<x.progression.equipped.size()<<','<<immortal<<','<<dao<<','<<s.GetProgression().PityWaves()<<",\""<<build(x.progression.build)<<"\","<<firstUpgrade<<','<<firstFusion<<','<<groundXp(x)<<",pickup-distance-v1,"<<damageKindName(x.lastDamage.kind)<<','<<int(x.lastDamage.effectKind)<<','<<x.lastDamage.source<<','<<x.lastDamage.tick<<','<<x.lastDamage.hpLost<<','<<x.lastDamage.shieldLost<<','<<x.lastDamage.lethal<<'\n'<<std::flush;
 }
 int main(int argc,char**argv) {
   try {
@@ -331,7 +346,7 @@ int main(int argc,char**argv) {
     std::ofstream trace(argc>1?argv[1]:"/tmp/dywx-full-natural-trace.csv");
     if(!trace)throw std::runtime_error("trace open failed");
     trace<<"sample,seed,mode,hero,cave,elapsed,wave,phase,hp,level,kills,stones,enemies,uncollected_xp,choices\n";
-    std::cout<<"seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build,first_upgrade,first_fusion,uncollected_xp,harness_revision\n";
+    std::cout<<"seed,mode,hero,cave,profile,policy,bound_seconds,outcome,elapsed,wave,hp,kills,level,peak,opportunities,buys,reveals,identifies,equips,refines,reforges,settled,dao_yun,boss_entered,boss_phase,last_boss_hp,equipped,immortal_equipped,dao_equipped,pity_waves,build,first_upgrade,first_fusion,uncollected_xp,harness_revision,last_damage_kind,last_damage_effect,last_damage_source,last_damage_tick,last_damage_hp_lost,last_damage_shield_lost,last_damage_lethal\n";
     if(argc>2 && std::string(argv[2])!="--quick-onboarding")throw std::runtime_error("unknown sample selector");
     if(argc>2) {
       unsigned ordinal=0;

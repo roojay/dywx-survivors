@@ -16,7 +16,8 @@ ctest --test-dir build/standalone -C Release --output-on-failure
 Visual Studio 等多配置生成器的可执行文件位于 `build/standalone/Release/`，Windows 文件名有 `.exe` 后缀。最后一行相应改用该路径；CSV 重定向是 shell 功能。
 
 - `DywxCore`：纯 C++20 静态库（别名 `Dywx::Core`）。
-- `core_command_tests`：复用 `tests/core_command_tests.cpp` 的 CTest 测试；Release 也保持 `assert` 启用。默认 CTest 不运行较慢的自然演练。
+- CTest：直接复用 `tests/` 中的纯核回归程序，覆盖战斗、内容、经济、进度、机缘、账号保底和存档边界；Release 也保持 `assert` 启用。所有程序链接同一份 `DywxCore`，无需 Bash 或 Python 即可在 Windows/Linux 构建运行。默认 CTest 不运行较慢的自然演练。
+- CTest 不包含 Python 源码契约、字体/资源检查、UE 编译或运行，不能替代 `scripts/test-full-game-all.sh` 的完整离线门禁；两者的验证范围须分别报告。
 - `dywx_headless`：直接复用 `tests/full_game_playthrough.cpp`，不是另一份策略或规则实现。首个位置参数为轨迹 CSV 路径；父目录必须存在。请显式传路径，既有源码的缺省值是 `/tmp/dywx-full-natural-trace.csv`。
 - 标准输出是每场一行的结果 CSV（含表头），轨迹文件按约30模拟秒、波次/阶段、升级与选择变化记录，并包含地面未拾经验。异常写标准错误并返回1；正常完成返回0。`won`、`dead`、`sample_bound` 都是有效观测，返回0不代表全部通关。输出路径会被覆盖，不要复用需要保留的证据文件。
 

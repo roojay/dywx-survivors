@@ -1,4 +1,5 @@
 #include "DywxUIState.h"
+#include "DywxCombatFeedback.h"
 #include <cassert>
 #include <cmath>
 #include <limits>
@@ -52,5 +53,22 @@ int main()
     assert(SafeFraction(1,-1)==0); assert(SafeFraction(std::numeric_limits<float>::quiet_NaN(),10)==0);
     assert(SafeFraction(5,std::numeric_limits<float>::quiet_NaN())==0);
     assert(SafeFraction(std::numeric_limits<float>::infinity(),std::numeric_limits<float>::infinity())==0);
+    // Damage presentation consumes facts, never resolves a possibly removed actor.
+    mvp::DamageFeedback hit;
+    assert(DamageLabel(hit)=="未明来源" && DamageAdvice(hit).empty());
+    for(auto kind : {mvp::DamageKind::Contact,mvp::DamageKind::Charge,mvp::DamageKind::Explosion,
+                    mvp::DamageKind::Projectile,mvp::DamageKind::HostileArea,mvp::DamageKind::Orbit,
+                    mvp::DamageKind::Lightning,mvp::DamageKind::Fissure}) {
+        hit.kind=kind;
+        assert(DamageLabel(hit)!="未明来源" && !DamageAdvice(hit).empty());
+        hit.source=9999; // Source lifetime cannot affect the text.
+        assert(!DamageLabel(hit).empty());
+    }
+    hit.kind=mvp::DamageKind::HostileArea; hit.effectKind=mvp::EffectKind::Burn;
+    assert(DamageLabel(hit)=="灼烧区域");
+    hit.effectKind=mvp::EffectKind::FireWall; assert(DamageLabel(hit)=="火墙");
+    hit.effectKind=mvp::EffectKind::Circle; assert(DamageLabel(hit)=="敌方术法区域");
+    hit.kind=mvp::DamageKind::Unknown; assert(DamageLabel(hit)=="未明来源" && DamageAdvice(hit).empty());
+    hit.kind=static_cast<mvp::DamageKind>(999); assert(DamageLabel(hit)=="未明来源" && DamageAdvice(hit).empty());
     std::cout << "PASS: navigation, locked content, repeated actions, back/pause, selection retention, invalid fractions\n";
 }

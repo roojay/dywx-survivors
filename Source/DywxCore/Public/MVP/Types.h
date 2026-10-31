@@ -213,6 +213,19 @@ struct DYWXCORE_API PickupState {
   Relic relic;
   int spiritStones = 0;
 };
+// Transient combat feedback, deliberately not part of a saved checkpoint.
+// IDs may outlive their entity; presentation must not assume the source exists.
+enum class DamageKind { None, Unknown, Contact, Charge, Explosion, Projectile,
+                        HostileArea, Orbit, Lightning, Fissure };
+struct DYWXCORE_API DamageFeedback {
+  DamageKind kind = DamageKind::None;
+  EffectKind effectKind = EffectKind::Circle;
+  EntityId source = 0;
+  Vec2 position{};
+  std::uint64_t tick = 0;
+  float hpLost = 0, shieldLost = 0;
+  bool lethal = false;
+};
 struct DYWXCORE_API RunStatistics {
   std::uint64_t kills = 0, shots = 0, hits = 0, dodges = 0;
   float damageDealt = 0, damageTaken = 0, elapsed = 0;
@@ -253,6 +266,7 @@ struct DYWXCORE_API Snapshot {
   std::vector<EffectState> effects;
   std::vector<PickupState> pickups;
   RunStatistics statistics;
+  DamageFeedback lastDamage;
 };
 struct DYWXCORE_API ArenaObstacle {
   Vec2 position;

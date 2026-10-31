@@ -44,7 +44,7 @@ void UDywxRunSession::InitializeProfile()
 }
 void UDywxRunSession::StartRun(HeroId Hero,uint64 Seed)
 {
-    if (!IsStandaloneSession()) return;
+    if (!IsStandaloneSession() || bActive) return;
     if(bProfileLoaded && !SaveProfile()) return;
     InitializeProfile();
     Simulation.Start(Seed,Hero);
@@ -54,6 +54,9 @@ void UDywxRunSession::StartRun(HeroId Hero,uint64 Seed)
 bool UDywxRunSession::StartFullRun(int32 Hero,int32 Map,int32 Mode,uint32 RiskMask)
 {
     if (!IsStandaloneSession()) return false;
+    // Only a completed result may be replaced by Retry. Repeated/stale start
+    // commands must not abandon an active wave or consume another durable id.
+    if(bActive && GetSnapshot().phase!=RunPhase::Won && GetSnapshot().phase!=RunPhase::Dead) return false;
     InitializeProfile();
     if(!Profile.IsWritable() || Hero<0 || Hero>=3 || Map<0 || Map>=3 || Mode<0 || Mode>=3) return false;
     // One in-progress run per hero. A new start must not silently replace it.
@@ -106,7 +109,7 @@ bool UDywxRunSession::SaveRun()
 }
 bool UDywxRunSession::ResumeRun(int32 Hero)
 {
-    if (!IsStandaloneSession()) return false;
+    if (!IsStandaloneSession() || bActive) return false;
     InitializeProfile(); if(Hero<0 || Hero>=3 || !Profile.IsWritable()) return false;
     if(!SaveProfile()) return false;
     std::string Bytes; RunCheckpoint Checkpoint;

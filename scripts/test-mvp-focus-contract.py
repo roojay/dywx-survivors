@@ -26,7 +26,9 @@ release = body(c, 'void ADywxUIPlayerController::StopPreviewBudget')
 pause = body(c, 'void ADywxUIPlayerController::SetUIPaused')
 clear = body(c, 'void ADywxUIPlayerController::ClearGameplayInput')
 ui_only = body(body(c, 'void ADywxUIPlayerController::ApplyUIInput'), 'if (!bLive || bModalOpen)')
+close_modal = body(root, 'FReply SDywxRoot::CloseModal')
 checks = {
+    'explicit resume cannot undo a nested focus-loss pause': close_modal.index('Owner->SetUIPaused(false)') < close_modal.index('SyncInput()'),
     'live HUD preserves navigation-selected modal input mode': 'if (RootWidget.IsValid()) RootWidget->BeginLiveHUD(State);\n    else ApplyUIInput(true, false);' in begin_hud and begin_hud.count('ApplyUIInput(') == 1 and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::BeginLiveHUD') and 'Nav.modal!=dywx::Modal::None' in body(root, 'void SDywxRoot::SyncInput'),
     'focus navigation cannot be overwritten after nested input-mode change': 'RefreshPreviewBudget()' not in body(c, 'void ADywxUIPlayerController::StartPreviewBudget') and apply_input.rstrip().endswith('RefreshPreviewBudget();\n}') and 'Rebuild();SyncInput();' in body(root, 'void SDywxRoot::HandleFocusLoss'),
     'pause entry clears queued dash and stale held keys': 'if (bPaused) ClearGameplayInput()' in pause and all(s in clear for s in ['bDashQueued = false', 'if (PlayerInput) PlayerInput->FlushPressedKeys()', 'Session()->SetInput({})']) and '#include "GameFramework/PlayerInput.h"' in c,

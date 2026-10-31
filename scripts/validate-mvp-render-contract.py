@@ -77,6 +77,7 @@ assert 'LoadGeometry' not in arena and 'BuildMesh' not in arena
 render = function('void ADywxMVPWorld::Render(float')
 assert 'RebuildArena' not in render and 'BuildMesh' not in render and 'MakeBatch' not in render
 start = function('bool UDywxRunSession::StartFullRun', runtime)
+assert start.index('if(bActive && GetSnapshot().phase!=RunPhase::Won && GetSnapshot().phase!=RunPhase::Dead) return false;') < start.index('SaveProfile()')
 assert start.index('AllocateRunId()') < start.index('Simulation=MoveTemp(Candidate)')
 assert 'if(!RunId) return false;' in start
 settle = function('bool UDywxRunSession::SaveProfile', runtime)
@@ -88,6 +89,7 @@ assert settle.index('CandidateProfile.Save()') < settle.index('Simulation=MoveTe
 checkpoint = function('bool UDywxRunSession::SaveRun', runtime)
 assert checkpoint.index('ObserveRunInto(CandidateProfile)') < checkpoint.index('CandidateProfile.SaveCheckpoint') < checkpoint.index('Profile=MoveTemp(CandidateProfile)')
 resume = function('bool UDywxRunSession::ResumeRun', runtime)
+assert resume.index('if (!IsStandaloneSession() || bActive) return false;') < resume.index('SaveProfile()')
 assert resume.index('RestoreCheckpoint') < resume.index('Profile.Apply(Candidate.GetProgression())') < resume.index('ConsumeCheckpoint') < resume.index('Simulation=MoveTemp(Candidate)')
 for element in ('Metal', 'Wood', 'Water', 'Earth', 'Fire', 'Thunder'):
     assert f'Element::{element}' in cpp + vfx
